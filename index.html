@@ -32,7 +32,7 @@
                         <input 
                             type="text" 
                             id="vehicleNumber" 
-                            placeholder="e.g., DL3CAW1234, MH12AB1234" 
+                            placeholder="e.g., GJ05HG7801, PB65AM0008" 
                             required
                             class="w-full bg-slate-950 border border-slate-700 rounded-xl py-3.5 pl-10 pr-4 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 uppercase tracking-widest font-semibold transition-all"
                         >
@@ -75,54 +75,62 @@
     </footer>
 
     <script>
-        // API Configurations
-        const API_KEY = "a5175b9516mshdab26204e9428aap13a278jsnaf854305ba92";
-        const API_HOST = "rapidapi.com"; // नोट: अगर आपके API का होस्ट अलग है जैसे 'vehicle-rc-information.p.rapidapi.com' तो उसे यहाँ बदलें
-
         document.getElementById('rcForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const vehicleNumber = document.getElementById('vehicleNumber').value.trim().toUpperCase();
+            const vehicleNumberInput = document.getElementById('vehicleNumber').value.trim().toUpperCase();
             const loading = document.getElementById('loading');
             const errorMessage = document.getElementById('errorMessage');
             const resultDashboard = document.getElementById('resultDashboard');
             const rcDetailsGrid = document.getElementById('rcDetailsGrid');
 
-            // Reset UI
+            // Reset UI States
             loading.classList.remove('hidden');
             errorMessage.classList.add('hidden');
             resultDashboard.classList.add('hidden');
             rcDetailsGrid.innerHTML = '';
 
-            // API Endpoint (आपकी इमेज 'Vehicle Advanced Info' की है, उसके अनुसार POST रिक्वेस्ट)
-            const url = 'https://vehicle-rc-information-v2.p.rapidapi.com/v1/vehicle/advanced-info'; 
-            
+            // Exact Configuration from your Code Snippet
+            const url = 'https://vehicle-rc-information-v2.p.rapidapi.com/';
             const options = {
                 method: 'POST',
                 headers: {
-                    'content-type': 'application/json',
-                    'X-RapidAPI-Key': API_KEY,
-                    'X-RapidAPI-Host': API_HOST
+                    'x-rapidapi-key': 'a5175b9516mshdab26204e9428aap13a278jsnaf854305ba92',
+                    'x-rapidapi-host': 'vehicle-rc-information-v2.p.rapidapi.com',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    vehicle_number: vehicleNumber
+                    vehicle_number: vehicleNumberInput
                 })
             };
 
             try {
                 const response = await fetch(url, options);
-                const data = await response.json();
+                
+                if (!response.ok) {
+                    if(response.status === 404) {
+                        throw new Error("Endpoint not found (404). Please verify API deployment.");
+                    } else if(response.status === 403) {
+                        throw new Error("Invalid API Key or subscription limit reached (403).");
+                    } else {
+                        throw new Error(`Server returned error status: ${response.status}`);
+                    }
+                }
 
-                if (!response.ok || data.status === "failed" || data.error) {
+                const data = await response.json();
+                console.log("API Response Data:", data);
+
+                // Check if API returned an error inside JSON structure
+                if (data.status === "failed" || data.error) {
                     throw new Error(data.message || data.error || "Vehicle details not found.");
                 }
 
-                // डाटा मिलने पर डैशबोर्ड रेंडर करना
-                renderDashboard(data.result || data); 
+                // Call Render Function
+                renderDashboard(data); 
                 resultDashboard.classList.remove('hidden');
 
             } catch (error) {
-                console.error(error);
+                console.error("Error occurred:", error);
                 document.getElementById('errorText').innerText = error.message || "Failed to connect to the server.";
                 errorMessage.classList.remove('hidden');
             } finally {
@@ -130,40 +138,38 @@
             }
         });
 
-        // डैशबोर्ड में डाटा दिखाने का फंक्शन
+        // Function to dynamic display data on UI cards
         function renderDashboard(data) {
             const rcDetailsGrid = document.getElementById('rcDetailsGrid');
             
-            // अगर API का रिस्पॉन्स स्ट्रक्चर अलग हो, तो इसे अपनी API Keys के हिसाब से बदलें
-            // यहाँ एक स्टैण्डर्ड RTO रिस्पॉन्स फॉर्मेट माना गया है:
+            // Extracting values or setting fallback fields based on your exact API response
             const displayFields = [
-                { label: "Registration No", val: data.reg_no || data.vehicle_number || "N/A", icon: "fa-id-card" },
+                { label: "Registration No", val: data.license_plate || data.vehicleId || data.reg_no || document.getElementById('vehicleNumber').value.toUpperCase(), icon: "fa-id-card" },
                 { label: "Owner Name", val: data.owner_name || data.owner || "N/A", icon: "fa-user" },
-                { label: "Maker / Model", val: data.maker_model || data.model || "N/A", icon: "fa-car" },
-                { label: "Chassis Number", val: data.chassis_no || data.chassis || "N/A", icon: "fa-fingerprint" },
-                { label: "Engine Number", val: data.engine_no || data.engine || "N/A", icon: "fa-gears" },
-                { label: "Fuel Type", val: data.fuel_type || data.fuel || "N/A", icon: "fa-gas-pump" },
-                { label: "Registration Date", val: data.reg_date || data.registration_date || "N/A", icon: "fa-calendar-days" },
-                { label: "RC Status", val: data.status || data.rc_status || "ACTIVE", icon: "fa-shield-halved" }
+                { label: "Brand Name", val: data.brand_name || "N/A", icon: "fa-building" },
+                { label: "Model / Variant", val: data.brand_model || data.maker_model || "N/A", icon: "fa-car" },
+                { label: "Engine Number", val: data.engine_number || data.engine_no || "N/A", icon: "fa-gears" },
+                { label: "Fuel Type", val: data.fuel_type || "N/A", icon: "fa-gas-pump" },
+                { label: "Tax Paid Upto", val: data.tax_paid_upto || "N/A", icon: "fa-calendar-days" },
+                { label: "RC Status", val: data.rc_status || "ACTIVE", icon: "fa-shield-halved" }
             ];
 
             displayFields.forEach(field => {
                 const card = document.createElement('div');
-                card.className = "bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center gap-4";
+                card.className = "bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center gap-4 animate-fadeIn";
                 
-                // Status के लिए अलग रंग दिखाना
-                let valClass = "text-white font-semibold";
-                if(field.label === "RC Status" && (field.val.toUpperCase() === "ACTIVE" || field.val.toUpperCase() === "ACTIVE")) {
-                    valClass = "text-emerald-400 font-bold";
+                let valClass = "text-white font-semibold text-sm sm:text-base";
+                if(field.label === "RC Status" && field.val.toUpperCase() === "ACTIVE") {
+                    valClass = "text-emerald-400 font-bold text-sm sm:text-base";
                 }
 
                 card.innerHTML = `
-                    <div class="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center text-emerald-400 text-lg">
+                    <div class="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center text-emerald-400 text-lg flex-shrink-0">
                         <i class="fa-solid ${field.icon}"></i>
                     </div>
-                    <div>
+                    <div class="min-w-0 flex-grow">
                         <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">${field.label}</p>
-                        <p class="${valClass} mt-0.5 break-all">${field.val}</p>
+                        <p class="${valClass} mt-0.5 break-words">${field.val}</p>
                     </div>
                 `;
                 rcDetailsGrid.appendChild(card);
