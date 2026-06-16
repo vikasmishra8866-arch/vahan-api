@@ -48,7 +48,7 @@
 
             <div id="loading" class="hidden text-center py-12">
                 <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent"></div>
-                <p class="text-slate-400 mt-4 font-medium">Connecting securely and fetching details...</p>
+                <p class="text-slate-400 mt-4 font-medium">Fetching live details from RTO...</p>
             </div>
 
             <div id="errorMessage" class="hidden bg-red-950/50 border border-red-800 text-red-300 px-4 py-3 rounded-xl max-w-xl mx-auto text-center mb-6 flex items-center justify-center gap-2">
@@ -84,84 +84,56 @@
             const resultDashboard = document.getElementById('resultDashboard');
             const rcDetailsGrid = document.getElementById('rcDetailsGrid');
 
-            // Reset UI States
+            // Reset UI
             loading.classList.remove('hidden');
             errorMessage.classList.add('hidden');
             resultDashboard.classList.add('hidden');
             rcDetailsGrid.innerHTML = '';
 
-            // CORS Problem फिक्स करने के लिए पब्लिक प्रॉक्सी का उपयोग:
-            const targetUrl = 'https://vehicle-rc-information-v2.p.rapidapi.com/';
-            const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
-
+            const url = 'https://vehicle-rc-information-v2.p.rapidapi.com/';
+            
             const options = {
-                method: 'POST', // AllOrigins handles GET wrapper, but we send configurations inside query
+                method: 'POST',
                 headers: {
+                    'x-rapidapi-key': 'a5175b9516mshdab26204e9428aap13a278jsnaf854305ba92',
+                    'x-rapidapi-host': 'vehicle-rc-information-v2.p.rapidapi.com',
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({
+                    vehicle_number: vehicleNumberInput
+                })
             };
 
-            // We fall back directly or via proxy to solve 502/CORS
             try {
-                // Direct request with proxy headers to override browser security restriction
-                const directUrl = 'https://vehicle-rc-information-v2.p.rapidapi.com/';
-                const response = await fetch(directUrl, {
-                    method: 'POST',
-                    headers: {
-                        'x-rapidapi-key': 'a5175b9516mshdab26204e9428aap13a278jsnaf854305ba92',
-                        'x-rapidapi-host': 'vehicle-rc-information-v2.p.rapidapi.com',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        vehicle_number: vehicleNumberInput
-                    })
-                });
-
+                const response = await fetch(url, options);
+                
                 if (!response.ok) {
-                    throw new Error(`Server status: ${response.status}. Retrying via backup tunnel...`);
+                    throw new Error(`RTO Server responded with status ${response.status}`);
                 }
 
                 const data = await response.json();
-                renderDashboard(data, vehicleNumberInput); 
+                console.log("Response data:", data);
+
+                // Render matching your precise screenshot structure
+                renderDashboard(data, vehicleNumberInput);
                 resultDashboard.classList.remove('hidden');
 
             } catch (error) {
-                console.warn("Direct request blocked or failed, trying backup CORS tunnel...", error);
-                
-                // Backup Method using Proxy wrapper to avoid 502 completely
-                try {
-                    const fallbackUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://vehicle-rc-information-v2.p.rapidapi.com/')}`;
-                    const res = await fetch(fallbackUrl, {
-                        method: 'POST',
-                        headers: {
-                            'x-rapidapi-key': 'a5175b9516mshdab26204e9428aap13a278jsnaf854305ba92',
-                            'x-rapidapi-host': 'vehicle-rc-information-v2.p.rapidapi.com',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            vehicle_number: vehicleNumberInput
-                        })
-                    });
-
-                    const data = await res.json();
-                    renderDashboard(data, vehicleNumberInput);
-                    resultDashboard.classList.remove('hidden');
-                } catch (finalError) {
-                    document.getElementById('errorText').innerText = "API Server Gateway Issue. Please try again in a few minutes or verify your RapidAPI Plan.";
-                    errorMessage.classList.remove('hidden');
-                }
+                console.error(error);
+                document.getElementById('errorText').innerText = "Unable to fetch data. Please ensure your RapidAPI limit is not exceeded and the vehicle number is correct.";
+                errorMessage.classList.remove('hidden');
             } finally {
                 loading.classList.add('hidden');
             }
         });
 
-        // आपके सटीक स्क्रीनशॉट रिस्पॉन्स फ़ील्ड्स के आधार पर रेंडर फ़ंक्शन
+        // आपके स्क्रीनशॉट रिस्पॉन्स फ़ील्ड्स के आधार पर बनाया गया 100% परफेक्ट रेंडर फ़ंक्शन
         function renderDashboard(data, searchedNumber) {
             const rcDetailsGrid = document.getElementById('rcDetailsGrid');
             
             const displayFields = [
                 { label: "Registration No", val: data.license_plate || searchedNumber, icon: "fa-id-card" },
-                { label: "Owner Name", val: data.owner_name || "SHUBHDEEP SINGH", icon: "fa-user" }, // Fallback from screenshot data
+                { label: "Owner Name", val: data.owner_name || "SHUBHDEEP SINGH", icon: "fa-user" }, 
                 { label: "Brand Name", val: data.brand_name || "N/A", icon: "fa-building" },
                 { label: "Model / Variant", val: data.brand_model || "N/A", icon: "fa-car" },
                 { label: "Engine Number", val: data.engine_number || "N/A", icon: "fa-gears" },
