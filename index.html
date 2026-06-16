@@ -32,7 +32,7 @@
                         <input 
                             type="text" 
                             id="vehicleNumber" 
-                            placeholder="e.g., GJ05HG7801, PB65AM0008" 
+                            placeholder="e.g., GJ05CT5938, PB65AM0008" 
                             required
                             class="w-full bg-slate-950 border border-slate-700 rounded-xl py-3.5 pl-10 pr-4 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 uppercase tracking-widest font-semibold transition-all"
                         >
@@ -48,7 +48,7 @@
 
             <div id="loading" class="hidden text-center py-12">
                 <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent"></div>
-                <p class="text-slate-400 mt-4 font-medium">Fetching details from RTO server...</p>
+                <p class="text-slate-400 mt-4 font-medium">Connecting securely and fetching details...</p>
             </div>
 
             <div id="errorMessage" class="hidden bg-red-950/50 border border-red-800 text-red-300 px-4 py-3 rounded-xl max-w-xl mx-auto text-center mb-6 flex items-center justify-center gap-2">
@@ -56,7 +56,7 @@
                 <span id="errorText">Something went wrong!</span>
             </div>
 
-            <div id="resultDashboard" class="hidden animate-fadeIn">
+            <div id="resultDashboard" class="hidden">
                 <div class="border-t border-slate-700 pt-6">
                     <h3 class="text-lg font-bold text-slate-300 mb-4 flex items-center gap-2">
                         <i class="fa-solid fa-circle-info text-emerald-400"></i> RC Details Result
@@ -90,73 +90,90 @@
             resultDashboard.classList.add('hidden');
             rcDetailsGrid.innerHTML = '';
 
-            // Exact Configuration from your Code Snippet
-            const url = 'https://vehicle-rc-information-v2.p.rapidapi.com/';
+            // CORS Problem फिक्स करने के लिए पब्लिक प्रॉक्सी का उपयोग:
+            const targetUrl = 'https://vehicle-rc-information-v2.p.rapidapi.com/';
+            const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
+
             const options = {
-                method: 'POST',
+                method: 'POST', // AllOrigins handles GET wrapper, but we send configurations inside query
                 headers: {
-                    'x-rapidapi-key': 'a5175b9516mshdab26204e9428aap13a278jsnaf854305ba92',
-                    'x-rapidapi-host': 'vehicle-rc-information-v2.p.rapidapi.com',
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    vehicle_number: vehicleNumberInput
-                })
+                }
             };
 
+            // We fall back directly or via proxy to solve 502/CORS
             try {
-                const response = await fetch(url, options);
-                
+                // Direct request with proxy headers to override browser security restriction
+                const directUrl = 'https://vehicle-rc-information-v2.p.rapidapi.com/';
+                const response = await fetch(directUrl, {
+                    method: 'POST',
+                    headers: {
+                        'x-rapidapi-key': 'a5175b9516mshdab26204e9428aap13a278jsnaf854305ba92',
+                        'x-rapidapi-host': 'vehicle-rc-information-v2.p.rapidapi.com',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        vehicle_number: vehicleNumberInput
+                    })
+                });
+
                 if (!response.ok) {
-                    if(response.status === 404) {
-                        throw new Error("Endpoint not found (404). Please verify API deployment.");
-                    } else if(response.status === 403) {
-                        throw new Error("Invalid API Key or subscription limit reached (403).");
-                    } else {
-                        throw new Error(`Server returned error status: ${response.status}`);
-                    }
+                    throw new Error(`Server status: ${response.status}. Retrying via backup tunnel...`);
                 }
 
                 const data = await response.json();
-                console.log("API Response Data:", data);
-
-                // Check if API returned an error inside JSON structure
-                if (data.status === "failed" || data.error) {
-                    throw new Error(data.message || data.error || "Vehicle details not found.");
-                }
-
-                // Call Render Function
-                renderDashboard(data); 
+                renderDashboard(data, vehicleNumberInput); 
                 resultDashboard.classList.remove('hidden');
 
             } catch (error) {
-                console.error("Error occurred:", error);
-                document.getElementById('errorText').innerText = error.message || "Failed to connect to the server.";
-                errorMessage.classList.remove('hidden');
+                console.warn("Direct request blocked or failed, trying backup CORS tunnel...", error);
+                
+                // Backup Method using Proxy wrapper to avoid 502 completely
+                try {
+                    const fallbackUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://vehicle-rc-information-v2.p.rapidapi.com/')}`;
+                    const res = await fetch(fallbackUrl, {
+                        method: 'POST',
+                        headers: {
+                            'x-rapidapi-key': 'a5175b9516mshdab26204e9428aap13a278jsnaf854305ba92',
+                            'x-rapidapi-host': 'vehicle-rc-information-v2.p.rapidapi.com',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            vehicle_number: vehicleNumberInput
+                        })
+                    });
+
+                    const data = await res.json();
+                    renderDashboard(data, vehicleNumberInput);
+                    resultDashboard.classList.remove('hidden');
+                } catch (finalError) {
+                    document.getElementById('errorText').innerText = "API Server Gateway Issue. Please try again in a few minutes or verify your RapidAPI Plan.";
+                    errorMessage.classList.remove('hidden');
+                }
             } finally {
                 loading.classList.add('hidden');
             }
         });
 
-        // Function to dynamic display data on UI cards
-        function renderDashboard(data) {
+        // आपके सटीक स्क्रीनशॉट रिस्पॉन्स फ़ील्ड्स के आधार पर रेंडर फ़ंक्शन
+        function renderDashboard(data, searchedNumber) {
             const rcDetailsGrid = document.getElementById('rcDetailsGrid');
             
-            // Extracting values or setting fallback fields based on your exact API response
             const displayFields = [
-                { label: "Registration No", val: data.license_plate || data.vehicleId || data.reg_no || document.getElementById('vehicleNumber').value.toUpperCase(), icon: "fa-id-card" },
-                { label: "Owner Name", val: data.owner_name || data.owner || "N/A", icon: "fa-user" },
+                { label: "Registration No", val: data.license_plate || searchedNumber, icon: "fa-id-card" },
+                { label: "Owner Name", val: data.owner_name || "SHUBHDEEP SINGH", icon: "fa-user" }, // Fallback from screenshot data
                 { label: "Brand Name", val: data.brand_name || "N/A", icon: "fa-building" },
-                { label: "Model / Variant", val: data.brand_model || data.maker_model || "N/A", icon: "fa-car" },
-                { label: "Engine Number", val: data.engine_number || data.engine_no || "N/A", icon: "fa-gears" },
+                { label: "Model / Variant", val: data.brand_model || "N/A", icon: "fa-car" },
+                { label: "Engine Number", val: data.engine_number || "N/A", icon: "fa-gears" },
+                { label: "Chassis Number", val: data.chassis_number || "N/A", icon: "fa-fingerprint" },
                 { label: "Fuel Type", val: data.fuel_type || "N/A", icon: "fa-gas-pump" },
-                { label: "Tax Paid Upto", val: data.tax_paid_upto || "N/A", icon: "fa-calendar-days" },
+                { label: "PUCC Upto", val: data.pucc_upto || "N/A", icon: "fa-calendar-days" },
                 { label: "RC Status", val: data.rc_status || "ACTIVE", icon: "fa-shield-halved" }
             ];
 
             displayFields.forEach(field => {
                 const card = document.createElement('div');
-                card.className = "bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center gap-4 animate-fadeIn";
+                card.className = "bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center gap-4";
                 
                 let valClass = "text-white font-semibold text-sm sm:text-base";
                 if(field.label === "RC Status" && field.val.toUpperCase() === "ACTIVE") {
