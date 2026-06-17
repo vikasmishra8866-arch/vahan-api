@@ -14,7 +14,7 @@
             <h1 class="text-xl font-bold tracking-wider text-emerald-400 flex items-center gap-2">
                 <i class="fa-solid fa-car-rear"></i> VahanVerify
             </h1>
-            <span class="text-xs bg-slate-700 px-3 py-1 rounded-full text-slate-400">RC Status Dashboard v2</span>
+            <span class="text-xs bg-slate-700 px-3 py-1 rounded-full text-slate-400">Live Tracking Mode</span>
         </div>
     </header>
 
@@ -48,12 +48,12 @@
 
             <div id="loading" class="hidden text-center py-12">
                 <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent"></div>
-                <p class="text-slate-400 mt-4 font-medium">Connecting to RTO Servers securely...</p>
+                <p class="text-slate-400 mt-4 font-medium">Fetching real-time data from Parivahan Servers...</p>
             </div>
 
             <div id="errorMessage" class="hidden bg-red-950/50 border border-red-800 text-red-300 px-4 py-3 rounded-xl max-w-xl mx-auto text-center mb-6 flex items-center justify-center gap-2">
                 <i class="fa-solid fa-triangle-exclamation"></i>
-                <span id="errorText">Gateway Handshake Error.</span>
+                <span id="errorText">Error processing your request.</span>
             </div>
 
             <div id="resultDashboard" class="hidden">
@@ -84,62 +84,69 @@
             const resultDashboard = document.getElementById('resultDashboard');
             const rcDetailsGrid = document.getElementById('rcDetailsGrid');
 
-            // Reset UI states
+            // UI States Reset
             loading.classList.remove('hidden');
             errorMessage.classList.add('hidden');
             resultDashboard.classList.add('hidden');
             rcDetailsGrid.innerHTML = '';
 
-            // हमने यहाँ ऑल-ओरिजिंस के पुराने तरीके को बदलकर सीधे Raw Content API मेथड का उपयोग किया है 
-            // जो POST बॉडी और सीक्रेट कीज को बिना ब्लॉक किए सीधा ट्रांसफर करती है।
-            const targetUrl = 'https://vehicle-rc-information-v2.p.rapidapi.com/';
-            const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+            // RapidAPI प्लेग्राउंड का बिल्कुल ओरिजिनल और डायरेक्ट URL
+            const url = 'https://vehicle-rc-information-v2.p.rapidapi.com/';
+            
+            // आपके स्क्रीनशॉट (1000531582.jpg) से मैच की गई बिल्कुल सही चाबी और हेडर्स
+            const options = {
+                method: 'POST',
+                headers: {
+                    'x-rapidapi-key': 'a5175b9516mshdab26204e9428aap13a278jsnaf854305ba92',
+                    'x-rapidapi-host': 'vehicle-rc-information-v2.p.rapidapi.com',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    vehicle_number: vehicleNumberInput
+                })
+            };
 
             try {
-                const response = await fetch(proxyUrl, {
-                    method: 'POST',
-                    headers: {
-                        'x-rapidapi-key': 'a5175b9516mshdab26204e9428aap13a278jsnaf854305ba92',
-                        'x-rapidapi-host': 'vehicle-rc-information-v2.p.rapidapi.com',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        vehicle_number: vehicleNumberInput
-                    })
-                });
+                // बिना किसी बिचौलिये प्रॉक्सी के डायरेक्ट हिट
+                const response = await fetch(url, options);
+                
+                // अगर लिमिट खत्म हो गई होगी तो यहाँ साफ़ पता चल जाएगा
+                if (response.status === 429 || response.status === 502) {
+                    throw new Error("RapidAPI Daily Limit Exceeded or Server Busy. Please check your billing dashboard.");
+                }
 
                 if (!response.ok) {
-                    throw new Error(`RTO Channel dropped. Server Code: ${response.status}`);
+                    throw new Error(`Server returned status code: ${response.status}`);
                 }
 
                 const data = await response.json();
-                console.log("Successfully Processed Data Object:", data);
+                console.log("Live API Response:", data);
 
-                // अगर सर्वर ने कोई एरर स्ट्रक्चर दिया हो
-                if (data.error || data.status === "failed" || (!data.brand_name && !data.owner_name)) {
-                    throw new Error(data.message || "Invalid registration number or limits exceeded.");
+                // अगर डेटा में कोई एरर मेसेज छुपा हो
+                if (data.error || data.status === "failed") {
+                    throw new Error(data.message || "No profile found for this vehicle number.");
                 }
 
-                // डैशबोर्ड रेंडर करें
+                // डैशबोर्ड जनरेट करें
                 renderDashboard(data, vehicleNumberInput);
                 resultDashboard.classList.remove('hidden');
 
             } catch (error) {
-                console.error("Deep Logs Catch Block:", error);
-                document.getElementById('errorText').innerText = "Gateway Handshake Error. Please clear browser cache and try again.";
+                console.error("Technical Debug Log:", error);
+                document.getElementById('errorText').innerText = error.message || "Connection Failed. Ensure CORS extension is active or limit is available.";
                 errorMessage.classList.remove('hidden');
             } finally {
                 loading.classList.add('hidden');
             }
         });
 
-        // आपके स्क्रीनशॉट 'image_65430a.jpg' के अनुसार रिस्पॉन्स फ़ील्ड्स की 100% परफेक्ट मैपिंग
+        // आपके 'image_65430a.jpg' स्क्रीनशॉट के रिस्पॉन्स ऑब्जेक्ट से 100% परफेक्ट की-मैपिंग
         function renderDashboard(data, searchedNumber) {
             const rcDetailsGrid = document.getElementById('rcDetailsGrid');
             
             const displayFields = [
-                { label: "Registration No", val: data.license_plate || data.pucc_number || searchedNumber, icon: "fa-id-card" },
-                { label: "Owner Name", val: data.owner_name || "SHUBHDEEP SINGH", icon: "fa-user" }, 
+                { label: "Registration No", val: data.license_plate || data.vehicleId || searchedNumber, icon: "fa-id-card" },
+                { label: "Owner Name", val: data.owner_name || "N/A", icon: "fa-user" }, 
                 { label: "Brand Name", val: data.brand_name || "N/A", icon: "fa-building" },
                 { label: "Model / Variant", val: data.brand_model || "N/A", icon: "fa-car" },
                 { label: "Engine Number", val: data.engine_number || "N/A", icon: "fa-gears" },
