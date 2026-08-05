@@ -184,6 +184,7 @@
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: none;
         }
 
         /* Vehicle Header Dark Banner */
@@ -421,13 +422,9 @@
             margin-top: auto;
         }
 
-        /* Responsive Layout adjustments */
         @media (max-width: 768px) {
             .details-grid {
                 grid-template-columns: 1fr;
-            }
-            .info-card.full-width {
-                grid-column: span 1;
             }
             .vehicle-header {
                 flex-direction: column;
@@ -450,7 +447,7 @@
             </div>
         </div>
         <div class="badge-status">
-            <span class="dot"></span> Fallback Data Loaded
+            <span class="dot"></span> Live API Connected
         </div>
     </header>
 
@@ -462,7 +459,7 @@
             <div class="input-group">
                 <div class="input-wrapper">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="vehicleNumInput" value="DL4SDH5925" placeholder="e.g. DL4SDH5925">
+                    <input type="text" id="vehicleNumInput" value="MH47BM9865" placeholder="e.g. MH47BM9865">
                 </div>
                 <button class="btn-search" id="searchBtn" onclick="fetchVehicleDetails()">
                     <i class="fa-solid fa-magnifying-glass"></i> Search Vehicle
@@ -483,19 +480,19 @@
             <div class="vehicle-header">
                 <div class="vehicle-title-area">
                     <div class="vehicle-icon">
-                        <i class="fa-solid fa-motorcycle" id="vehicleTypeIcon"></i>
+                        <i class="fa-solid fa-car" id="vehicleTypeIcon"></i>
                     </div>
                     <div>
                         <div class="plate-number-box">
-                            <span class="plate-number" id="dispRegNo">DL-4S-DH-5925</span>
+                            <span class="plate-number" id="dispRegNo">MH47BM9865</span>
                             <span class="status-tag" id="dispStatus">ACTIVE</span>
                         </div>
-                        <div class="vehicle-model" id="dispMakeModel">HERO MOTOCORP LTD • SPLENDOR +</div>
+                        <div class="vehicle-model" id="dispMakeModel">COMMERCIAL VEHICLE</div>
                     </div>
                 </div>
                 <div class="specs-pills">
-                    <div class="pill">Fuel: <span id="dispFuel">PETROL</span></div>
-                    <div class="pill">Norms: <span id="dispNorms">BHARAT STAGE III</span></div>
+                    <div class="pill">Vertical: <span id="dispVertical">CV</span></div>
+                    <div class="pill">RTO: <span id="dispRtoPlate">MH-47-Borivali</span></div>
                 </div>
             </div>
 
@@ -510,19 +507,19 @@
                         </div>
                         <div class="data-row">
                             <span class="data-label">Full Name</span>
-                            <span class="data-value" id="dispOwnerName">SANDIL RAJ</span>
+                            <span class="data-value" id="dispOwnerName">N/A</span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">Father's Name</span>
-                            <span class="data-value" id="dispFatherName">P MUKHAN</span>
+                            <span class="data-value" id="dispFatherName">N/A</span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">Owner Serial No</span>
-                            <span class="data-value" id="dispOwnerSeq">1</span>
+                            <span class="data-value" id="dispOwnerSeq">N/A</span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">Nominee</span>
-                            <span class="data-value" id="dispNominee">P MUKHAN</span>
+                            <span class="data-value" id="dispNominee">N/A</span>
                         </div>
                     </div>
 
@@ -532,7 +529,7 @@
                             <i class="fa-solid fa-location-dot"></i> Address Details
                         </div>
                         <div style="font-size: 0.75rem; color: var(--text-primary); font-weight: 500; line-height: 1.4;" id="dispAddress">
-                            W/Z-57, BUDHELA VILLAGE, VIKAS PURI, NEW DELHI, DELHI
+                            N/A
                         </div>
                     </div>
                 </div>
@@ -544,36 +541,36 @@
                     </div>
                     <div class="data-row">
                         <span class="data-label">Chassis No</span>
-                        <span class="data-value blur-val" id="dispChassis">MBLHA10CGGH--B0460</span>
+                        <span class="data-value blur-val" id="dispChassis">NOT AVAILABLE</span>
                     </div>
                     <div class="data-row">
                         <span class="data-label">Engine No</span>
-                        <span class="data-value blur-val" id="dispEngine">HA10ERGH--93561</span>
+                        <span class="data-value blur-val" id="dispEngine">NOT AVAILABLE</span>
                     </div>
                     <div class="data-row">
                         <span class="data-label">Engine CC</span>
-                        <span class="data-value" id="dispCc">97 cc</span>
+                        <span class="data-value" id="dispCc">N/A</span>
                     </div>
                     <div class="data-row">
                         <span class="data-label">Mfg Month/Year</span>
-                        <span class="data-value" id="dispMfg">08/2016</span>
+                        <span class="data-value" id="dispMfg">N/A</span>
                     </div>
                     <div class="data-row">
                         <span class="data-label">Color</span>
-                        <span class="data-value" id="dispColor">BLK</span>
+                        <span class="data-value" id="dispColor">N/A</span>
                     </div>
                     <div class="data-row">
                         <span class="data-label">Unladen Weight</span>
-                        <span class="data-value" id="dispWeight">112 kg</span>
+                        <span class="data-value" id="dispWeight">N/A</span>
                     </div>
 
                     <div style="margin-top: 28px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
                         <div class="data-row">
                             <span class="data-label">Financed Status</span>
-                            <span class="badge-financed" id="dispFinanceStatus">Financed</span>
+                            <span class="badge-financed" id="dispFinanceStatus">Not Financed</span>
                         </div>
                         <div style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; margin-top: 4px;" id="dispBankName">
-                            Bank: HOME CREDIT INDIA FINANCE PVT. LTD.
+                            Bank: N/A
                         </div>
                     </div>
                 </div>
@@ -586,23 +583,23 @@
                         </div>
                         <div class="data-row">
                             <span class="data-label">Reg Authority</span>
-                            <span class="data-value" id="dispRto">JANAKPURI (DL04)</span>
+                            <span class="data-value" id="dispRto">Borivali (MH47)</span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">Registration Date</span>
-                            <span class="data-value" id="dispRegDate">28/08/2016</span>
+                            <span class="data-value" id="dispRegDate">N/A</span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">RC Valid Upto</span>
-                            <span class="data-value text-green" id="dispRcValid">01/09/2031</span>
+                            <span class="data-value text-green" id="dispRcValid">N/A</span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">PUCC Expiry</span>
-                            <span class="data-value" id="dispPucc">05/11/2022</span>
+                            <span class="data-value" id="dispPucc">N/A</span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">Tax Upto</span>
-                            <span class="data-value" id="dispTax">LTT</span>
+                            <span class="data-value" id="dispTax">N/A</span>
                         </div>
                     </div>
 
@@ -613,19 +610,19 @@
                         </div>
                         <div class="data-row">
                             <span class="data-label">Insurer</span>
-                            <span class="data-value" id="dispInsurer" style="font-size:0.7rem;">GODIGIT GENERAL INS...</span>
+                            <span class="data-value" id="dispInsurer" style="font-size:0.7rem;">N/A</span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">Policy No</span>
-                            <span class="data-value" id="dispPolicyNo">0149138552</span>
+                            <span class="data-value" id="dispPolicyNo">N/A</span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">Policy Expiry</span>
-                            <span class="data-value" id="dispInsExpiry">27/05/2025</span>
+                            <span class="data-value" id="dispInsExpiry">N/A</span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">Prev. NCB</span>
-                            <span class="data-value text-green" id="dispNcb">25%</span>
+                            <span class="data-value text-green" id="dispNcb">0%</span>
                         </div>
                     </div>
                 </div>
@@ -634,8 +631,8 @@
 
             <!-- Footer Details inside Card -->
             <div class="card-footer-bar">
-                <span id="dispStatusVerified">Status verified on: 02/06/2025</span>
-                <a href="#" class="json-btn" onclick="alert('Viewing Raw JSON Payload')">View Raw JSON &lt;&gt;</a>
+                <span id="dispStatusVerified">Status verified via API response</span>
+                <a href="#" class="json-btn" onclick="alert(JSON.stringify(rawApiResponse, null, 2))">View Raw JSON &lt;&gt;</a>
             </div>
         </div>
 
@@ -645,8 +642,8 @@
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <h3>Details Not Found</h3>
-            <p>We couldn't retrieve valid vehicle specifications for the requested Registration Number.</p>
-            <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px;">(API Returned Error / Unauthorized response)</p>
+            <p>API returned a warning or unauthorized status for this vehicle number.</p>
+            <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px;" id="errorMsgSub">(Error: Unauthorized)</p>
         </div>
     </main>
 
@@ -657,6 +654,8 @@
 
     <!-- JS Logic -->
     <script>
+        let rawApiResponse = null;
+
         async function fetchVehicleDetails() {
             const rawRegNo = document.getElementById('vehicleNumInput').value.trim();
             if(!rawRegNo) {
@@ -668,61 +667,73 @@
             const notFoundBox = document.getElementById('notFoundBox');
             const loader = document.getElementById('loader');
 
-            // Hide boxes & Show Loader
             resultsBox.style.display = 'none';
             notFoundBox.style.display = 'none';
             loader.style.display = 'block';
 
             try {
-                // API Request Call
                 const response = await fetch(`https://cjpindia.vercel.app/api/vehicle-details/${rawRegNo}`);
                 const data = await response.json();
+                rawApiResponse = data; // store for raw json inspection
 
                 loader.style.display = 'none';
 
-                // Check condition if registration Details are missing or Error occurs (Like MH47BM9865 JSON Response)
-                if (data.registrationResult && (data.registrationResult.errorMsg === "Unauthorized" || data.registrationResult.status === "WARNING") && !data.registrationResult.ownerName) {
-                    // Show Animated Not Found Box
+                // Check API status or error message
+                const regResult = data.registrationResult || {};
+                
+                if (regResult.errorMsg || regResult.status === "WARNING" || !data.premiumRequest) {
+                    // Show animated details not found box with error message
+                    document.getElementById('errorMsgSub').innerText = `(Error: ${regResult.errorMsg || regResult.status || 'Data Not Found'})`;
                     notFoundBox.style.display = 'block';
                 } else {
-                    // Render details if found
                     renderData(data);
                     resultsBox.style.display = 'block';
                 }
             } catch (error) {
                 loader.style.display = 'none';
-                // If API Fails or returns Unauthorized without proper vehicle data
+                document.getElementById('errorMsgSub').innerText = `(Network or CORS Error)`;
                 notFoundBox.style.display = 'block';
             }
         }
 
         function renderData(data) {
-            // Function to safely update fields from API JSON Response
             const regRes = data.registrationResult || {};
             const premReq = data.premiumRequest?.motorPremiumRequest || {};
 
-            document.getElementById('dispRegNo').innerText = regRes.registrationNo || 'MH-47-BM-9865';
-            document.getElementById('dispRto').innerText = (premReq.rtoDesp || 'Borivali') + ` (${premReq.rtoId || 'MH47'})`;
-            document.getElementById('dispMakeModel').innerText = regRes.makeModel || 'HERO MOTOCORP LTD • SPLENDOR +';
-            document.getElementById('dispOwnerName').innerText = regRes.ownerName || 'SANDIL RAJ';
-            document.getElementById('dispFatherName').innerText = regRes.fatherName || 'P MUKHAN';
-            document.getElementById('dispOwnerSeq').innerText = regRes.ownerSerialNo || '1';
-            document.getElementById('dispNominee').innerText = regRes.nominee || 'P MUKHAN';
-            document.getElementById('dispAddress').innerText = regRes.address || 'W/Z-57,BUDHELA VILLAGE,VIKAS PURI,NEW DELHI,DELHI';
-            document.getElementById('dispChassis').innerText = regRes.chassisNo || 'MBLHA10CGGH--B0460';
-            document.getElementById('dispEngine').innerText = regRes.engineNo || 'HA10ERGH--93561';
-            document.getElementById('dispCc').innerText = regRes.engineCc ? regRes.engineCc + ' cc' : '97 cc';
-            document.getElementById('dispMfg').innerText = regRes.mfgDate || '08/2016';
-            document.getElementById('dispColor').innerText = regRes.color || 'BLK';
-            document.getElementById('dispWeight').innerText = regRes.weight ? regRes.weight + ' kg' : '112 kg';
-            document.getElementById('dispRegDate').innerText = regRes.regDate || '28/08/2016';
-            document.getElementById('dispRcValid').innerText = regRes.rcValidUpto || '01/09/2031';
-            document.getElementById('dispPucc').innerText = regRes.puccExpiry || '05/11/2022';
-            document.getElementById('dispInsurer').innerText = regRes.insurer || 'GODIGIT GENERAL INS...';
-            document.getElementById('dispPolicyNo').innerText = regRes.policyNo || '0149138552';
-            document.getElementById('dispInsExpiry').innerText = regRes.policyExpiry || '27/05/2025';
-            document.getElementById('dispNcb').innerText = (premReq.prevNCB || '25') + '%';
+            document.getElementById('dispRegNo').innerText = regRes.registrationNo || document.getElementById('vehicleNumInput').value;
+            document.getElementById('dispStatus').innerText = regRes.status || 'ACTIVE';
+            document.getElementById('dispVertical').innerText = regRes.vertical || 'CV';
+            document.getElementById('dispRtoPlate').innerText = regRes.rto?.rtoPlateLntLoc || 'MH-47-Borivali';
+            
+            document.getElementById('dispOwnerName').innerText = regRes.ownerName || 'N/A';
+            document.getElementById('dispFatherName').innerText = regRes.fatherName || 'N/A';
+            document.getElementById('dispOwnerSeq').innerText = regRes.ownerSerialNo || 'N/A';
+            document.getElementById('dispNominee').innerText = regRes.nominee || 'N/A';
+            document.getElementById('dispAddress').innerText = regRes.address || 'N/A';
+
+            document.getElementById('dispChassis').innerText = regRes.chassisNo || 'NOT AVAILABLE';
+            document.getElementById('dispEngine').innerText = regRes.engineNo || 'NOT AVAILABLE';
+            document.getElementById('dispCc').innerText = regRes.engineCc ? regRes.engineCc + ' cc' : 'N/A';
+            document.getElementById('dispMfg').innerText = regRes.mfgDate || 'N/A';
+            document.getElementById('dispColor').innerText = regRes.color || 'N/A';
+            document.getElementById('dispWeight').innerText = regRes.weight ? regRes.weight + ' kg' : 'N/A';
+
+            document.getElementById('dispRto').innerText = (premReq.rtoDesp || regRes.rto?.lntLoc || 'Borivali') + ` (${premReq.rtoId || regRes.rto?.rtoCode || 'MH47'})`;
+            document.getElementById('dispRegDate').innerText = regRes.regDate || 'N/A';
+            document.getElementById('dispRcValid').innerText = regRes.rcValidUpto || 'N/A';
+            document.getElementById('dispPucc').innerText = regRes.puccExpiry || 'N/A';
+            document.getElementById('dispTax').innerText = regRes.taxUpto || 'N/A';
+
+            document.getElementById('dispInsurer').innerText = regRes.insurer || 'N/A';
+            document.getElementById('dispPolicyNo').innerText = regRes.policyNo || 'N/A';
+            document.getElementById('dispInsExpiry').innerText = regRes.policyExpiry || 'N/A';
+            document.getElementById('dispNcb').innerText = (premReq.prevNCB || 0) + '%';
         }
+
+        // Run automatically for the default input value on load
+        window.onload = () => {
+            fetchVehicleDetails();
+        };
     </script>
 </body>
 </html>
