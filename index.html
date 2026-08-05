@@ -61,7 +61,7 @@
   <!-- Main Content Area -->
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
     
-    <!-- Live Search Box Section -->
+    <!-- Search Box Section -->
     <div class="mb-8 max-w-2xl mx-auto">
       <label class="block text-sm font-semibold text-slate-700 mb-2 text-center sm:text-left">
         Enter Registration Number to Fetch Details
@@ -90,7 +90,7 @@
         </button>
       </form>
       <p class="text-xs text-slate-400 mt-2 text-center sm:text-left">
-        Enter vehicle registration number with or without spaces/dashes.
+        Enter vehicle registration number without spaces/dashes for best results.
       </p>
     </div>
 
@@ -109,7 +109,7 @@
           <i data-lucide="alert-triangle" class="w-8 h-8"></i>
         </div>
         <h3 class="text-lg font-bold text-slate-800 mb-1" id="errorTitle">No Records Found</h3>
-        <p class="text-sm text-slate-500 max-w-md mb-6" id="errorMessage">We couldn't retrieve details for this vehicle number. Please check the number or verify if the API server is online.</p>
+        <p class="text-sm text-slate-500 max-w-md mb-6" id="errorMessage">We couldn't retrieve details for this vehicle number. Please check the number or try again later.</p>
       </div>
 
       <!-- Data Display Section -->
@@ -126,243 +126,59 @@
     </div>
   </footer>
 
-  <!-- Inline Application Logic JavaScript -->
+  <!-- Logic JavaScript -->
   <script>
-    // Base API Endpoint URL
     const BASE_API_URL = "https://cjpindia.vercel.app/api/vehicle-details/";
+    
+    // CORS Proxies to fix browser network blocking issues
+    const CORS_PROXIES = [
+      "https://api.allorigins.win/raw?url=",
+      "https://corsproxy.io/?"
+    ];
 
-    // Fallback Data
     const FALLBACK_DATA = [{
-      "newProfileFlow": false,
-      "premiumRequest": {
-        "createdByCustomer": false,
-        "customerName": "  ",
-        "defaultedFields": [],
-        "eldestMemberAge": 0,
-        "initialReqFlag": true,
-        "isAsync": true,
-        "isB2C": false,
-        "membersCovered": 0,
-        "motorPremiumRequest": {
-          "accidentalHospitalization": false,
-          "applicableNCB": 0,
-          "businessType": 0,
-          "comprehensive": {
-            "accidentalHospitalization": false,
-            "antiTheft": false,
-            "batteryAndChargerProtect": false,
-            "consumableCover": false,
-            "consumableCoverEstimatedPremium": 0,
-            "dailyCashAllowance": false,
-            "drivingTuitionCoverage": false,
-            "emergencyTransportAndHotelExpense": false,
-            "engineProtect": false,
-            "engineProtectEstimatedPremium": 0,
-            "fibretank": false,
-            "fullInvoiceCover": false,
-            "fullInvoiceCoverEstimatedPremium": 0,
-            "geographicExt": false,
-            "hydrostaticLockCover": false,
-            "imt23": false,
-            "imt34": false,
-            "imt47": false,
-            "keyReplacement": false,
-            "keyReplacementEstimatedPremium": 0,
-            "ncbProtect": false,
-            "paOwnerDriver": 0,
-            "paOwnerDriverEstimatedPremium": 0,
-            "personalBaggage": false,
-            "repairOfGlassRubberPlasticParts": false,
-            "rimProtect": false,
-            "rodentCover": false,
-            "rsa": false,
-            "rsaEstimatedPremium": 0,
-            "secureTowing": false,
-            "secureTowingEstimatedPremium": 0,
-            "tppd": false,
-            "tyreSecure": false,
-            "tyreSecureEstimatedPremium": 0,
-            "zeroDep": false,
-            "zeroDepEstimatedPremium": 0
-          },
-          "consumableCover": false,
-          "cvVehicleType": "",
-          "cvWheels": "",
-          "dailyCashAllowance": false,
-          "drivingTuitionCoverage": false,
-          "eligibleForNCB": true,
-          "emergencyTransportAndHotelExpense": false,
-          "expiryFlag": false,
-          "expiryInTwoDays": false,
-          "fibretank": false,
-          "fullInvoiceCover": false,
-          "geographicExt": false,
-          "horseIdv": 0,
-          "hydrostaticLockCover": false,
-          "insTrailerIDV": 0,
-          "isExpiryDateSet": false,
-          "isGoodCustomerDiscountSelected": false,
-          "isIndividual": true,
-          "isMaxIdv": false,
-          "isMinIdv": false,
-          "isRegisteredOwnerDifferent": false,
-          "keyReplacement": false,
-          "od": {
-            "accidentalHospitalization": false,
-            "antiTheft": false,
-            "batteryAndChargerProtect": false,
-            "consumableCover": false,
-            "consumableCoverEstimatedPremium": 0,
-            "dailyCashAllowance": false,
-            "drivingTuitionCoverage": false,
-            "emergencyTransportAndHotelExpense": false,
-            "engineProtect": false,
-            "engineProtectEstimatedPremium": 0,
-            "fibretank": false,
-            "fullInvoiceCover": false,
-            "fullInvoiceCoverEstimatedPremium": 0,
-            "geographicExt": false,
-            "hydrostaticLockCover": false,
-            "imt23": false,
-            "imt34": false,
-            "imt47": false,
-            "keyReplacement": false,
-            "keyReplacementEstimatedPremium": 0,
-            "ncbProtect": false,
-            "paOwnerDriver": 0,
-            "paOwnerDriverEstimatedPremium": 0,
-            "personalBaggage": false,
-            "repairOfGlassRubberPlasticParts": false,
-            "rimProtect": false,
-            "rodentCover": false,
-            "rsa": false,
-            "rsaEstimatedPremium": 0,
-            "secureTowing": false,
-            "secureTowingEstimatedPremium": 0,
-            "tppd": false,
-            "tyreSecure": false,
-            "tyreSecureEstimatedPremium": 0,
-            "zeroDep": false,
-            "zeroDepEstimatedPremium": 0
-          },
-          "pastClient": false,
-          "personalBaggage": false,
-          "prevClaim": false,
-          "prevNCB": 0,
-          "previousPolicyDidntHadCNG": false,
-          "previousPolicyDidntHadRTI": false,
-          "previousPolicyDidntHadZeroDep": false,
-          "purchasePolicy": false,
-          "registrationNo": "MH47BM9865",
-          "repairOfGlassRubberPlasticParts": false,
-          "rtoDesp": "Borivali",
-          "rtoId": "MH47",
-          "secureTowing": false,
-          "shouldUpdateRenewalService": false,
-          "skippedRenewal": false,
-          "tp": {
-            "accidentalHospitalization": false,
-            "antiTheft": false,
-            "batteryAndChargerProtect": false,
-            "consumableCover": false,
-            "consumableCoverEstimatedPremium": 0,
-            "dailyCashAllowance": false,
-            "drivingTuitionCoverage": false,
-            "emergencyTransportAndHotelExpense": false,
-            "engineProtect": false,
-            "engineProtectEstimatedPremium": 0,
-            "fibretank": false,
-            "fullInvoiceCover": false,
-            "fullInvoiceCoverEstimatedPremium": 0,
-            "geographicExt": false,
-            "hydrostaticLockCover": false,
-            "imt23": false,
-            "imt34": false,
-            "imt47": false,
-            "keyReplacement": false,
-            "keyReplacementEstimatedPremium": 0,
-            "ncbProtect": false,
-            "paOwnerDriver": 0,
-            "paOwnerDriverEstimatedPremium": 0,
-            "personalBaggage": false,
-            "repairOfGlassRubberPlasticParts": false,
-            "rimProtect": false,
-            "rodentCover": false,
-            "rsa": false,
-            "rsaEstimatedPremium": 0,
-            "secureTowing": false,
-            "secureTowingEstimatedPremium": 0,
-            "tppd": false,
-            "tyreSecure": false,
-            "tyreSecureEstimatedPremium": 0,
-            "zeroDep": false,
-            "zeroDepEstimatedPremium": 0
-          },
-          "tyreSecure": false
-        },
-        "newCheckoutFlow": false,
-        "newProfileFlow": false,
-        "requestIssuanceClick": false,
-        "resultPageVisited": true,
-        "stateCode": "MH",
-        "utmParams": {
-          "fbclid": null,
-          "gclid": null,
-          "utmAdgroup": null,
-          "utmAdposition": null,
-          "utmAudience": null,
-          "utmCampaign": null,
-          "utmContent": null,
-          "utmDevice": null,
-          "utmLocation": null,
-          "utmMatchtype": null,
-          "utmMedium": null,
-          "utmNetwork": null,
-          "utmPlacement": null,
-          "utmPrice": null,
-          "utmPromotion": null,
-          "utmSitelink": null,
-          "utmSource": null,
-          "utmTerm": null,
-          "utmUrl": null
-        },
-        "vertical": "CV"
-      },
-      "registrationResult": {
-        "errorMsg": "Unauthorized",
-        "previousClaim": false,
-        "reg1": "MH",
-        "reg2": "47",
-        "reg3": "BM",
-        "reg4": "9865",
-        "registrationNo": "MH47BM9865",
-        "rto": {
-          "lntLoc": "Borivali",
-          "rtoCode": "MH47",
-          "rtoPlate": "MH-47",
-          "rtoPlateLntLoc": "MH-47-Borivali"
-        },
-        "status": "WARNING",
-        "vertical": "CV"
-      },
-      "renewal": false
+      "registration_number": "MH47BM9865",
+      "meta_data": {
+        "signzy_response": {
+          "result": {
+            "regNo": "MH47BM9865",
+            "owner": "PAWAN AUTO FINANCE",
+            "status": "ACTIVE",
+            "vehicleManufacturerName": "HONDA",
+            "model": "ACTIVA 5G",
+            "type": "PETROL",
+            "normsType": "BS IV",
+            "chassis": "ME4JF507KKB123456",
+            "engine": "JF50E7123456",
+            "vehicleCubicCapacity": "109.19",
+            "vehicleManufacturingMonthYear": "03/2019",
+            "vehicleColour": "GREY",
+            "regAuthority": "BORIVALI RTO",
+            "rtoCode": "MH47",
+            "regDate": "15/03/2019",
+            "rcExpiryDate": "14/03/2034",
+            "puccUpto": "10/11/2025",
+            "vehicleInsuranceCompanyName": "TATA AIG GENERAL INSURANCE",
+            "vehicleInsurancePolicyNumber": "0159874521",
+            "vehicleInsuranceUpto": "14/03/2026",
+            "presentAddress": "BORIVALI WEST, MUMBAI, MAHARASHTRA - 400092"
+          }
+        }
+      }
     }];
 
     let masterVehicleData = [];
 
-    // Helper: Safe Value Formatting
     function val(value, fallback = 'N/A') {
-      if (value === null || value === undefined || value === '' || value === 'NA') {
+      if (value === null || value === undefined || value === '' || value === 'NA' || value === 'null') {
         return `<span class="text-slate-400 font-normal">${fallback}</span>`;
       }
       return value;
     }
 
-    // Search Submit Handler
     function handleSearch(e) {
       if (e) e.preventDefault();
       const rawInput = document.getElementById('vehicleInput').value;
-      // Clean vehicle number: remove spaces, dashes, special chars
       const cleanRegNo = rawInput.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
 
       if (!cleanRegNo) {
@@ -373,62 +189,73 @@
       fetchVehicleData(cleanRegNo);
     }
 
-    // Fetch Vehicle Data from API
     async function fetchVehicleData(regNo) {
       showLoading(true);
       updateStatus('Fetching...', 'bg-yellow-400');
 
-      const fullApiUrl = `${BASE_API_URL}${regNo}`;
+      let responseData = null;
+      const targetUrl = `${BASE_API_URL}${regNo}`;
 
+      // 1. Direct Fetch Attempt
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 second timeout
-
-        const response = await fetch(fullApiUrl, {
-          signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-
-        const data = await response.json();
-
-        if (Array.isArray(data) && data.length > 0) {
-          masterVehicleData = data;
-          updateStatus('Live API Data', 'bg-emerald-500');
-        } else if (typeof data === 'object' && data !== null && !data.error) {
-          masterVehicleData = [data];
-          updateStatus('Live API Data', 'bg-emerald-500');
-        } else {
-          throw new Error('Vehicle record not found.');
+        const res = await fetch(targetUrl, { method: 'GET' });
+        if (res.ok) {
+          responseData = await res.json();
         }
-      } catch (error) {
-        console.warn("API Fetch failed or timed out:", error);
+      } catch (e) {
+        console.warn("Direct API call blocked or failed. Trying CORS Proxies...", e);
+      }
 
-        // Fallback check: if user searched for default registration number
-        if (regNo.toUpperCase().replace(/[^A-Z0-9]/g, '') === 'MH47BM9865') {
-          masterVehicleData = FALLBACK_DATA;
-          updateStatus('Fallback Data Loaded', 'bg-blue-500');
+      // 2. CORS Proxy Fallback if Direct Fetch failed
+      if (!responseData) {
+        for (let proxy of CORS_PROXIES) {
+          try {
+            const proxyUrl = proxy + encodeURIComponent(targetUrl);
+            const res = await fetch(proxyUrl);
+            if (res.ok) {
+              responseData = await res.json();
+              if (responseData) break;
+            }
+          } catch (e) {
+            console.warn("Proxy attempt failed:", proxy, e);
+          }
+        }
+      }
+
+      // 3. Process Response Data
+      if (responseData) {
+        if (Array.isArray(responseData) && responseData.length > 0) {
+          masterVehicleData = responseData;
+        } else if (typeof responseData === 'object' && Object.keys(responseData).length > 0 && !responseData.error) {
+          masterVehicleData = [responseData];
         } else {
           masterVehicleData = [];
-          updateStatus('Error / Offline', 'bg-red-500');
-          showError("Record Not Found", `Could not fetch details for vehicle "${regNo}". Please check if the API server is online or if the vehicle number is correct.`);
         }
-      } finally {
-        showLoading(false);
-        renderCards(masterVehicleData);
+      } else {
+        masterVehicleData = [];
       }
+
+      // 4. Fallback verification for demo number
+      if (masterVehicleData.length === 0 && regNo === 'MH47BM9865') {
+        masterVehicleData = FALLBACK_DATA;
+        updateStatus('Fallback Data Loaded', 'bg-blue-500');
+      } else if (masterVehicleData.length > 0) {
+        updateStatus('Live Data Loaded', 'bg-emerald-500');
+      } else {
+        updateStatus('Error / Not Found', 'bg-red-500');
+        showError("Record Not Found", `Could not fetch details for vehicle "${regNo}". Please check the vehicle number.`);
+      }
+
+      showLoading(false);
+      renderCards(masterVehicleData);
     }
 
-    // Update Status Badge
     function updateStatus(text, dotClass) {
       document.getElementById('statusText').innerText = text;
       const dot = document.getElementById('statusDot');
       dot.className = `w-2 h-2 rounded-full mr-2 ${dotClass}`;
     }
 
-    // Toggle Loading UI
     function showLoading(isLoading) {
       const loading = document.getElementById('loadingState');
       const error = document.getElementById('errorState');
@@ -446,7 +273,6 @@
       }
     }
 
-    // Show Error UI
     function showError(title, message) {
       const error = document.getElementById('errorState');
       document.getElementById('errorTitle').innerText = title;
@@ -455,7 +281,6 @@
       error.classList.add('flex');
     }
 
-    // Render Cards
     function renderCards(records) {
       const container = document.getElementById('dataList');
       const errorState = document.getElementById('errorState');
@@ -470,18 +295,19 @@
       container.classList.remove('hidden');
 
       container.innerHTML = records.map((item, index) => {
-        const sz = item?.meta_data?.signzy_response?.result || {};
+        // Safe extraction from various possible JSON response structures
+        const sz = item?.meta_data?.signzy_response?.result || item?.result || item?.data || item || {};
         const cust = item?.customer_details || {};
         const veh = item?.vehicle_details || {};
         const nominee = item?.nominee_details || {};
         const regRes = item?.registrationResult || {};
         const motorReq = item?.premiumRequest?.motorPremiumRequest || {};
 
-        const regNo = item?.registration_number || sz?.regNo || regRes?.registrationNo || motorReq?.registrationNo || 'NO REGISTRATION NO';
-        const model = sz?.model || motorReq?.cvVehicleType || 'Vehicle';
-        const manufacturer = sz?.vehicleManufacturerName || 'Unknown Manufacturer';
-        const ownerName = cust?.full_name || sz?.owner || item?.premiumRequest?.customerName || 'Unknown Owner';
-        const status = sz?.status || regRes?.status || 'ACTIVE';
+        const regNo = item?.registration_number || sz?.regNo || sz?.registration_number || regRes?.registrationNo || motorReq?.registrationNo || 'NO REGISTRATION NO';
+        const model = sz?.model || sz?.vehicle_model || motorReq?.cvVehicleType || 'Vehicle';
+        const manufacturer = sz?.vehicleManufacturerName || sz?.maker || sz?.manufacturer || 'Unknown Manufacturer';
+        const ownerName = sz?.owner || sz?.owner_name || cust?.full_name || item?.premiumRequest?.customerName || 'Unknown Owner';
+        const status = sz?.status || sz?.rc_status || regRes?.status || 'ACTIVE';
 
         return `
           <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
@@ -496,7 +322,7 @@
                   <div>
                     <div class="flex items-center space-x-3">
                       <h2 class="text-2xl font-black tracking-wider text-amber-400">${regNo}</h2>
-                      <span class="badge ${status === 'ACTIVE' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400'}">
+                      <span class="badge ${status === 'ACTIVE' || status === 'ACT' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400'}">
                         ${status}
                       </span>
                     </div>
@@ -506,10 +332,10 @@
 
                 <div class="flex flex-wrap gap-2">
                   <span class="bg-slate-800 text-slate-300 text-xs px-3 py-1.5 rounded-lg border border-slate-700">
-                    Fuel: <strong class="text-white">${val(sz?.type)}</strong>
+                    Fuel: <strong class="text-white">${val(sz?.type || sz?.fuel_type)}</strong>
                   </span>
                   <span class="bg-slate-800 text-slate-300 text-xs px-3 py-1.5 rounded-lg border border-slate-700">
-                    Norms: <strong class="text-white">${val(sz?.normsType)}</strong>
+                    Norms: <strong class="text-white">${val(sz?.normsType || sz?.emission_norms)}</strong>
                   </span>
                 </div>
               </div>
@@ -531,11 +357,11 @@
                     </div>
                     <div class="flex justify-between">
                       <span class="text-slate-500">Father's Name</span>
-                      <span class="font-medium text-slate-700">${val(sz?.ownerFatherName)}</span>
+                      <span class="font-medium text-slate-700">${val(sz?.ownerFatherName || sz?.father_name)}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-slate-500">Owner Serial No</span>
-                      <span class="font-medium text-slate-700">${val(sz?.ownerCount)}</span>
+                      <span class="font-medium text-slate-700">${val(sz?.ownerCount || sz?.owner_serial_number)}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-slate-500">Nominee</span>
@@ -549,7 +375,7 @@
                     <i data-lucide="map-pin" class="w-4 h-4 mr-1.5 text-blue-600"></i> Address Details
                   </h3>
                   <p class="text-xs text-slate-600 leading-relaxed">
-                    ${val(sz?.presentAddress || cust?.communication_address?.address_line)}
+                    ${val(sz?.presentAddress || sz?.address || cust?.communication_address?.address_line)}
                   </p>
                 </div>
               </div>
@@ -564,23 +390,23 @@
                     <div class="space-y-2.5 text-sm">
                       <div class="flex justify-between">
                         <span class="text-slate-500">Chassis No</span>
-                        <span class="font-mono font-medium text-xs text-slate-800 bg-slate-200/60 px-1.5 py-0.5 rounded">${val(item?.chassis_number || sz?.chassis)}</span>
+                        <span class="font-mono font-medium text-xs text-slate-800 bg-slate-200/60 px-1.5 py-0.5 rounded">${val(item?.chassis_number || sz?.chassis || sz?.chassis_number)}</span>
                       </div>
                       <div class="flex justify-between">
                         <span class="text-slate-500">Engine No</span>
-                        <span class="font-mono font-medium text-xs text-slate-800 bg-slate-200/60 px-1.5 py-0.5 rounded">${val(item?.engine_number || sz?.engine)}</span>
+                        <span class="font-mono font-medium text-xs text-slate-800 bg-slate-200/60 px-1.5 py-0.5 rounded">${val(item?.engine_number || sz?.engine || sz?.engine_number)}</span>
                       </div>
                       <div class="flex justify-between">
                         <span class="text-slate-500">Engine CC</span>
-                        <span class="font-medium text-slate-700">${val(sz?.vehicleCubicCapacity)} cc</span>
+                        <span class="font-medium text-slate-700">${val(sz?.vehicleCubicCapacity || sz?.cubic_capacity)} cc</span>
                       </div>
                       <div class="flex justify-between">
                         <span class="text-slate-500">Mfg Month/Year</span>
-                        <span class="font-medium text-slate-700">${val(sz?.vehicleManufacturingMonthYear)}</span>
+                        <span class="font-medium text-slate-700">${val(sz?.vehicleManufacturingMonthYear || sz?.mfg_date)}</span>
                       </div>
                       <div class="flex justify-between">
                         <span class="text-slate-500">Color</span>
-                        <span class="font-medium text-slate-700">${val(sz?.vehicleColour)}</span>
+                        <span class="font-medium text-slate-700">${val(sz?.vehicleColour || sz?.color)}</span>
                       </div>
                       <div class="flex justify-between">
                         <span class="text-slate-500">Unladen Weight</span>
@@ -592,7 +418,7 @@
                   <div class="mt-4 pt-3 border-t border-slate-200/60">
                     <div class="flex items-center justify-between">
                       <span class="text-xs font-medium text-slate-500">Financed Status</span>
-                      ${veh?.is_vehicle_financed 
+                      ${veh?.is_vehicle_financed || sz?.rcFinancer
                         ? `<span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Financed</span>` 
                         : `<span class="text-xs font-bold text-slate-600">N/A</span>`}
                     </div>
@@ -610,23 +436,23 @@
                   <div class="space-y-2.5 text-sm">
                     <div class="flex justify-between">
                       <span class="text-slate-500">Reg Authority</span>
-                      <span class="font-medium text-slate-700">${val(sz?.regAuthority || regRes?.rto?.lntLoc || motorReq?.rtoDesp)} (${val(sz?.rtoCode || regRes?.rto?.rtoCode || motorReq?.rtoId)})</span>
+                      <span class="font-medium text-slate-700">${val(sz?.regAuthority || sz?.rto || regRes?.rto?.lntLoc)}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-slate-500">Registration Date</span>
-                      <span class="font-medium text-slate-700">${val(sz?.regDate)}</span>
+                      <span class="font-medium text-slate-700">${val(sz?.regDate || sz?.registration_date)}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-slate-500">RC Valid Upto</span>
-                      <span class="font-medium text-emerald-600">${val(sz?.rcExpiryDate)}</span>
+                      <span class="font-medium text-emerald-600">${val(sz?.rcExpiryDate || sz?.fit_up_to)}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-slate-500">PUCC Expiry</span>
-                      <span class="font-medium text-slate-700">${val(sz?.puccUpto)}</span>
+                      <span class="font-medium text-slate-700">${val(sz?.puccUpto || sz?.puc_valid_upto)}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-slate-500">Tax Upto</span>
-                      <span class="font-medium text-slate-700">${val(sz?.vehicleTaxUpto)}</span>
+                      <span class="font-medium text-slate-700">${val(sz?.vehicleTaxUpto || sz?.tax_upto)}</span>
                     </div>
                   </div>
                 </div>
@@ -638,15 +464,15 @@
                   <div class="space-y-2 text-xs">
                     <div class="flex justify-between">
                       <span class="text-slate-500">Insurer</span>
-                      <span class="font-semibold text-slate-800 text-right max-w-[150px] truncate">${val(sz?.vehicleInsuranceCompanyName)}</span>
+                      <span class="font-semibold text-slate-800 text-right max-w-[150px] truncate">${val(sz?.vehicleInsuranceCompanyName || sz?.insurance_company)}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-slate-500">Policy No</span>
-                      <span class="font-mono text-slate-700">${val(item?.previous_policy_number || sz?.vehicleInsurancePolicyNumber)}</span>
+                      <span class="font-mono text-slate-700">${val(item?.previous_policy_number || sz?.vehicleInsurancePolicyNumber || sz?.policy_number)}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-slate-500">Policy Expiry</span>
-                      <span class="font-semibold text-slate-800">${val(item?.previous_policy_exp_date || sz?.vehicleInsuranceUpto)}</span>
+                      <span class="font-semibold text-slate-800">${val(item?.previous_policy_exp_date || sz?.vehicleInsuranceUpto || sz?.insurance_upto)}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-slate-500">Prev. NCB</span>
@@ -686,7 +512,6 @@
       if (element) element.classList.toggle('hidden');
     }
 
-    // Initial Load (Lucide icons render only, no auto search)
     window.addEventListener('DOMContentLoaded', () => {
       if (window.lucide) lucide.createIcons();
     });
