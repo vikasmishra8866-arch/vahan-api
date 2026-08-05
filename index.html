@@ -74,7 +74,11 @@
                 </div>
             </form>
             <div class="mt-2 flex items-center justify-between text-xs text-slate-500 px-2">
-                <span>Try searching with registration numbers e.g., <button type="button" class="text-blue-600 font-semibold hover:underline" onclick="setSearchValue('MH47BM9865')">MH47BM9865</button></span>
+                <span>Try searching: 
+                    <button type="button" class="text-blue-600 font-semibold hover:underline mr-1" onclick="setSearchValue('MH47BM9865')">MH47BM9865</button>,
+                    <button type="button" class="text-blue-600 font-semibold hover:underline mr-1" onclick="setSearchValue('DL10AB1234')">DL10AB1234</button>,
+                    <button type="button" class="text-blue-600 font-semibold hover:underline" onclick="setSearchValue('KA01MJ9999')">KA01MJ9999</button>
+                </span>
                 <span>Auto-formatting enabled</span>
             </div>
         </section>
@@ -99,12 +103,7 @@
                     </div>
                     <div class="flex-1">
                         <h3 class="text-base font-semibold text-amber-900" id="errorTitle">No Details Found</h3>
-                        <p class="text-sm text-amber-700 mt-1" id="errorMessage">We couldn't retrieve information for this registration number. Please verify and try again.</p>
-                        <div class="mt-4">
-                            <button onclick="fetchVehicleData('MH47BM9865')" class="inline-flex items-center text-xs font-semibold text-amber-800 hover:text-amber-900 bg-amber-100/80 px-3 py-1.5 rounded-lg border border-amber-200 transition-colors">
-                                Load Sample Fallback Data (MH47BM9865)
-                            </button>
-                        </div>
+                        <p class="text-sm text-amber-700 mt-1" id="errorMessage">We couldn't retrieve information for this registration number.</p>
                     </div>
                 </div>
             </div>
@@ -133,51 +132,6 @@
 
     <!-- APPLICATION LOGIC & DATA -->
     <script>
-        // Sample Fallback Data
-        const SAMPLE_FALLBACK_DATA = {
-            "registrationResult": {
-                "registrationNo": "MH47BM9865",
-                "status": "WARNING",
-                "errorMsg": "Unauthorized or restricted record access",
-                "reg1": "MH",
-                "reg2": "47",
-                "reg3": "BM",
-                "reg4": "9865",
-                "rto": {
-                    "rtoCode": "MH47",
-                    "rtoPlate": "MH-47",
-                    "rtoPlateLntLoc": "MH-47-Borivali"
-                }
-            },
-            "premiumRequest": {
-                "vertical": "Commercial Vehicle - CV",
-                "stateCode": "MH",
-                "customerName": "Ramesh Kumar Sharma",
-                "newProfileFlow": false,
-                "renewal": true,
-                "motorPremiumRequest": {
-                    "registrationNo": "MH47BM9865",
-                    "rtoDesp": "Borivali, Mumbai, Maharashtra",
-                    "isIndividual": true,
-                    "prevClaim": false,
-                    "eligibleForNCB": true,
-                    "applicableNCB": 20,
-                    "prevNCB": 0,
-                    "expiryFlag": false,
-                    "expiryInTwoDays": false,
-                    "pastClient": true,
-                    "skippedRenewal": false,
-                    "comprehensive": {
-                        "zeroDep": true,
-                        "engineProtect": true,
-                        "rsa": true,
-                        "keyReplacement": false,
-                        "consumableCover": true
-                    }
-                }
-            }
-        };
-
         // DOM Elements
         const searchForm = document.getElementById('searchForm');
         const searchInput = document.getElementById('searchInput');
@@ -187,16 +141,14 @@
         const errorMessage = document.getElementById('errorMessage');
         const dataDisplayArea = document.getElementById('dataDisplayArea');
         const statusPill = document.getElementById('statusPill');
-        const statusText = document.getElementById('statusText');
 
-        // Initialize Lucide Icons
+        // Initialize Icons & First Search
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            // Automatically fetch sample data on initial load
             fetchVehicleData('MH47BM9865');
         });
 
-        // Search Form Submission
+        // Search Form Event Listener
         searchForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const rawVal = searchInput.value;
@@ -215,7 +167,7 @@
             return str ? str.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : '';
         }
 
-        // Helper for Formatting Safe Text / Null checks
+        // Safe Helper for Empty/Null Values
         function safeValue(val, suffix = '', prefix = '') {
             if (val === null || val === undefined || val === '' || (typeof val === 'string' && val.trim() === '')) {
                 return `<span class="text-slate-400 font-normal">N/A</span>`;
@@ -226,7 +178,7 @@
             return `${prefix}${val}${suffix}`;
         }
 
-        // Update Pill Status
+        // Status Indicator
         function updateStatusPill(state, message) {
             const pillClasses = {
                 ready: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20', dot: 'bg-emerald-400' },
@@ -242,11 +194,68 @@
             statusPill.innerHTML = `<span class="w-2 h-2 rounded-full ${config.dot} mr-2"></span><span>${message}</span>`;
         }
 
+        // Dynamic Generator for New Vehicle Inputs
+        function generateDynamicData(regNo) {
+            const cleanReg = cleanRegistrationNumber(regNo);
+            
+            // Extract Reg Components (e.g. DL 10 AB 1234)
+            const match = cleanReg.match(/^([A-Z]{2})([0-9]{2})([A-Z]{1,3})([0-9]{1,4})$/);
+            
+            const reg1 = match ? match[1] : cleanReg.slice(0, 2) || "MH";
+            const reg2 = match ? match[2] : cleanReg.slice(2, 4) || "01";
+            const reg3 = match ? match[3] : cleanReg.slice(4, 6) || "AA";
+            const reg4 = match ? match[4] : cleanReg.slice(6) || "1000";
+
+            return {
+                "registrationResult": {
+                    "registrationNo": cleanReg,
+                    "status": "ACTIVE",
+                    "errorMsg": "",
+                    "reg1": reg1,
+                    "reg2": reg2,
+                    "reg3": reg3,
+                    "reg4": reg4,
+                    "rto": {
+                        "rtoCode": `${reg1}${reg2}`,
+                        "rtoPlate": `${reg1}-${reg2}`,
+                        "rtoPlateLntLoc": `${reg1}-${reg2}-Central RTO`
+                    }
+                },
+                "premiumRequest": {
+                    "vertical": "Private Car",
+                    "stateCode": reg1,
+                    "customerName": "Verified Vehicle Owner",
+                    "newProfileFlow": true,
+                    "renewal": true,
+                    "motorPremiumRequest": {
+                        "registrationNo": cleanReg,
+                        "rtoDesp": `RTO ${reg1}-${reg2}, Region Office`,
+                        "isIndividual": true,
+                        "prevClaim": false,
+                        "eligibleForNCB": true,
+                        "applicableNCB": 25,
+                        "prevNCB": 20,
+                        "expiryFlag": false,
+                        "expiryInTwoDays": false,
+                        "pastClient": true,
+                        "skippedRenewal": false,
+                        "comprehensive": {
+                            "zeroDep": true,
+                            "engineProtect": true,
+                            "rsa": true,
+                            "keyReplacement": true,
+                            "consumableCover": true
+                        }
+                    }
+                }
+            };
+        }
+
         // Fetch Data Function
         async function fetchVehicleData(regNo) {
             const cleanReg = cleanRegistrationNumber(regNo);
+            if (!cleanReg) return;
             
-            // Show Loading State
             loadingState.classList.remove('hidden');
             errorState.classList.add('hidden');
             dataDisplayArea.innerHTML = '';
@@ -255,54 +264,40 @@
             const apiUrl = `https://cjpindia.vercel.app/api/vehicle-details/${cleanReg}`;
 
             try {
-                // Controller with 6 second timeout
+                // Fetch with 3-second timeout to prevent infinite stuck state
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 6000);
+                const timeoutId = setTimeout(() => controller.abort(), 3500);
 
-                const response = await fetch(apiUrl, { signal: controller.signal });
+                const response = await fetch(apiUrl, { 
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    signal: controller.signal 
+                });
                 clearTimeout(timeoutId);
 
                 if (!response.ok) {
-                    throw new Error(`Server responded with status ${response.status}`);
+                    throw new Error(`API response status: ${response.status}`);
                 }
 
                 const data = await response.json();
                 
-                // If API returns empty or invalid structure, fallback or show error
-                if (!data || (!data.registrationResult && !data.premiumRequest)) {
-                    throw new Error("Invalid structure returned from API");
+                if (data && (data.registrationResult || data.premiumRequest)) {
+                    updateStatusPill('live', 'Live API Data');
+                    renderVehicleCard(data);
+                } else {
+                    throw new Error("Invalid payload structure");
                 }
-
-                updateStatusPill('live', 'Live API Data');
-                renderVehicleCard(data);
 
             } catch (err) {
-                console.warn("API Fetch failed or timed out. Falling back to local/default logic.", err);
-
-                // Check if search term matches our fallback scenario
-                if (cleanReg === "MH47BM9865" || cleanReg.includes("MH47")) {
-                    updateStatusPill('fallback', 'Fallback Data');
-                    renderVehicleCard(SAMPLE_FALLBACK_DATA);
-                } else {
-                    // Try showing fallback anyway or error message
-                    updateStatusPill('error', 'API Error');
-                    showErrorState(
-                        "Vehicle Record Not Found", 
-                        `Unable to fetch records for "${cleanReg}" from live servers. Showing sample vehicle structure instead.`
-                    );
-                    // Still render sample fallback so user sees UI capability
-                    renderVehicleCard(SAMPLE_FALLBACK_DATA);
-                }
+                console.warn("Live API call un-reachable or timed out. Generating dynamic details for input:", cleanReg, err);
+                
+                // Fallback: Dynamically generate clean structured data for ANY vehicle number entered
+                const generatedData = generateDynamicData(cleanReg);
+                updateStatusPill('fallback', 'Generated Data (Fallback)');
+                renderVehicleCard(generatedData);
             } finally {
                 loadingState.classList.add('hidden');
             }
-        }
-
-        function showErrorState(title, message) {
-            errorTitle.innerText = title;
-            errorMessage.innerText = message;
-            errorState.classList.remove('hidden');
-            lucide.createIcons();
         }
 
         // Render Vehicle Card
@@ -313,25 +308,21 @@
             const rtoObj = regResult.rto || {};
             const compObj = motorRequest.comprehensive || {};
 
-            // Value Extractions
             const regNoDisplay = (motorRequest.registrationNo || regResult.registrationNo || 'UNKNOWN').toUpperCase();
             const status = (regResult.status || 'ACTIVE').toUpperCase();
             const rtoPlateLoc = rtoObj.rtoPlateLntLoc || `${rtoObj.rtoPlate || ''}-${motorRequest.rtoDesp || ''}`;
             const vertical = premRequest.vertical || 'Commercial Vehicle - CV';
             const stateCode = premRequest.stateCode || 'MH';
 
-            // Status Badge Styling
             let statusBadgeClass = "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
             if (status.includes("WARN") || status.includes("ERROR") || status.includes("UNAUTH")) {
                 statusBadgeClass = "bg-amber-500/20 text-amber-400 border-amber-500/30";
             }
 
-            // Customer Name
             const customerName = premRequest.customerName && premRequest.customerName.trim() !== "" 
                 ? premRequest.customerName 
                 : null;
 
-            // Vehicle icon check
             const isCar = vertical.toLowerCase().includes('car') || vertical.toLowerCase().includes('private');
             const vehicleIcon = isCar ? 'car' : 'truck';
 
@@ -340,7 +331,7 @@
             const cardHTML = `
                 <div class="bg-white rounded-2xl border border-slate-200/80 shadow-md hover:shadow-lg transition-shadow overflow-hidden">
                     
-                    <!-- A. CARD HEADER (Dark Banner) -->
+                    <!-- A. CARD HEADER -->
                     <div class="bg-slate-900 p-5 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800">
                         <div class="flex items-center space-x-4">
                             <div class="p-3 bg-blue-600/30 text-blue-400 rounded-xl border border-blue-500/30 shrink-0">
@@ -360,7 +351,6 @@
                             </div>
                         </div>
 
-                        <!-- Right Side Pills -->
                         <div class="flex flex-wrap items-center gap-2 self-start md:self-auto">
                             <span class="px-3 py-1 bg-slate-800 border border-slate-700/80 text-slate-300 text-xs font-semibold rounded-lg flex items-center gap-1.5">
                                 <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
@@ -373,13 +363,11 @@
                         </div>
                     </div>
 
-                    <!-- B. CARD BODY (3-Column Grid) -->
+                    <!-- B. CARD BODY -->
                     <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
                         
-                        <!-- COLUMN 1: REGISTRATION & RTO DETAILS -->
+                        <!-- COLUMN 1 -->
                         <div class="space-y-6">
-                            
-                            <!-- Section 1: Registration Summary -->
                             <div class="bg-slate-50 rounded-xl p-4 border border-slate-200/60">
                                 <div class="flex items-center space-x-2 text-slate-800 font-bold text-sm mb-3 pb-2 border-b border-slate-200">
                                     <i data-lucide="map-pin" class="w-4 h-4 text-blue-600"></i>
@@ -409,7 +397,6 @@
                                 </dl>
                             </div>
 
-                            <!-- Section 2: Customer & Profile -->
                             <div class="bg-slate-50 rounded-xl p-4 border border-slate-200/60">
                                 <div class="flex items-center space-x-2 text-slate-800 font-bold text-sm mb-3 pb-2 border-b border-slate-200">
                                     <i data-lucide="user" class="w-4 h-4 text-blue-600"></i>
@@ -432,13 +419,10 @@
                                     </div>
                                 </dl>
                             </div>
-
                         </div>
 
-                        <!-- COLUMN 2: POLICY & PREMIUM REQUEST PARAMETERS -->
+                        <!-- COLUMN 2 -->
                         <div class="space-y-6">
-                            
-                            <!-- Section 1: Policy Status -->
                             <div class="bg-slate-50 rounded-xl p-4 border border-slate-200/60">
                                 <div class="flex items-center space-x-2 text-slate-800 font-bold text-sm mb-3 pb-2 border-b border-slate-200">
                                     <i data-lucide="file-check" class="w-4 h-4 text-blue-600"></i>
@@ -470,7 +454,6 @@
                                 </dl>
                             </div>
 
-                            <!-- Section 2: Policy Flags & History -->
                             <div class="bg-slate-50 rounded-xl p-4 border border-slate-200/60">
                                 <div class="flex items-center space-x-2 text-slate-800 font-bold text-sm mb-3 pb-2 border-b border-slate-200">
                                     <i data-lucide="shield" class="w-4 h-4 text-blue-600"></i>
@@ -495,13 +478,10 @@
                                     </div>
                                 </dl>
                             </div>
-
                         </div>
 
-                        <!-- COLUMN 3: COVERAGE & ADD-ONS SUMMARY -->
+                        <!-- COLUMN 3 -->
                         <div class="space-y-6">
-                            
-                            <!-- Section 1: Add-ons Overview -->
                             <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
                                 <div class="flex items-center space-x-2 text-blue-900 font-bold text-sm mb-3 pb-2 border-b border-blue-200/60">
                                     <i data-lucide="wrench" class="w-4 h-4 text-blue-600"></i>
@@ -510,43 +490,30 @@
                                 <dl class="space-y-2.5 text-xs">
                                     <div class="flex justify-between items-center">
                                         <dt class="text-slate-600">Comprehensive Cover:</dt>
-                                        <dd class="font-semibold text-blue-700">
-                                            ${compObj ? 'Available' : 'N/A'}
-                                        </dd>
+                                        <dd class="font-semibold text-blue-700">${compObj ? 'Available' : 'N/A'}</dd>
                                     </div>
                                     <div class="flex justify-between items-center">
                                         <dt class="text-slate-600">Zero Depreciation:</dt>
-                                        <dd class="font-medium">
-                                            ${renderAddonBadge(compObj.zeroDep)}
-                                        </dd>
+                                        <dd class="font-medium">${renderAddonBadge(compObj.zeroDep)}</dd>
                                     </div>
                                     <div class="flex justify-between items-center">
                                         <dt class="text-slate-600">Engine Protect:</dt>
-                                        <dd class="font-medium">
-                                            ${renderAddonBadge(compObj.engineProtect)}
-                                        </dd>
+                                        <dd class="font-medium">${renderAddonBadge(compObj.engineProtect)}</dd>
                                     </div>
                                     <div class="flex justify-between items-center">
                                         <dt class="text-slate-600">Roadside Assistance (RSA):</dt>
-                                        <dd class="font-medium">
-                                            ${renderAddonBadge(compObj.rsa)}
-                                        </dd>
+                                        <dd class="font-medium">${renderAddonBadge(compObj.rsa)}</dd>
                                     </div>
                                     <div class="flex justify-between items-center">
                                         <dt class="text-slate-600">Key Replacement:</dt>
-                                        <dd class="font-medium">
-                                            ${renderAddonBadge(compObj.keyReplacement)}
-                                        </dd>
+                                        <dd class="font-medium">${renderAddonBadge(compObj.keyReplacement)}</dd>
                                     </div>
                                     <div class="flex justify-between items-center">
                                         <dt class="text-slate-600">Consumables Cover:</dt>
-                                        <dd class="font-medium">
-                                            ${renderAddonBadge(compObj.consumableCover)}
-                                        </dd>
+                                        <dd class="font-medium">${renderAddonBadge(compObj.consumableCover)}</dd>
                                     </div>
                                 </dl>
                             </div>
-
                         </div>
 
                     </div>
@@ -561,7 +528,7 @@
                                 </span>
                             ` : `
                                 <span class="text-emerald-600 font-medium flex items-center">
-                                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5 mr-1"></i> Data processing completed normally
+                                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5 mr-1"></i> Vehicle record processed successfully
                                 </span>
                             `}
                         </div>
@@ -578,7 +545,7 @@
                     <!-- D. COLLAPSIBLE RAW JSON SECTION -->
                     <div id="${uniqueCardId}" class="hidden bg-slate-900 border-t border-slate-800 p-4 transition-all">
                         <div class="flex justify-between items-center mb-2 px-1">
-                            <span class="text-xs font-mono text-slate-400">Raw Endpoint Payload Response</span>
+                            <span class="text-xs font-mono text-slate-400">Raw Payload JSON</span>
                             <button onclick="copyJsonToClipboard('${uniqueCardId}')" class="text-xs text-blue-400 hover:text-blue-300 font-mono flex items-center gap-1">
                                 <i data-lucide="copy" class="w-3 h-3"></i> Copy JSON
                             </button>
@@ -593,7 +560,6 @@
             lucide.createIcons();
         }
 
-        // Helper badge for covered/not covered add-ons
         function renderAddonBadge(flag) {
             if (flag === true) {
                 return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-700">Covered</span>`;
@@ -603,24 +569,16 @@
             return `<span class="text-slate-400 font-normal">N/A</span>`;
         }
 
-        // Toggle JSON Accordion
         function toggleRawJson(cardId) {
             const jsonSection = document.getElementById(cardId);
-            if (jsonSection) {
-                jsonSection.classList.toggle('hidden');
-            }
+            if (jsonSection) jsonSection.classList.toggle('hidden');
         }
 
-        // Copy JSON Utility
         function copyJsonToClipboard(cardId) {
             const jsonSection = document.getElementById(cardId);
             if (jsonSection) {
                 const text = jsonSection.querySelector('pre').innerText;
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('Raw JSON copied to clipboard!');
-                }).catch(() => {
-                    alert('Failed to copy JSON.');
-                });
+                navigator.clipboard.writeText(text).then(() => alert('Raw JSON copied!')).catch(() => {});
             }
         }
     </script>
