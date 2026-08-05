@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vehicle Details Portal</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -37,7 +39,7 @@
 </head>
 <body class="min-h-screen text-slate-800 flex flex-col">
 
-  <!-- Header -->
+  <!-- Navigation Bar -->
   <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -56,13 +58,13 @@
     </div>
   </header>
 
-  <!-- Main Content -->
+  <!-- Main Content Area -->
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
     
-    <!-- Search Section -->
+    <!-- Live Search Box Section -->
     <div class="mb-8 max-w-2xl mx-auto">
       <label class="block text-sm font-semibold text-slate-700 mb-2 text-center sm:text-left">
-        Enter Registration Number
+        Enter Registration Number to Fetch Details
       </label>
       <form onsubmit="handleSearch(event)" class="flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1">
@@ -73,8 +75,9 @@
             type="text" 
             id="vehicleInput" 
             placeholder="e.g. MH47BM9865 or DL4SDH5925" 
+            value=""
             required
-            class="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-base font-semibold uppercase placeholder-normal placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition"
+            class="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-base font-semibold uppercase placeholder-normal placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition"
           />
         </div>
         <button 
@@ -86,15 +89,18 @@
           <span>Search Vehicle</span>
         </button>
       </form>
+      <p class="text-xs text-slate-400 mt-2 text-center sm:text-left">
+        Enter vehicle registration number with or without spaces/dashes.
+      </p>
     </div>
 
-    <!-- Content Container -->
+    <!-- Dynamic Content Container -->
     <div id="contentContainer">
       <!-- Loading State -->
       <div id="loadingState" class="hidden flex-col items-center justify-center py-20 text-center">
         <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
         <p class="text-slate-600 font-medium text-lg">Fetching vehicle details...</p>
-        <p class="text-xs text-slate-400 mt-1">Checking multiple API endpoints (Fast Race Mode)</p>
+        <p class="text-xs text-slate-400 mt-1">Calling API Server</p>
       </div>
 
       <!-- Error / Empty State -->
@@ -103,64 +109,260 @@
           <i data-lucide="alert-triangle" class="w-8 h-8"></i>
         </div>
         <h3 class="text-lg font-bold text-slate-800 mb-1" id="errorTitle">No Records Found</h3>
-        <p class="text-sm text-slate-500 max-w-md mb-6" id="errorMessage">We couldn't retrieve details for this vehicle number. Please verify the input or try again.</p>
+        <p class="text-sm text-slate-500 max-w-md mb-6" id="errorMessage">We couldn't retrieve details for this vehicle number. Please check the number or verify if the API server is online.</p>
       </div>
 
       <!-- Data Display Section -->
-      <div id="dataList" class="hidden space-y-8"></div>
+      <div id="dataList" class="hidden space-y-8">
+        <!-- Dynamic Cards rendered here -->
+      </div>
     </div>
   </main>
 
   <!-- Footer -->
   <footer class="bg-white border-t border-slate-200 py-6 mt-auto">
     <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
-      <p>&copy; All Rights Reserved | VahanVerify Portal</p>
+      <p>&copy; All Rights Reserved | Made with ❤️ by Vikas Mishra</p>
     </div>
   </footer>
 
-  <!-- Script logic -->
+  <!-- Inline Application Logic JavaScript -->
   <script>
-    const API_ENDPOINT = "https://cjpindia.vercel.app/api/vehicle-details/";
+    // Base API Endpoint URL
+    const BASE_API_URL = "https://cjpindia.vercel.app/api/vehicle-details/";
 
+    // Fallback Data
+    const FALLBACK_DATA = [{
+      "newProfileFlow": false,
+      "premiumRequest": {
+        "createdByCustomer": false,
+        "customerName": "  ",
+        "defaultedFields": [],
+        "eldestMemberAge": 0,
+        "initialReqFlag": true,
+        "isAsync": true,
+        "isB2C": false,
+        "membersCovered": 0,
+        "motorPremiumRequest": {
+          "accidentalHospitalization": false,
+          "applicableNCB": 0,
+          "businessType": 0,
+          "comprehensive": {
+            "accidentalHospitalization": false,
+            "antiTheft": false,
+            "batteryAndChargerProtect": false,
+            "consumableCover": false,
+            "consumableCoverEstimatedPremium": 0,
+            "dailyCashAllowance": false,
+            "drivingTuitionCoverage": false,
+            "emergencyTransportAndHotelExpense": false,
+            "engineProtect": false,
+            "engineProtectEstimatedPremium": 0,
+            "fibretank": false,
+            "fullInvoiceCover": false,
+            "fullInvoiceCoverEstimatedPremium": 0,
+            "geographicExt": false,
+            "hydrostaticLockCover": false,
+            "imt23": false,
+            "imt34": false,
+            "imt47": false,
+            "keyReplacement": false,
+            "keyReplacementEstimatedPremium": 0,
+            "ncbProtect": false,
+            "paOwnerDriver": 0,
+            "paOwnerDriverEstimatedPremium": 0,
+            "personalBaggage": false,
+            "repairOfGlassRubberPlasticParts": false,
+            "rimProtect": false,
+            "rodentCover": false,
+            "rsa": false,
+            "rsaEstimatedPremium": 0,
+            "secureTowing": false,
+            "secureTowingEstimatedPremium": 0,
+            "tppd": false,
+            "tyreSecure": false,
+            "tyreSecureEstimatedPremium": 0,
+            "zeroDep": false,
+            "zeroDepEstimatedPremium": 0
+          },
+          "consumableCover": false,
+          "cvVehicleType": "",
+          "cvWheels": "",
+          "dailyCashAllowance": false,
+          "drivingTuitionCoverage": false,
+          "eligibleForNCB": true,
+          "emergencyTransportAndHotelExpense": false,
+          "expiryFlag": false,
+          "expiryInTwoDays": false,
+          "fibretank": false,
+          "fullInvoiceCover": false,
+          "geographicExt": false,
+          "horseIdv": 0,
+          "hydrostaticLockCover": false,
+          "insTrailerIDV": 0,
+          "isExpiryDateSet": false,
+          "isGoodCustomerDiscountSelected": false,
+          "isIndividual": true,
+          "isMaxIdv": false,
+          "isMinIdv": false,
+          "isRegisteredOwnerDifferent": false,
+          "keyReplacement": false,
+          "od": {
+            "accidentalHospitalization": false,
+            "antiTheft": false,
+            "batteryAndChargerProtect": false,
+            "consumableCover": false,
+            "consumableCoverEstimatedPremium": 0,
+            "dailyCashAllowance": false,
+            "drivingTuitionCoverage": false,
+            "emergencyTransportAndHotelExpense": false,
+            "engineProtect": false,
+            "engineProtectEstimatedPremium": 0,
+            "fibretank": false,
+            "fullInvoiceCover": false,
+            "fullInvoiceCoverEstimatedPremium": 0,
+            "geographicExt": false,
+            "hydrostaticLockCover": false,
+            "imt23": false,
+            "imt34": false,
+            "imt47": false,
+            "keyReplacement": false,
+            "keyReplacementEstimatedPremium": 0,
+            "ncbProtect": false,
+            "paOwnerDriver": 0,
+            "paOwnerDriverEstimatedPremium": 0,
+            "personalBaggage": false,
+            "repairOfGlassRubberPlasticParts": false,
+            "rimProtect": false,
+            "rodentCover": false,
+            "rsa": false,
+            "rsaEstimatedPremium": 0,
+            "secureTowing": false,
+            "secureTowingEstimatedPremium": 0,
+            "tppd": false,
+            "tyreSecure": false,
+            "tyreSecureEstimatedPremium": 0,
+            "zeroDep": false,
+            "zeroDepEstimatedPremium": 0
+          },
+          "pastClient": false,
+          "personalBaggage": false,
+          "prevClaim": false,
+          "prevNCB": 0,
+          "previousPolicyDidntHadCNG": false,
+          "previousPolicyDidntHadRTI": false,
+          "previousPolicyDidntHadZeroDep": false,
+          "purchasePolicy": false,
+          "registrationNo": "MH47BM9865",
+          "repairOfGlassRubberPlasticParts": false,
+          "rtoDesp": "Borivali",
+          "rtoId": "MH47",
+          "secureTowing": false,
+          "shouldUpdateRenewalService": false,
+          "skippedRenewal": false,
+          "tp": {
+            "accidentalHospitalization": false,
+            "antiTheft": false,
+            "batteryAndChargerProtect": false,
+            "consumableCover": false,
+            "consumableCoverEstimatedPremium": 0,
+            "dailyCashAllowance": false,
+            "drivingTuitionCoverage": false,
+            "emergencyTransportAndHotelExpense": false,
+            "engineProtect": false,
+            "engineProtectEstimatedPremium": 0,
+            "fibretank": false,
+            "fullInvoiceCover": false,
+            "fullInvoiceCoverEstimatedPremium": 0,
+            "geographicExt": false,
+            "hydrostaticLockCover": false,
+            "imt23": false,
+            "imt34": false,
+            "imt47": false,
+            "keyReplacement": false,
+            "keyReplacementEstimatedPremium": 0,
+            "ncbProtect": false,
+            "paOwnerDriver": 0,
+            "paOwnerDriverEstimatedPremium": 0,
+            "personalBaggage": false,
+            "repairOfGlassRubberPlasticParts": false,
+            "rimProtect": false,
+            "rodentCover": false,
+            "rsa": false,
+            "rsaEstimatedPremium": 0,
+            "secureTowing": false,
+            "secureTowingEstimatedPremium": 0,
+            "tppd": false,
+            "tyreSecure": false,
+            "tyreSecureEstimatedPremium": 0,
+            "zeroDep": false,
+            "zeroDepEstimatedPremium": 0
+          },
+          "tyreSecure": false
+        },
+        "newCheckoutFlow": false,
+        "newProfileFlow": false,
+        "requestIssuanceClick": false,
+        "resultPageVisited": true,
+        "stateCode": "MH",
+        "utmParams": {
+          "fbclid": null,
+          "gclid": null,
+          "utmAdgroup": null,
+          "utmAdposition": null,
+          "utmAudience": null,
+          "utmCampaign": null,
+          "utmContent": null,
+          "utmDevice": null,
+          "utmLocation": null,
+          "utmMatchtype": null,
+          "utmMedium": null,
+          "utmNetwork": null,
+          "utmPlacement": null,
+          "utmPrice": null,
+          "utmPromotion": null,
+          "utmSitelink": null,
+          "utmSource": null,
+          "utmTerm": null,
+          "utmUrl": null
+        },
+        "vertical": "CV"
+      },
+      "registrationResult": {
+        "errorMsg": "Unauthorized",
+        "previousClaim": false,
+        "reg1": "MH",
+        "reg2": "47",
+        "reg3": "BM",
+        "reg4": "9865",
+        "registrationNo": "MH47BM9865",
+        "rto": {
+          "lntLoc": "Borivali",
+          "rtoCode": "MH47",
+          "rtoPlate": "MH-47",
+          "rtoPlateLntLoc": "MH-47-Borivali"
+        },
+        "status": "WARNING",
+        "vertical": "CV"
+      },
+      "renewal": false
+    }];
+
+    let masterVehicleData = [];
+
+    // Helper: Safe Value Formatting
     function val(value, fallback = 'N/A') {
-      if (value === null || value === undefined || value === '' || value === 'NA' || value === 'null') {
+      if (value === null || value === undefined || value === '' || value === 'NA') {
         return `<span class="text-slate-400 font-normal">${fallback}</span>`;
       }
       return value;
     }
 
-    // Helper to safely execute JSON fetch with a strict timeout
-    async function fetchWithTimeout(url, timeoutMs = 12000) {
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), timeoutMs);
-
-      try {
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: { 'Accept': 'application/json' },
-          signal: controller.signal
-        });
-        clearTimeout(id);
-
-        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-        
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          // If response is HTML or text, parse text to check if it's stringified JSON
-          const textData = await response.text();
-          return JSON.parse(textData);
-        }
-
-        return await response.json();
-      } catch (err) {
-        clearTimeout(id);
-        throw err;
-      }
-    }
-
+    // Search Submit Handler
     function handleSearch(e) {
       if (e) e.preventDefault();
       const rawInput = document.getElementById('vehicleInput').value;
+      // Clean vehicle number: remove spaces, dashes, special chars
       const cleanRegNo = rawInput.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
 
       if (!cleanRegNo) {
@@ -171,66 +373,62 @@
       fetchVehicleData(cleanRegNo);
     }
 
+    // Fetch Vehicle Data from API
     async function fetchVehicleData(regNo) {
       showLoading(true);
-      updateStatus('Searching...', 'bg-yellow-400');
+      updateStatus('Fetching...', 'bg-yellow-400');
 
-      const targetUrl = `${API_ENDPOINT}${regNo}`;
-      
-      // Parallel Request URLs
-      const requestSources = [
-        targetUrl,
-        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
-      ];
-
-      let rawResult = null;
+      const fullApiUrl = `${BASE_API_URL}${regNo}`;
 
       try {
-        // Fast-race: Execute calls in parallel, pick the fastest working response
-        rawResult = await Promise.any(
-          requestSources.map(url => fetchWithTimeout(url, 12000))
-        );
-      } catch (aggregateError) {
-        console.error("All fetch sources failed or timed out:", aggregateError);
-      }
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 second timeout
 
-      // Extract records safely from varying payload shapes
-      let records = [];
-      if (rawResult) {
-        if (Array.isArray(rawResult)) {
-          records = rawResult;
-        } else if (typeof rawResult === 'object') {
-          if (rawResult.data && Array.isArray(rawResult.data)) {
-            records = rawResult.data;
-          } else if (rawResult.result && typeof rawResult.result === 'object') {
-            records = [rawResult];
-          } else if (!rawResult.error && Object.keys(rawResult).length > 0) {
-            records = [rawResult];
-          }
+        const response = await fetch(fullApiUrl, {
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+
+        const data = await response.json();
+
+        if (Array.isArray(data) && data.length > 0) {
+          masterVehicleData = data;
+          updateStatus('Live API Data', 'bg-emerald-500');
+        } else if (typeof data === 'object' && data !== null && !data.error) {
+          masterVehicleData = [data];
+          updateStatus('Live API Data', 'bg-emerald-500');
+        } else {
+          throw new Error('Vehicle record not found.');
         }
-      }
+      } catch (error) {
+        console.warn("API Fetch failed or timed out:", error);
 
-      showLoading(false);
-
-      if (records.length > 0) {
-        updateStatus('Data Found', 'bg-emerald-500');
-        renderCards(records);
-      } else {
-        updateStatus('Not Found / Timeout', 'bg-red-500');
-        showError(
-          "Details Not Found",
-          `API server took too long to respond or has no records for vehicle "${regNo}". Please re-check the registration number or try again in a few moments.`
-        );
+        // Fallback check: if user searched for default registration number
+        if (regNo.toUpperCase().replace(/[^A-Z0-9]/g, '') === 'MH47BM9865') {
+          masterVehicleData = FALLBACK_DATA;
+          updateStatus('Fallback Data Loaded', 'bg-blue-500');
+        } else {
+          masterVehicleData = [];
+          updateStatus('Error / Offline', 'bg-red-500');
+          showError("Record Not Found", `Could not fetch details for vehicle "${regNo}". Please check if the API server is online or if the vehicle number is correct.`);
+        }
+      } finally {
+        showLoading(false);
+        renderCards(masterVehicleData);
       }
     }
 
+    // Update Status Badge
     function updateStatus(text, dotClass) {
       document.getElementById('statusText').innerText = text;
       const dot = document.getElementById('statusDot');
       dot.className = `w-2 h-2 rounded-full mr-2 ${dotClass}`;
     }
 
+    // Toggle Loading UI
     function showLoading(isLoading) {
       const loading = document.getElementById('loadingState');
       const error = document.getElementById('errorState');
@@ -248,6 +446,7 @@
       }
     }
 
+    // Show Error UI
     function showError(title, message) {
       const error = document.getElementById('errorState');
       document.getElementById('errorTitle').innerText = title;
@@ -256,43 +455,48 @@
       error.classList.add('flex');
     }
 
+    // Render Cards
     function renderCards(records) {
       const container = document.getElementById('dataList');
       const errorState = document.getElementById('errorState');
+
+      if (!records || records.length === 0) {
+        container.classList.add('hidden');
+        return;
+      }
 
       errorState.classList.add('hidden');
       errorState.classList.remove('flex');
       container.classList.remove('hidden');
 
       container.innerHTML = records.map((item, index) => {
-        // Broad field extraction for varying API keys
-        const sz = item?.meta_data?.signzy_response?.result || item?.result || item?.data || item || {};
+        const sz = item?.meta_data?.signzy_response?.result || {};
         const cust = item?.customer_details || {};
         const veh = item?.vehicle_details || {};
         const nominee = item?.nominee_details || {};
         const regRes = item?.registrationResult || {};
         const motorReq = item?.premiumRequest?.motorPremiumRequest || {};
 
-        const regNo = item?.registration_number || sz?.regNo || sz?.registration_number || regRes?.registrationNo || motorReq?.registrationNo || 'REGISTRATION N/A';
-        const model = sz?.model || sz?.vehicle_model || motorReq?.cvVehicleType || 'Vehicle';
-        const manufacturer = sz?.vehicleManufacturerName || sz?.maker || sz?.manufacturer || 'Unknown Brand';
-        const ownerName = sz?.owner || sz?.owner_name || cust?.full_name || item?.premiumRequest?.customerName || 'Unknown Owner';
-        const status = sz?.status || sz?.rc_status || regRes?.status || 'ACTIVE';
+        const regNo = item?.registration_number || sz?.regNo || regRes?.registrationNo || motorReq?.registrationNo || 'NO REGISTRATION NO';
+        const model = sz?.model || motorReq?.cvVehicleType || 'Vehicle';
+        const manufacturer = sz?.vehicleManufacturerName || 'Unknown Manufacturer';
+        const ownerName = cust?.full_name || sz?.owner || item?.premiumRequest?.customerName || 'Unknown Owner';
+        const status = sz?.status || regRes?.status || 'ACTIVE';
 
         return `
-          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
             
             <!-- Card Header -->
             <div class="bg-slate-900 text-white p-6">
               <div class="flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center space-x-4">
                   <div class="bg-blue-600/20 text-blue-400 p-3 rounded-xl border border-blue-500/30">
-                    <i data-lucide="car" class="w-8 h-8"></i>
+                    <i data-lucide="bike" class="w-8 h-8"></i>
                   </div>
                   <div>
                     <div class="flex items-center space-x-3">
                       <h2 class="text-2xl font-black tracking-wider text-amber-400">${regNo}</h2>
-                      <span class="badge ${status === 'ACTIVE' || status === 'ACT' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400'}">
+                      <span class="badge ${status === 'ACTIVE' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400'}">
                         ${status}
                       </span>
                     </div>
@@ -302,51 +506,55 @@
 
                 <div class="flex flex-wrap gap-2">
                   <span class="bg-slate-800 text-slate-300 text-xs px-3 py-1.5 rounded-lg border border-slate-700">
-                    Fuel: <strong class="text-white">${val(sz?.type || sz?.fuel_type)}</strong>
+                    Fuel: <strong class="text-white">${val(sz?.type)}</strong>
                   </span>
                   <span class="bg-slate-800 text-slate-300 text-xs px-3 py-1.5 rounded-lg border border-slate-700">
-                    Norms: <strong class="text-white">${val(sz?.normsType || sz?.emission_norms)}</strong>
+                    Norms: <strong class="text-white">${val(sz?.normsType)}</strong>
                   </span>
                 </div>
               </div>
             </div>
 
-            <!-- Details Body -->
+            <!-- Card Body Content -->
             <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
               
-              <!-- Column 1: Owner -->
+              <!-- Owner & Address -->
               <div class="space-y-6">
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
-                    <i data-lucide="user" class="w-4 h-4 mr-1.5 text-blue-600"></i> Owner Information
+                    <i data-lucide="user" class="w-4 h-4 mr-1.5 text-blue-600"></i> Owner Details
                   </h3>
                   <div class="space-y-2.5 text-sm">
                     <div class="flex justify-between">
-                      <span class="text-slate-500">Name</span>
+                      <span class="text-slate-500">Full Name</span>
                       <span class="font-semibold text-slate-800">${val(ownerName)}</span>
                     </div>
                     <div class="flex justify-between">
-                      <span class="text-slate-500">Father Name</span>
-                      <span class="font-medium text-slate-700">${val(sz?.ownerFatherName || sz?.father_name)}</span>
+                      <span class="text-slate-500">Father's Name</span>
+                      <span class="font-medium text-slate-700">${val(sz?.ownerFatherName)}</span>
                     </div>
                     <div class="flex justify-between">
-                      <span class="text-slate-500">Owner Serial</span>
-                      <span class="font-medium text-slate-700">${val(sz?.ownerCount || sz?.owner_serial_number)}</span>
+                      <span class="text-slate-500">Owner Serial No</span>
+                      <span class="font-medium text-slate-700">${val(sz?.ownerCount)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-500">Nominee</span>
+                      <span class="font-medium text-slate-700">${val(nominee?.name)}</span>
                     </div>
                   </div>
                 </div>
 
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
-                    <i data-lucide="map-pin" class="w-4 h-4 mr-1.5 text-blue-600"></i> Address
+                    <i data-lucide="map-pin" class="w-4 h-4 mr-1.5 text-blue-600"></i> Address Details
                   </h3>
                   <p class="text-xs text-slate-600 leading-relaxed">
-                    ${val(sz?.presentAddress || sz?.address || cust?.communication_address?.address_line)}
+                    ${val(sz?.presentAddress || cust?.communication_address?.address_line)}
                   </p>
                 </div>
               </div>
 
-              <!-- Column 2: Specs -->
+              <!-- Technical Specs -->
               <div class="space-y-6">
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 h-full flex flex-col justify-between">
                   <div>
@@ -356,27 +564,35 @@
                     <div class="space-y-2.5 text-sm">
                       <div class="flex justify-between">
                         <span class="text-slate-500">Chassis No</span>
-                        <span class="font-mono text-xs text-slate-800 bg-slate-200/60 px-1.5 py-0.5 rounded">${val(item?.chassis_number || sz?.chassis || sz?.chassis_number)}</span>
+                        <span class="font-mono font-medium text-xs text-slate-800 bg-slate-200/60 px-1.5 py-0.5 rounded">${val(item?.chassis_number || sz?.chassis)}</span>
                       </div>
                       <div class="flex justify-between">
                         <span class="text-slate-500">Engine No</span>
-                        <span class="font-mono text-xs text-slate-800 bg-slate-200/60 px-1.5 py-0.5 rounded">${val(item?.engine_number || sz?.engine || sz?.engine_number)}</span>
+                        <span class="font-mono font-medium text-xs text-slate-800 bg-slate-200/60 px-1.5 py-0.5 rounded">${val(item?.engine_number || sz?.engine)}</span>
                       </div>
                       <div class="flex justify-between">
                         <span class="text-slate-500">Engine CC</span>
-                        <span class="font-medium text-slate-700">${val(sz?.vehicleCubicCapacity || sz?.cubic_capacity)} cc</span>
+                        <span class="font-medium text-slate-700">${val(sz?.vehicleCubicCapacity)} cc</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-slate-500">Mfg Month/Year</span>
+                        <span class="font-medium text-slate-700">${val(sz?.vehicleManufacturingMonthYear)}</span>
                       </div>
                       <div class="flex justify-between">
                         <span class="text-slate-500">Color</span>
-                        <span class="font-medium text-slate-700">${val(sz?.vehicleColour || sz?.color)}</span>
+                        <span class="font-medium text-slate-700">${val(sz?.vehicleColour)}</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-slate-500">Unladen Weight</span>
+                        <span class="font-medium text-slate-700">${val(sz?.unladenWeight)} kg</span>
                       </div>
                     </div>
                   </div>
 
-                  <div class="mt-4 pt-3 border-t border-slate-200">
+                  <div class="mt-4 pt-3 border-t border-slate-200/60">
                     <div class="flex items-center justify-between">
-                      <span class="text-xs font-medium text-slate-500">Finance Status</span>
-                      ${veh?.is_vehicle_financed || sz?.rcFinancer
+                      <span class="text-xs font-medium text-slate-500">Financed Status</span>
+                      ${veh?.is_vehicle_financed 
                         ? `<span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Financed</span>` 
                         : `<span class="text-xs font-bold text-slate-600">N/A</span>`}
                     </div>
@@ -385,44 +601,56 @@
                 </div>
               </div>
 
-              <!-- Column 3: Insurance & RC -->
+              <!-- Compliance & Insurance -->
               <div class="space-y-6">
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
-                    <i data-lucide="file-check" class="w-4 h-4 mr-1.5 text-blue-600"></i> Registration Info
+                    <i data-lucide="file-check" class="w-4 h-4 mr-1.5 text-blue-600"></i> RC & Compliance
                   </h3>
                   <div class="space-y-2.5 text-sm">
                     <div class="flex justify-between">
-                      <span class="text-slate-500">Authority</span>
-                      <span class="font-medium text-slate-700">${val(sz?.regAuthority || sz?.rto || regRes?.rto?.lntLoc)}</span>
+                      <span class="text-slate-500">Reg Authority</span>
+                      <span class="font-medium text-slate-700">${val(sz?.regAuthority || regRes?.rto?.lntLoc || motorReq?.rtoDesp)} (${val(sz?.rtoCode || regRes?.rto?.rtoCode || motorReq?.rtoId)})</span>
                     </div>
                     <div class="flex justify-between">
-                      <span class="text-slate-500">Reg Date</span>
-                      <span class="font-medium text-slate-700">${val(sz?.regDate || sz?.registration_date)}</span>
+                      <span class="text-slate-500">Registration Date</span>
+                      <span class="font-medium text-slate-700">${val(sz?.regDate)}</span>
                     </div>
                     <div class="flex justify-between">
-                      <span class="text-slate-500">RC Expiry</span>
-                      <span class="font-medium text-emerald-600">${val(sz?.rcExpiryDate || sz?.fit_up_to)}</span>
+                      <span class="text-slate-500">RC Valid Upto</span>
+                      <span class="font-medium text-emerald-600">${val(sz?.rcExpiryDate)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-500">PUCC Expiry</span>
+                      <span class="font-medium text-slate-700">${val(sz?.puccUpto)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-500">Tax Upto</span>
+                      <span class="font-medium text-slate-700">${val(sz?.vehicleTaxUpto)}</span>
                     </div>
                   </div>
                 </div>
 
                 <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
                   <h3 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3 flex items-center">
-                    <i data-lucide="shield" class="w-4 h-4 mr-1.5 text-blue-600"></i> Insurance Details
+                    <i data-lucide="shield" class="w-4 h-4 mr-1.5 text-blue-600"></i> Insurance Info
                   </h3>
                   <div class="space-y-2 text-xs">
                     <div class="flex justify-between">
                       <span class="text-slate-500">Insurer</span>
-                      <span class="font-semibold text-slate-800 truncate max-w-[150px]">${val(sz?.vehicleInsuranceCompanyName || sz?.insurance_company)}</span>
+                      <span class="font-semibold text-slate-800 text-right max-w-[150px] truncate">${val(sz?.vehicleInsuranceCompanyName)}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-slate-500">Policy No</span>
-                      <span class="font-mono text-slate-700">${val(item?.previous_policy_number || sz?.vehicleInsurancePolicyNumber || sz?.policy_number)}</span>
+                      <span class="font-mono text-slate-700">${val(item?.previous_policy_number || sz?.vehicleInsurancePolicyNumber)}</span>
                     </div>
                     <div class="flex justify-between">
-                      <span class="text-slate-500">Expiry Date</span>
-                      <span class="font-semibold text-slate-800">${val(item?.previous_policy_exp_date || sz?.vehicleInsuranceUpto || sz?.insurance_upto)}</span>
+                      <span class="text-slate-500">Policy Expiry</span>
+                      <span class="font-semibold text-slate-800">${val(item?.previous_policy_exp_date || sz?.vehicleInsuranceUpto)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-500">Prev. NCB</span>
+                      <span class="font-semibold text-emerald-600">${val(item?.previous_year_ncb)}%</span>
                     </div>
                   </div>
                 </div>
@@ -430,16 +658,16 @@
 
             </div>
 
-            <!-- Footer -->
+            <!-- Card Footer -->
             <div class="bg-slate-50 border-t border-slate-200/80 px-6 py-3 flex justify-between items-center text-xs">
-              <span class="text-slate-400">Verified status as per database</span>
+              <span class="text-slate-400">Status verified on: ${val(sz?.statusAsOn)}</span>
               <button onclick="toggleRawData('${index}')" class="text-blue-600 hover:text-blue-800 font-medium flex items-center space-x-1">
                 <span>View Raw JSON</span>
                 <i data-lucide="code" class="w-3.5 h-3.5"></i>
               </button>
             </div>
 
-            <!-- Debug JSON -->
+            <!-- JSON Accordion -->
             <div id="raw-json-${index}" class="hidden bg-slate-900 text-slate-200 p-4 font-mono text-xs overflow-x-auto max-h-60 custom-scrollbar border-t border-slate-800">
               <pre>${JSON.stringify(item, null, 2)}</pre>
             </div>
@@ -458,6 +686,7 @@
       if (element) element.classList.toggle('hidden');
     }
 
+    // Initial Load (Lucide icons render only, no auto search)
     window.addEventListener('DOMContentLoaded', () => {
       if (window.lucide) lucide.createIcons();
     });
