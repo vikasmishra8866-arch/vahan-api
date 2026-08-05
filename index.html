@@ -1,770 +1,349 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VahanVerify - Vehicle Info & History Portal</title>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Font (Inter) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+    <title>Vehicle Details Finder</title>
     <style>
-        :root {
-            --bg-color: #f1f5f9;
-            --header-bg: #1d4ed8;
-            --card-dark: #0f172a;
-            --card-light: #f8fafc;
-            --border-color: #e2e8f0;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --accent-blue: #2563eb;
-            --accent-green: #10b981;
-            --badge-bg: #dbeafe;
-            --badge-text: #1e40af;
-        }
-
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
+            background-color: #f4f7f6;
+            color: #333;
+            padding: 20px;
             display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        /* Top Header */
-        header {
-            background-color: var(--header-bg);
-            color: white;
-            padding: 12px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .brand-icon {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 8px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
             justify-content: center;
         }
 
-        .brand-text h1 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            line-height: 1.2;
-        }
-
-        .brand-text span {
-            font-size: 0.75rem;
-            opacity: 0.8;
-        }
-
-        .badge-status {
-            background: rgba(255, 255, 255, 0.2);
-            font-size: 0.75rem;
-            padding: 4px 10px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .badge-status .dot {
-            width: 8px;
-            height: 8px;
-            background-color: #38bdf8;
-            border-radius: 50%;
-        }
-
-        /* Main Container */
-        main {
-            max-width: 900px;
+        .container {
             width: 100%;
-            margin: 20px auto;
-            padding: 0 16px;
-            flex-grow: 1;
+            max-width: 900px;
         }
 
-        /* Search Section */
-        .search-box {
-            background: white;
-            padding: 20px;
+        .search-card {
+            background: #ffffff;
+            padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            margin-bottom: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
             text-align: center;
         }
 
-        .search-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 12px;
-            text-align: left;
+        .search-card h2 {
+            margin-bottom: 15px;
+            color: #1a365d;
         }
 
         .input-group {
             display: flex;
             gap: 10px;
-            margin-bottom: 8px;
+            justify-content: center;
+            max-width: 500px;
+            margin: 0 auto;
         }
 
-        .input-wrapper {
-            position: relative;
-            flex-grow: 1;
-        }
-
-        .input-wrapper i {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-secondary);
-        }
-
-        .input-wrapper input {
-            width: 100%;
-            padding: 10px 14px 10px 40px;
-            border: 1px solid var(--border-color);
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
             border-radius: 8px;
-            font-size: 0.95rem;
-            outline: none;
+            font-size: 16px;
             text-transform: uppercase;
-            font-weight: 600;
+            outline: none;
+            transition: border-color 0.2s;
         }
 
-        .input-wrapper input:focus {
-            border-color: var(--accent-blue);
+        input[type="text"]:focus {
+            border-color: #3182ce;
         }
 
-        .btn-search {
-            background-color: var(--accent-blue);
+        button {
+            padding: 12px 25px;
+            background-color: #3182ce;
             color: white;
             border: none;
-            padding: 10px 20px;
             border-radius: 8px;
-            font-weight: 600;
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.2s;
+            transition: background-color 0.2s;
         }
 
-        .btn-search:hover {
-            background-color: #1d4ed8;
+        button:hover {
+            background-color: #2b6cb0;
         }
 
-        .search-hint {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-align: left;
+        .loader {
+            display: none;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #3182ce;
         }
 
-        /* Results Card Container */
-        .results-container {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        .error-msg {
+            color: #e53e3e;
+            background: #fed7d7;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 15px;
             display: none;
         }
 
-        /* Vehicle Header Dark Banner */
-        .vehicle-header {
-            background-color: var(--card-dark);
-            color: white;
-            padding: 20px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
+        .details-container {
+            display: none;
+            gap: 20px;
+            flex-direction: column;
         }
 
-        .vehicle-title-area {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .vehicle-icon {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 1.5rem;
-        }
-
-        .plate-number-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .plate-number {
-            font-size: 1.3rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .status-tag {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--accent-green);
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 700;
-        }
-
-        .vehicle-model {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            margin-top: 4px;
-            font-weight: 600;
-        }
-
-        .specs-pills {
-            display: flex;
-            gap: 8px;
-        }
-
-        .pill {
-            background: rgba(255, 255, 255, 0.1);
-            font-size: 0.7rem;
-            padding: 4px 10px;
-            border-radius: 4px;
-            color: #cbd5e1;
-        }
-
-        .pill span {
-            font-weight: 700;
-            color: white;
-        }
-
-        /* Details Grid */
-        .details-grid {
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
             padding: 20px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-
-        .info-card {
-            background: var(--card-light);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 16px;
-        }
-
-        .info-card.full-width {
-            grid-column: span 1;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
         .card-header {
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 8px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            margin-bottom: 12px;
+        }
+
+        .card-header h3 {
+            color: #2d3748;
+            font-size: 18px;
+        }
+
+        .badge {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 15px;
+        }
+
+        .info-box {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #3182ce;
+        }
+
+        .info-box.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #718096;
             text-transform: uppercase;
-        }
-
-        .data-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            font-size: 0.78rem;
-        }
-
-        .data-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .data-label {
-            color: var(--text-secondary);
-        }
-
-        .data-value {
             font-weight: 600;
-            color: var(--text-primary);
-            text-align: right;
+            margin-bottom: 4px;
         }
 
-        .blur-val {
-            background: #e2e8f0;
-            color: transparent;
-            text-shadow: 0 0 5px rgba(0,0,0,0.5);
-            user-select: none;
-            border-radius: 3px;
-            padding: 0 4px;
-        }
-
-        .text-green {
-            color: var(--accent-green);
-        }
-
-        .badge-financed {
-            background: #fef3c7;
-            color: #d97706;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 4px;
+        .value {
+            font-size: 15px;
+            color: #1a202c;
             font-weight: 600;
+            word-break: break-word;
         }
 
-        /* Bottom Footer Bar */
-        .card-footer-bar {
-            padding: 12px 24px;
-            background-color: #fafafa;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        .json-btn {
-            color: var(--accent-blue);
-            cursor: pointer;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        /* Not Found Animation Container */
-        .not-found-box {
-            display: none;
-            padding: 40px 20px;
-            text-align: center;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            animation: fadeIn 0.4s ease-in-out;
-        }
-
-        .animated-icon {
-            font-size: 3rem;
-            color: #ef4444;
-            margin-bottom: 12px;
-            animation: bounce 1.2s infinite;
-        }
-
-        .not-found-box h3 {
-            font-size: 1.2rem;
-            color: var(--text-primary);
-            margin-bottom: 6px;
-        }
-
-        .not-found-box p {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        /* Loading Spinner */
-        .loading-box {
-            display: none;
-            text-align: center;
-            padding: 30px;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--accent-blue);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px auto;
-        }
-
-        /* Animations */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Global Page Footer */
-        footer {
-            text-align: center;
-            padding: 20px;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-top: auto;
-        }
-
-        @media (max-width: 768px) {
-            .details-grid {
-                grid-template-columns: 1fr;
-            }
-            .vehicle-header {
+        @media (max-width: 600px) {
+            .input-group {
                 flex-direction: column;
-                align-items: flex-start;
+            }
+            button {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Section -->
-    <header>
-        <div class="brand">
-            <div class="brand-icon">
-                <i class="fa-solid fa-shield-halved"></i>
-            </div>
-            <div class="brand-text">
-                <h1>VahanVerify</h1>
-                <span>Vehicle Info & History Portal</span>
-            </div>
+<div class="container">
+    <!-- Search Section -->
+    <div class="search-card">
+        <h2>Vehicle Details Search</h2>
+        <div class="input-group">
+            <input type="text" id="vehicleNo" placeholder="e.g. MH47BM9865" value="MH47BM9865">
+            <button onclick="fetchVehicleDetails()">Search</button>
         </div>
-        <div class="badge-status">
-            <span class="dot"></span> Live API Connected
-        </div>
-    </header>
+        <div id="loader" class="loader">Fetching details...</div>
+        <div id="errorMsg" class="error-msg"></div>
+    </div>
 
-    <!-- Main Body Container -->
-    <main>
-        <!-- Search Input Bar -->
-        <div class="search-box">
-            <div class="search-title">Enter Registration Number to Fetch Details</div>
-            <div class="input-group">
-                <div class="input-wrapper">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="vehicleNumInput" value="GJ05BY2328" placeholder="e.g. GJ05BY2328">
-                </div>
-                <button class="btn-search" id="searchBtn" onclick="fetchVehicleDetails()">
-                    <i class="fa-solid fa-magnifying-glass"></i> Search Vehicle
-                </button>
+    <!-- Result Section -->
+    <div id="detailsContainer" class="details-container">
+        
+        <!-- Basic & Owner Info -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Vehicle & Owner Info</h3>
+                <span class="badge" id="regNoBadge"></span>
             </div>
-            <div class="search-hint">Enter vehicle registration number with or without spaces/dashes.</div>
-        </div>
-
-        <!-- Loader -->
-        <div class="loading-box" id="loader">
-            <div class="spinner"></div>
-            <p style="font-size: 0.85rem; color: var(--text-secondary);">Fetching Vehicle Details...</p>
-        </div>
-
-        <!-- Main Details Display Box -->
-        <div class="results-container" id="resultsBox">
-            <!-- Header Black Card -->
-            <div class="vehicle-header">
-                <div class="vehicle-title-area">
-                    <div class="vehicle-icon">
-                        <i class="fa-solid fa-motorcycle" id="vehicleTypeIcon"></i>
-                    </div>
-                    <div>
-                        <div class="plate-number-box">
-                            <span class="plate-number" id="dispRegNo">--</span>
-                            <span class="status-tag" id="dispStatus">ACTIVE</span>
-                        </div>
-                        <div class="vehicle-model" id="dispMakeModel">VEHICLE DETAILS</div>
-                    </div>
+            <div class="grid">
+                <div class="info-box">
+                    <div class="label">Owner Name</div>
+                    <div class="value" id="ownerName">-</div>
                 </div>
-                <div class="specs-pills">
-                    <div class="pill">Vertical: <span id="dispVertical">TW</span></div>
-                    <div class="pill">RTO: <span id="dispRtoPlate">--</span></div>
+                <div class="info-box">
+                    <div class="label">Make & Model</div>
+                    <div class="value" id="makeModel">-</div>
                 </div>
-            </div>
-
-            <!-- Detailed Grid Columns -->
-            <div class="details-grid">
-                
-                <!-- Column 1: Owner Details -->
-                <div>
-                    <div class="info-card" style="margin-bottom: 16px;">
-                        <div class="card-header">
-                            <i class="fa-regular fa-user"></i> Owner Details
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Full Name</span>
-                            <span class="data-value" id="dispOwnerName">N/A</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Father's Name</span>
-                            <span class="data-value" id="dispFatherName">N/A</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Owner Serial No</span>
-                            <span class="data-value" id="dispOwnerSeq">N/A</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Nominee</span>
-                            <span class="data-value" id="dispNominee">N/A</span>
-                        </div>
-                    </div>
-
-                    <!-- Address Details -->
-                    <div class="info-card">
-                        <div class="card-header">
-                            <i class="fa-solid fa-location-dot"></i> Address Details
-                        </div>
-                        <div style="font-size: 0.75rem; color: var(--text-primary); font-weight: 500; line-height: 1.4;" id="dispAddress">
-                            N/A
-                        </div>
-                    </div>
+                <div class="info-box">
+                    <div class="label">Variant</div>
+                    <div class="value" id="variant">-</div>
                 </div>
-
-                <!-- Column 2: Technical Specs -->
-                <div class="info-card">
-                    <div class="card-header">
-                        <i class="fa-solid fa-wrench"></i> Technical Specs
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Chassis No</span>
-                        <span class="data-value blur-val" id="dispChassis">NOT AVAILABLE</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Engine No</span>
-                        <span class="data-value blur-val" id="dispEngine">NOT AVAILABLE</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Engine CC</span>
-                        <span class="data-value" id="dispCc">N/A</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Mfg Month/Year</span>
-                        <span class="data-value" id="dispMfg">N/A</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Color</span>
-                        <span class="data-value" id="dispColor">N/A</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Unladen Weight</span>
-                        <span class="data-value" id="dispWeight">N/A</span>
-                    </div>
-
-                    <div style="margin-top: 28px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
-                        <div class="data-row">
-                            <span class="data-label">Financed Status</span>
-                            <span class="badge-financed" id="dispFinanceStatus">Not Financed</span>
-                        </div>
-                        <div style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; margin-top: 4px;" id="dispBankName">
-                            Bank: N/A
-                        </div>
-                    </div>
+                <div class="info-box">
+                    <div class="label">Registration Date</div>
+                    <div class="value" id="regDate">-</div>
                 </div>
-
-                <!-- Column 3: RC Compliance & Insurance -->
-                <div>
-                    <div class="info-card" style="margin-bottom: 16px;">
-                        <div class="card-header">
-                            <i class="fa-solid fa-file-contract"></i> RC & Compliance
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Reg Authority</span>
-                            <span class="data-value" id="dispRto">N/A</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Registration Date</span>
-                            <span class="data-value" id="dispRegDate">N/A</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">RC Valid Upto</span>
-                            <span class="data-value text-green" id="dispRcValid">N/A</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">PUCC Expiry</span>
-                            <span class="data-value" id="dispPucc">N/A</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Tax Upto</span>
-                            <span class="data-value" id="dispTax">N/A</span>
-                        </div>
-                    </div>
-
-                    <!-- Insurance Card -->
-                    <div class="info-card">
-                        <div class="card-header">
-                            <i class="fa-solid fa-shield-cat"></i> Insurance Info
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Insurer</span>
-                            <span class="data-value" id="dispInsurer" style="font-size:0.7rem;">N/A</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Policy No</span>
-                            <span class="data-value" id="dispPolicyNo">N/A</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Policy Expiry</span>
-                            <span class="data-value" id="dispInsExpiry">N/A</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Prev. NCB</span>
-                            <span class="data-value text-green" id="dispNcb">0%</span>
-                        </div>
-                    </div>
+                <div class="info-box">
+                    <div class="label">Fuel Type</div>
+                    <div class="value" id="fuelType">-</div>
                 </div>
-
-            </div>
-
-            <!-- Footer Details inside Card -->
-            <div class="card-footer-bar">
-                <span id="dispStatusVerified">Status verified via API response</span>
-                <a href="javascript:void(0)" class="json-btn" onclick="alert(JSON.stringify(rawApiResponse, null, 2))">View Raw JSON &lt;&gt;</a>
+                <div class="info-box">
+                    <div class="label">Engine CC</div>
+                    <div class="value" id="cubicCapacity">-</div>
+                </div>
             </div>
         </div>
 
-        <!-- Animated Details Not Found Box -->
-        <div class="not-found-box" id="notFoundBox">
-            <div class="animated-icon">
-                <i class="fa-solid fa-triangle-exclamation"></i>
+        <!-- Technical & Registration Specs -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Technical Details</h3>
             </div>
-            <h3>Details Not Found</h3>
-            <p>API returned a warning or unauthorized status for this vehicle number.</p>
-            <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px;" id="errorMsgSub">(Error: Connection Failed)</p>
+            <div class="grid">
+                <div class="info-box">
+                    <div class="label">Chassis Number</div>
+                    <div class="value" id="chassisNo">-</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Engine Number</div>
+                    <div class="value" id="engineNo">-</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Financier / Hypothecation</div>
+                    <div class="value" id="financier">-</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">RTO Location</div>
+                    <div class="value" id="rtoLoc">-</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">PUC Valid Till</div>
+                    <div class="value" id="pucValid">-</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">PUC Number</div>
+                    <div class="value" id="pucNo">-</div>
+                </div>
+            </div>
         </div>
-    </main>
 
-    <!-- Global Footer -->
-    <footer>
-        © 2026 VahanVerify. All vehicle information sourced securely via API.
-    </footer>
+        <!-- Address & Policy Info -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Address & Policy Details</h3>
+            </div>
+            <div class="grid">
+                <div class="info-box">
+                    <div class="label">Previous Policy No.</div>
+                    <div class="value" id="prevPolicyNo">-</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Seating Capacity</div>
+                    <div class="value" id="seatingCapacity">-</div>
+                </div>
+                <div class="info-box full-width">
+                    <div class="label">Address</div>
+                    <div class="value" id="address">-</div>
+                </div>
+            </div>
+        </div>
 
-    <!-- JS Logic -->
-    <script>
-        let rawApiResponse = null;
+    </div>
+</div>
 
-        async function fetchVehicleDetails() {
-            const rawRegNo = document.getElementById('vehicleNumInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-            if(!rawRegNo) {
-                alert("Please enter a vehicle registration number.");
-                return;
+<script>
+    async function fetchVehicleDetails() {
+        const vehicleNoInput = document.getElementById('vehicleNo').value.trim().toUpperCase();
+        const loader = document.getElementById('loader');
+        const errorMsg = document.getElementById('errorMsg');
+        const detailsContainer = document.getElementById('detailsContainer');
+
+        if (!vehicleNoInput) {
+            alert('Kripya vehicle number daalein!');
+            return;
+        }
+
+        // Reset UI
+        loader.style.display = 'block';
+        errorMsg.style.display = 'none';
+        detailsContainer.style.display = 'none';
+
+        const apiUrl = `https://cjpindia.vercel.app/api/vehicle-details/${vehicleNoInput}`;
+
+        try {
+            const response = await fetch(apiUrl);
+            if (!response.ok) {
+                throw new Error('Data nahi mil saka! Kripya gaadi number check karein.');
             }
 
-            const resultsBox = document.getElementById('resultsBox');
-            const notFoundBox = document.getElementById('notFoundBox');
-            const loader = document.getElementById('loader');
+            const data = await response.json();
 
-            resultsBox.style.display = 'none';
-            notFoundBox.style.display = 'none';
-            loader.style.display = 'block';
+            if (data && data.registrationResult) {
+                const reg = data.registrationResult;
 
-            const targetUrl = `https://cjpindia.vercel.app/api/vehicle-details/${rawRegNo}`;
-            
-            // Ultra-Reliable Proxies Hierarchy
-            const proxies = [
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
-                targetUrl,
-                `https://cors-anywhere.herokuapp.com/${targetUrl}`
-            ];
+                // Populate UI
+                document.getElementById('regNoBadge').innerText = reg.registrationNo || vehicleNoInput;
+                document.getElementById('ownerName').innerText = `${reg.ownerFirstName || ''} ${reg.ownerLastName || ''}`.trim() || 'N/A';
+                document.getElementById('makeModel').innerText = `${reg.make || ''} ${reg.model || ''}`.trim() || 'N/A';
+                document.getElementById('variant').innerText = reg.displayVariant || 'N/A';
+                document.getElementById('regDate').innerText = reg.registrationDate || 'N/A';
+                document.getElementById('fuelType').innerText = reg.fuel || 'N/A';
+                document.getElementById('cubicCapacity').innerText = reg.cubicCapacity ? `${reg.cubicCapacity} CC` : 'N/A';
 
-            let data = null;
+                document.getElementById('chassisNo').innerText = reg.chasisno || 'N/A';
+                document.getElementById('engineNo').innerText = reg.engineno || 'N/A';
+                document.getElementById('financier').innerText = reg.financierName || 'None';
+                document.getElementById('rtoLoc').innerText = reg.rto ? `${reg.rto.lntLoc} (${reg.rto.rtoCode})` : 'N/A';
+                document.getElementById('pucValid').innerText = reg.pucValidDate || 'N/A';
+                document.getElementById('pucNo').innerText = reg.pucNo || 'N/A';
 
-            for (let url of proxies) {
-                try {
-                    const res = await fetch(url);
-                    if (res.ok) {
-                        data = await res.json();
-                        if (data) break; // Break loop if successfully fetched data
-                    }
-                } catch (e) {
-                    console.warn(`Failed fetching from ${url}`, e);
-                }
+                document.getElementById('prevPolicyNo').innerText = reg.prePolicyNo || 'N/A';
+                document.getElementById('seatingCapacity').innerText = reg.seatingCapacity || 'N/A';
+                document.getElementById('address').innerText = reg.permanentAddress || reg.corrAddress || 'N/A';
+
+                // Display
+                detailsContainer.style.display = 'flex';
+            } else {
+                throw new Error('Vehicle Details ka format sahi nahi hai.');
             }
 
+        } catch (err) {
+            errorMsg.innerText = err.message || 'API se fetch karne me issue aaya.';
+            errorMsg.style.display = 'block';
+        } finally {
             loader.style.display = 'none';
-
-            if (!data) {
-                document.getElementById('errorMsgSub').innerText = `(Unable to connect to API server)`;
-                notFoundBox.style.display = 'block';
-                return;
-            }
-
-            rawApiResponse = data;
-
-            // Extract data from response structure safely
-            const regRes = data.registrationResult || {};
-            const premReq = data.premiumRequest || {};
-
-            // Render output
-            renderData(data, rawRegNo);
-            resultsBox.style.display = 'block';
         }
+    }
+</script>
 
-        function renderData(data, regNo) {
-            const regRes = data.registrationResult || {};
-            const premReq = data.premiumRequest || {};
-            const motorPrem = premReq.motorPremiumRequest || {};
-
-            document.getElementById('dispRegNo').innerText = regRes.registrationNo || regNo;
-            document.getElementById('dispStatus').innerText = regRes.status || 'ACTIVE';
-            
-            // Extract Vehicle Name (e.g. SARK Honda Activa)
-            const vehicleTitle = regRes.makeModel || premReq.customerName || motorPrem.makeModel || "VEHICLE DETAILS";
-            document.getElementById('dispMakeModel').innerText = vehicleTitle;
-
-            // Extract Engine CC (e.g. 110 cc)
-            const ccVal = regRes.engineCc || premReq.cubicCapacity || motorPrem.cubicCapacity;
-            document.getElementById('dispCc').innerText = ccVal ? `${ccVal} cc` : 'N/A';
-
-            // Extract Owner & Specs
-            document.getElementById('dispOwnerName').innerText = regRes.ownerName || 'N/A';
-            document.getElementById('dispFatherName').innerText = regRes.fatherName || 'N/A';
-            document.getElementById('dispOwnerSeq').innerText = regRes.ownerSerialNo || 'N/A';
-            document.getElementById('dispNominee').innerText = regRes.nominee || 'N/A';
-            document.getElementById('dispAddress').innerText = regRes.address || 'N/A';
-
-            document.getElementById('dispChassis').innerText = regRes.chassisNo || 'NOT AVAILABLE';
-            document.getElementById('dispEngine').innerText = regRes.engineNo || 'NOT AVAILABLE';
-            document.getElementById('dispMfg').innerText = regRes.mfgDate || 'N/A';
-            document.getElementById('dispColor').innerText = regRes.color || 'N/A';
-            document.getElementById('dispWeight').innerText = regRes.weight ? regRes.weight + ' kg' : 'N/A';
-
-            // RTO & Compliance
-            const rtoLoc = regRes.rto?.rtoPlateLntLoc || (motorPrem.rtoDesp ? `${motorPrem.rtoId}-${motorPrem.rtoDesp}` : 'N/A');
-            document.getElementById('dispRtoPlate').innerText = rtoLoc;
-            document.getElementById('dispRto').innerText = (motorPrem.rtoDesp || regRes.rto?.lntLoc || 'N/A');
-            
-            document.getElementById('dispRegDate').innerText = regRes.regDate || 'N/A';
-            document.getElementById('dispRcValid').innerText = regRes.rcValidUpto || 'N/A';
-            document.getElementById('dispPucc').innerText = regRes.puccExpiry || 'N/A';
-            document.getElementById('dispTax').innerText = regRes.taxUpto || 'N/A';
-
-            // Insurance Info
-            document.getElementById('dispInsurer').innerText = regRes.insurer || 'N/A';
-            document.getElementById('dispPolicyNo').innerText = regRes.policyNo || 'N/A';
-            document.getElementById('dispInsExpiry').innerText = regRes.policyExpiry || 'N/A';
-            document.getElementById('dispNcb').innerText = (motorPrem.prevNCB || 0) + '%';
-        }
-
-        // Trigger on Enter Key Press
-        document.getElementById('vehicleNumInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                fetchVehicleDetails();
-            }
-        });
-    </script>
 </body>
 </html>
