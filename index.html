@@ -92,6 +92,7 @@
             border-radius: 6px;
             margin-top: 15px;
             display: none;
+            font-size: 14px;
         }
 
         .details-container {
@@ -175,18 +176,16 @@
 <body>
 
 <div class="container">
-    <!-- Search Section -->
     <div class="search-card">
         <h2>Vehicle Details Search</h2>
         <div class="input-group">
             <input type="text" id="vehicleNo" placeholder="e.g. MH47BM9865" value="MH47BM9865">
             <button onclick="fetchVehicleDetails()">Search</button>
         </div>
-        <div id="loader" class="loader">Fetching details...</div>
+        <div id="loader" class="loader">Details Fetch Ho Rahi Hain...</div>
         <div id="errorMsg" class="error-msg"></div>
     </div>
 
-    <!-- Result Section -->
     <div id="detailsContainer" class="details-container">
         
         <!-- Basic & Owner Info -->
@@ -223,7 +222,7 @@
             </div>
         </div>
 
-        <!-- Technical & Registration Specs -->
+        <!-- Technical Details -->
         <div class="card">
             <div class="card-header">
                 <h3>Technical Details</h3>
@@ -282,7 +281,7 @@
 
 <script>
     async function fetchVehicleDetails() {
-        const vehicleNoInput = document.getElementById('vehicleNo').value.trim().toUpperCase();
+        const vehicleNoInput = document.getElementById('vehicleNo').value.trim().toUpperCase().replace(/\s+/g, '');
         const loader = document.getElementById('loader');
         const errorMsg = document.getElementById('errorMsg');
         const detailsContainer = document.getElementById('detailsContainer');
@@ -297,51 +296,65 @@
         errorMsg.style.display = 'none';
         detailsContainer.style.display = 'none';
 
-        const apiUrl = `https://cjpindia.vercel.app/api/vehicle-details/${vehicleNoInput}`;
+        const directUrl = `https://cjpindia.vercel.app/api/vehicle-details/${vehicleNoInput}`;
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(directUrl)}`;
 
+        let data = null;
+
+        // Try direct call first, fallback to proxy on CORS/Network failure
         try {
-            const response = await fetch(apiUrl);
-            if (!response.ok) {
-                throw new Error('Data nahi mil saka! Kripya gaadi number check karein.');
-            }
-
-            const data = await response.json();
-
-            if (data && data.registrationResult) {
-                const reg = data.registrationResult;
-
-                // Populate UI
-                document.getElementById('regNoBadge').innerText = reg.registrationNo || vehicleNoInput;
-                document.getElementById('ownerName').innerText = `${reg.ownerFirstName || ''} ${reg.ownerLastName || ''}`.trim() || 'N/A';
-                document.getElementById('makeModel').innerText = `${reg.make || ''} ${reg.model || ''}`.trim() || 'N/A';
-                document.getElementById('variant').innerText = reg.displayVariant || 'N/A';
-                document.getElementById('regDate').innerText = reg.registrationDate || 'N/A';
-                document.getElementById('fuelType').innerText = reg.fuel || 'N/A';
-                document.getElementById('cubicCapacity').innerText = reg.cubicCapacity ? `${reg.cubicCapacity} CC` : 'N/A';
-
-                document.getElementById('chassisNo').innerText = reg.chasisno || 'N/A';
-                document.getElementById('engineNo').innerText = reg.engineno || 'N/A';
-                document.getElementById('financier').innerText = reg.financierName || 'None';
-                document.getElementById('rtoLoc').innerText = reg.rto ? `${reg.rto.lntLoc} (${reg.rto.rtoCode})` : 'N/A';
-                document.getElementById('pucValid').innerText = reg.pucValidDate || 'N/A';
-                document.getElementById('pucNo').innerText = reg.pucNo || 'N/A';
-
-                document.getElementById('prevPolicyNo').innerText = reg.prePolicyNo || 'N/A';
-                document.getElementById('seatingCapacity').innerText = reg.seatingCapacity || 'N/A';
-                document.getElementById('address').innerText = reg.permanentAddress || reg.corrAddress || 'N/A';
-
-                // Display
-                detailsContainer.style.display = 'flex';
+            const response = await fetch(directUrl);
+            if (response.ok) {
+                data = await response.json();
             } else {
-                throw new Error('Vehicle Details ka format sahi nahi hai.');
+                throw new Error('Direct API failed');
             }
-
-        } catch (err) {
-            errorMsg.innerText = err.message || 'API se fetch karne me issue aaya.';
-            errorMsg.style.display = 'block';
-        } finally {
-            loader.style.display = 'none';
+        } catch (e) {
+            try {
+                const proxyResponse = await fetch(proxyUrl);
+                if (proxyResponse.ok) {
+                    data = await proxyResponse.json();
+                } else {
+                    throw new Error('Proxy API failed');
+                }
+            } catch (proxyError) {
+                errorMsg.innerText = 'Error: Data fetch nahi ho paa raha hai. Browser CORS issue ya Network Block ho sakta hai.';
+                errorMsg.style.display = 'block';
+                loader.style.display = 'none';
+                return;
+            }
         }
+
+        // Render Data
+        if (data && data.registrationResult) {
+            const reg = data.registrationResult;
+
+            document.getElementById('regNoBadge').innerText = reg.registrationNo || vehicleNoInput;
+            document.getElementById('ownerName').innerText = `${reg.ownerFirstName || ''} ${reg.ownerLastName || ''}`.trim() || 'N/A';
+            document.getElementById('makeModel').innerText = `${reg.make || ''} ${reg.model || ''}`.trim() || 'N/A';
+            document.getElementById('variant').innerText = reg.displayVariant || 'N/A';
+            document.getElementById('regDate').innerText = reg.registrationDate || 'N/A';
+            document.getElementById('fuelType').innerText = reg.fuel || 'N/A';
+            document.getElementById('cubicCapacity').innerText = reg.cubicCapacity ? `${reg.cubicCapacity} CC` : 'N/A';
+
+            document.getElementById('chassisNo').innerText = reg.chasisno || 'N/A';
+            document.getElementById('engineNo').innerText = reg.engineno || 'N/A';
+            document.getElementById('financier').innerText = reg.financierName || 'None';
+            document.getElementById('rtoLoc').innerText = reg.rto ? `${reg.rto.lntLoc} (${reg.rto.rtoCode})` : 'N/A';
+            document.getElementById('pucValid').innerText = reg.pucValidDate || 'N/A';
+            document.getElementById('pucNo').innerText = reg.pucNo || 'N/A';
+
+            document.getElementById('prevPolicyNo').innerText = reg.prePolicyNo || 'N/A';
+            document.getElementById('seatingCapacity').innerText = reg.seatingCapacity || 'N/A';
+            document.getElementById('address').innerText = reg.permanentAddress || reg.corrAddress || 'N/A';
+
+            detailsContainer.style.display = 'flex';
+        } else {
+            errorMsg.innerText = 'Vehicle details nahi mili. Kripya number dobara check karein.';
+            errorMsg.style.display = 'block';
+        }
+
+        loader.style.display = 'none';
     }
 </script>
 
