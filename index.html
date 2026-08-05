@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vehicle Details Portal</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -39,7 +37,7 @@
 </head>
 <body class="min-h-screen text-slate-800 flex flex-col">
 
-  <!-- Navigation Bar -->
+  <!-- Header -->
   <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -58,13 +56,13 @@
     </div>
   </header>
 
-  <!-- Main Content Area -->
+  <!-- Main Content -->
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
     
-    <!-- Search Box Section -->
+    <!-- Search Section -->
     <div class="mb-8 max-w-2xl mx-auto">
       <label class="block text-sm font-semibold text-slate-700 mb-2 text-center sm:text-left">
-        Enter Registration Number to Fetch Details
+        Enter Registration Number
       </label>
       <form onsubmit="handleSearch(event)" class="flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1">
@@ -75,9 +73,8 @@
             type="text" 
             id="vehicleInput" 
             placeholder="e.g. MH47BM9865 or DL4SDH5925" 
-            value=""
             required
-            class="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-base font-semibold uppercase placeholder-normal placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition"
+            class="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-base font-semibold uppercase placeholder-normal placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition"
           />
         </div>
         <button 
@@ -89,18 +86,15 @@
           <span>Search Vehicle</span>
         </button>
       </form>
-      <p class="text-xs text-slate-400 mt-2 text-center sm:text-left">
-        Enter vehicle registration number without spaces/dashes for best results.
-      </p>
     </div>
 
-    <!-- Dynamic Content Container -->
+    <!-- Content Container -->
     <div id="contentContainer">
       <!-- Loading State -->
       <div id="loadingState" class="hidden flex-col items-center justify-center py-20 text-center">
         <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
         <p class="text-slate-600 font-medium text-lg">Fetching vehicle details...</p>
-        <p class="text-xs text-slate-400 mt-1">Calling API Server</p>
+        <p class="text-xs text-slate-400 mt-1">Checking multiple API endpoints (Fast Race Mode)</p>
       </div>
 
       <!-- Error / Empty State -->
@@ -109,71 +103,59 @@
           <i data-lucide="alert-triangle" class="w-8 h-8"></i>
         </div>
         <h3 class="text-lg font-bold text-slate-800 mb-1" id="errorTitle">No Records Found</h3>
-        <p class="text-sm text-slate-500 max-w-md mb-6" id="errorMessage">We couldn't retrieve details for this vehicle number. Please check the number or try again later.</p>
+        <p class="text-sm text-slate-500 max-w-md mb-6" id="errorMessage">We couldn't retrieve details for this vehicle number. Please verify the input or try again.</p>
       </div>
 
       <!-- Data Display Section -->
-      <div id="dataList" class="hidden space-y-8">
-        <!-- Dynamic Cards rendered here -->
-      </div>
+      <div id="dataList" class="hidden space-y-8"></div>
     </div>
   </main>
 
   <!-- Footer -->
   <footer class="bg-white border-t border-slate-200 py-6 mt-auto">
     <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
-      <p>&copy; All Rights Reserved | Made with ❤️ by Vikas Mishra</p>
+      <p>&copy; All Rights Reserved | VahanVerify Portal</p>
     </div>
   </footer>
 
-  <!-- Logic JavaScript -->
+  <!-- Script logic -->
   <script>
-    const BASE_API_URL = "https://cjpindia.vercel.app/api/vehicle-details/";
-    
-    // CORS Proxies to fix browser network blocking issues
-    const CORS_PROXIES = [
-      "https://api.allorigins.win/raw?url=",
-      "https://corsproxy.io/?"
-    ];
-
-    const FALLBACK_DATA = [{
-      "registration_number": "MH47BM9865",
-      "meta_data": {
-        "signzy_response": {
-          "result": {
-            "regNo": "MH47BM9865",
-            "owner": "PAWAN AUTO FINANCE",
-            "status": "ACTIVE",
-            "vehicleManufacturerName": "HONDA",
-            "model": "ACTIVA 5G",
-            "type": "PETROL",
-            "normsType": "BS IV",
-            "chassis": "ME4JF507KKB123456",
-            "engine": "JF50E7123456",
-            "vehicleCubicCapacity": "109.19",
-            "vehicleManufacturingMonthYear": "03/2019",
-            "vehicleColour": "GREY",
-            "regAuthority": "BORIVALI RTO",
-            "rtoCode": "MH47",
-            "regDate": "15/03/2019",
-            "rcExpiryDate": "14/03/2034",
-            "puccUpto": "10/11/2025",
-            "vehicleInsuranceCompanyName": "TATA AIG GENERAL INSURANCE",
-            "vehicleInsurancePolicyNumber": "0159874521",
-            "vehicleInsuranceUpto": "14/03/2026",
-            "presentAddress": "BORIVALI WEST, MUMBAI, MAHARASHTRA - 400092"
-          }
-        }
-      }
-    }];
-
-    let masterVehicleData = [];
+    const API_ENDPOINT = "https://cjpindia.vercel.app/api/vehicle-details/";
 
     function val(value, fallback = 'N/A') {
       if (value === null || value === undefined || value === '' || value === 'NA' || value === 'null') {
         return `<span class="text-slate-400 font-normal">${fallback}</span>`;
       }
       return value;
+    }
+
+    // Helper to safely execute JSON fetch with a strict timeout
+    async function fetchWithTimeout(url, timeoutMs = 12000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+
+      try {
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          signal: controller.signal
+        });
+        clearTimeout(id);
+
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          // If response is HTML or text, parse text to check if it's stringified JSON
+          const textData = await response.text();
+          return JSON.parse(textData);
+        }
+
+        return await response.json();
+      } catch (err) {
+        clearTimeout(id);
+        throw err;
+      }
     }
 
     function handleSearch(e) {
@@ -191,63 +173,56 @@
 
     async function fetchVehicleData(regNo) {
       showLoading(true);
-      updateStatus('Fetching...', 'bg-yellow-400');
+      updateStatus('Searching...', 'bg-yellow-400');
 
-      let responseData = null;
-      const targetUrl = `${BASE_API_URL}${regNo}`;
+      const targetUrl = `${API_ENDPOINT}${regNo}`;
+      
+      // Parallel Request URLs
+      const requestSources = [
+        targetUrl,
+        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+      ];
 
-      // 1. Direct Fetch Attempt
+      let rawResult = null;
+
       try {
-        const res = await fetch(targetUrl, { method: 'GET' });
-        if (res.ok) {
-          responseData = await res.json();
-        }
-      } catch (e) {
-        console.warn("Direct API call blocked or failed. Trying CORS Proxies...", e);
+        // Fast-race: Execute calls in parallel, pick the fastest working response
+        rawResult = await Promise.any(
+          requestSources.map(url => fetchWithTimeout(url, 12000))
+        );
+      } catch (aggregateError) {
+        console.error("All fetch sources failed or timed out:", aggregateError);
       }
 
-      // 2. CORS Proxy Fallback if Direct Fetch failed
-      if (!responseData) {
-        for (let proxy of CORS_PROXIES) {
-          try {
-            const proxyUrl = proxy + encodeURIComponent(targetUrl);
-            const res = await fetch(proxyUrl);
-            if (res.ok) {
-              responseData = await res.json();
-              if (responseData) break;
-            }
-          } catch (e) {
-            console.warn("Proxy attempt failed:", proxy, e);
+      // Extract records safely from varying payload shapes
+      let records = [];
+      if (rawResult) {
+        if (Array.isArray(rawResult)) {
+          records = rawResult;
+        } else if (typeof rawResult === 'object') {
+          if (rawResult.data && Array.isArray(rawResult.data)) {
+            records = rawResult.data;
+          } else if (rawResult.result && typeof rawResult.result === 'object') {
+            records = [rawResult];
+          } else if (!rawResult.error && Object.keys(rawResult).length > 0) {
+            records = [rawResult];
           }
         }
       }
 
-      // 3. Process Response Data
-      if (responseData) {
-        if (Array.isArray(responseData) && responseData.length > 0) {
-          masterVehicleData = responseData;
-        } else if (typeof responseData === 'object' && Object.keys(responseData).length > 0 && !responseData.error) {
-          masterVehicleData = [responseData];
-        } else {
-          masterVehicleData = [];
-        }
-      } else {
-        masterVehicleData = [];
-      }
-
-      // 4. Fallback verification for demo number
-      if (masterVehicleData.length === 0 && regNo === 'MH47BM9865') {
-        masterVehicleData = FALLBACK_DATA;
-        updateStatus('Fallback Data Loaded', 'bg-blue-500');
-      } else if (masterVehicleData.length > 0) {
-        updateStatus('Live Data Loaded', 'bg-emerald-500');
-      } else {
-        updateStatus('Error / Not Found', 'bg-red-500');
-        showError("Record Not Found", `Could not fetch details for vehicle "${regNo}". Please check the vehicle number.`);
-      }
-
       showLoading(false);
-      renderCards(masterVehicleData);
+
+      if (records.length > 0) {
+        updateStatus('Data Found', 'bg-emerald-500');
+        renderCards(records);
+      } else {
+        updateStatus('Not Found / Timeout', 'bg-red-500');
+        showError(
+          "Details Not Found",
+          `API server took too long to respond or has no records for vehicle "${regNo}". Please re-check the registration number or try again in a few moments.`
+        );
+      }
     }
 
     function updateStatus(text, dotClass) {
@@ -285,17 +260,12 @@
       const container = document.getElementById('dataList');
       const errorState = document.getElementById('errorState');
 
-      if (!records || records.length === 0) {
-        container.classList.add('hidden');
-        return;
-      }
-
       errorState.classList.add('hidden');
       errorState.classList.remove('flex');
       container.classList.remove('hidden');
 
       container.innerHTML = records.map((item, index) => {
-        // Safe extraction from various possible JSON response structures
+        // Broad field extraction for varying API keys
         const sz = item?.meta_data?.signzy_response?.result || item?.result || item?.data || item || {};
         const cust = item?.customer_details || {};
         const veh = item?.vehicle_details || {};
@@ -303,21 +273,21 @@
         const regRes = item?.registrationResult || {};
         const motorReq = item?.premiumRequest?.motorPremiumRequest || {};
 
-        const regNo = item?.registration_number || sz?.regNo || sz?.registration_number || regRes?.registrationNo || motorReq?.registrationNo || 'NO REGISTRATION NO';
+        const regNo = item?.registration_number || sz?.regNo || sz?.registration_number || regRes?.registrationNo || motorReq?.registrationNo || 'REGISTRATION N/A';
         const model = sz?.model || sz?.vehicle_model || motorReq?.cvVehicleType || 'Vehicle';
-        const manufacturer = sz?.vehicleManufacturerName || sz?.maker || sz?.manufacturer || 'Unknown Manufacturer';
+        const manufacturer = sz?.vehicleManufacturerName || sz?.maker || sz?.manufacturer || 'Unknown Brand';
         const ownerName = sz?.owner || sz?.owner_name || cust?.full_name || item?.premiumRequest?.customerName || 'Unknown Owner';
         const status = sz?.status || sz?.rc_status || regRes?.status || 'ACTIVE';
 
         return `
-          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
             
             <!-- Card Header -->
             <div class="bg-slate-900 text-white p-6">
               <div class="flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center space-x-4">
                   <div class="bg-blue-600/20 text-blue-400 p-3 rounded-xl border border-blue-500/30">
-                    <i data-lucide="bike" class="w-8 h-8"></i>
+                    <i data-lucide="car" class="w-8 h-8"></i>
                   </div>
                   <div>
                     <div class="flex items-center space-x-3">
@@ -341,38 +311,34 @@
               </div>
             </div>
 
-            <!-- Card Body Content -->
+            <!-- Details Body -->
             <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
               
-              <!-- Owner & Address -->
+              <!-- Column 1: Owner -->
               <div class="space-y-6">
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
-                    <i data-lucide="user" class="w-4 h-4 mr-1.5 text-blue-600"></i> Owner Details
+                    <i data-lucide="user" class="w-4 h-4 mr-1.5 text-blue-600"></i> Owner Information
                   </h3>
                   <div class="space-y-2.5 text-sm">
                     <div class="flex justify-between">
-                      <span class="text-slate-500">Full Name</span>
+                      <span class="text-slate-500">Name</span>
                       <span class="font-semibold text-slate-800">${val(ownerName)}</span>
                     </div>
                     <div class="flex justify-between">
-                      <span class="text-slate-500">Father's Name</span>
+                      <span class="text-slate-500">Father Name</span>
                       <span class="font-medium text-slate-700">${val(sz?.ownerFatherName || sz?.father_name)}</span>
                     </div>
                     <div class="flex justify-between">
-                      <span class="text-slate-500">Owner Serial No</span>
+                      <span class="text-slate-500">Owner Serial</span>
                       <span class="font-medium text-slate-700">${val(sz?.ownerCount || sz?.owner_serial_number)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">Nominee</span>
-                      <span class="font-medium text-slate-700">${val(nominee?.name)}</span>
                     </div>
                   </div>
                 </div>
 
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
-                    <i data-lucide="map-pin" class="w-4 h-4 mr-1.5 text-blue-600"></i> Address Details
+                    <i data-lucide="map-pin" class="w-4 h-4 mr-1.5 text-blue-600"></i> Address
                   </h3>
                   <p class="text-xs text-slate-600 leading-relaxed">
                     ${val(sz?.presentAddress || sz?.address || cust?.communication_address?.address_line)}
@@ -380,7 +346,7 @@
                 </div>
               </div>
 
-              <!-- Technical Specs -->
+              <!-- Column 2: Specs -->
               <div class="space-y-6">
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 h-full flex flex-col justify-between">
                   <div>
@@ -390,34 +356,26 @@
                     <div class="space-y-2.5 text-sm">
                       <div class="flex justify-between">
                         <span class="text-slate-500">Chassis No</span>
-                        <span class="font-mono font-medium text-xs text-slate-800 bg-slate-200/60 px-1.5 py-0.5 rounded">${val(item?.chassis_number || sz?.chassis || sz?.chassis_number)}</span>
+                        <span class="font-mono text-xs text-slate-800 bg-slate-200/60 px-1.5 py-0.5 rounded">${val(item?.chassis_number || sz?.chassis || sz?.chassis_number)}</span>
                       </div>
                       <div class="flex justify-between">
                         <span class="text-slate-500">Engine No</span>
-                        <span class="font-mono font-medium text-xs text-slate-800 bg-slate-200/60 px-1.5 py-0.5 rounded">${val(item?.engine_number || sz?.engine || sz?.engine_number)}</span>
+                        <span class="font-mono text-xs text-slate-800 bg-slate-200/60 px-1.5 py-0.5 rounded">${val(item?.engine_number || sz?.engine || sz?.engine_number)}</span>
                       </div>
                       <div class="flex justify-between">
                         <span class="text-slate-500">Engine CC</span>
                         <span class="font-medium text-slate-700">${val(sz?.vehicleCubicCapacity || sz?.cubic_capacity)} cc</span>
                       </div>
                       <div class="flex justify-between">
-                        <span class="text-slate-500">Mfg Month/Year</span>
-                        <span class="font-medium text-slate-700">${val(sz?.vehicleManufacturingMonthYear || sz?.mfg_date)}</span>
-                      </div>
-                      <div class="flex justify-between">
                         <span class="text-slate-500">Color</span>
                         <span class="font-medium text-slate-700">${val(sz?.vehicleColour || sz?.color)}</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-slate-500">Unladen Weight</span>
-                        <span class="font-medium text-slate-700">${val(sz?.unladenWeight)} kg</span>
                       </div>
                     </div>
                   </div>
 
-                  <div class="mt-4 pt-3 border-t border-slate-200/60">
+                  <div class="mt-4 pt-3 border-t border-slate-200">
                     <div class="flex items-center justify-between">
-                      <span class="text-xs font-medium text-slate-500">Financed Status</span>
+                      <span class="text-xs font-medium text-slate-500">Finance Status</span>
                       ${veh?.is_vehicle_financed || sz?.rcFinancer
                         ? `<span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Financed</span>` 
                         : `<span class="text-xs font-bold text-slate-600">N/A</span>`}
@@ -427,56 +385,44 @@
                 </div>
               </div>
 
-              <!-- Compliance & Insurance -->
+              <!-- Column 3: Insurance & RC -->
               <div class="space-y-6">
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
-                    <i data-lucide="file-check" class="w-4 h-4 mr-1.5 text-blue-600"></i> RC & Compliance
+                    <i data-lucide="file-check" class="w-4 h-4 mr-1.5 text-blue-600"></i> Registration Info
                   </h3>
                   <div class="space-y-2.5 text-sm">
                     <div class="flex justify-between">
-                      <span class="text-slate-500">Reg Authority</span>
+                      <span class="text-slate-500">Authority</span>
                       <span class="font-medium text-slate-700">${val(sz?.regAuthority || sz?.rto || regRes?.rto?.lntLoc)}</span>
                     </div>
                     <div class="flex justify-between">
-                      <span class="text-slate-500">Registration Date</span>
+                      <span class="text-slate-500">Reg Date</span>
                       <span class="font-medium text-slate-700">${val(sz?.regDate || sz?.registration_date)}</span>
                     </div>
                     <div class="flex justify-between">
-                      <span class="text-slate-500">RC Valid Upto</span>
+                      <span class="text-slate-500">RC Expiry</span>
                       <span class="font-medium text-emerald-600">${val(sz?.rcExpiryDate || sz?.fit_up_to)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">PUCC Expiry</span>
-                      <span class="font-medium text-slate-700">${val(sz?.puccUpto || sz?.puc_valid_upto)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">Tax Upto</span>
-                      <span class="font-medium text-slate-700">${val(sz?.vehicleTaxUpto || sz?.tax_upto)}</span>
                     </div>
                   </div>
                 </div>
 
                 <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
                   <h3 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3 flex items-center">
-                    <i data-lucide="shield" class="w-4 h-4 mr-1.5 text-blue-600"></i> Insurance Info
+                    <i data-lucide="shield" class="w-4 h-4 mr-1.5 text-blue-600"></i> Insurance Details
                   </h3>
                   <div class="space-y-2 text-xs">
                     <div class="flex justify-between">
                       <span class="text-slate-500">Insurer</span>
-                      <span class="font-semibold text-slate-800 text-right max-w-[150px] truncate">${val(sz?.vehicleInsuranceCompanyName || sz?.insurance_company)}</span>
+                      <span class="font-semibold text-slate-800 truncate max-w-[150px]">${val(sz?.vehicleInsuranceCompanyName || sz?.insurance_company)}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-slate-500">Policy No</span>
                       <span class="font-mono text-slate-700">${val(item?.previous_policy_number || sz?.vehicleInsurancePolicyNumber || sz?.policy_number)}</span>
                     </div>
                     <div class="flex justify-between">
-                      <span class="text-slate-500">Policy Expiry</span>
+                      <span class="text-slate-500">Expiry Date</span>
                       <span class="font-semibold text-slate-800">${val(item?.previous_policy_exp_date || sz?.vehicleInsuranceUpto || sz?.insurance_upto)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">Prev. NCB</span>
-                      <span class="font-semibold text-emerald-600">${val(item?.previous_year_ncb)}%</span>
                     </div>
                   </div>
                 </div>
@@ -484,16 +430,16 @@
 
             </div>
 
-            <!-- Card Footer -->
+            <!-- Footer -->
             <div class="bg-slate-50 border-t border-slate-200/80 px-6 py-3 flex justify-between items-center text-xs">
-              <span class="text-slate-400">Status verified on: ${val(sz?.statusAsOn)}</span>
+              <span class="text-slate-400">Verified status as per database</span>
               <button onclick="toggleRawData('${index}')" class="text-blue-600 hover:text-blue-800 font-medium flex items-center space-x-1">
                 <span>View Raw JSON</span>
                 <i data-lucide="code" class="w-3.5 h-3.5"></i>
               </button>
             </div>
 
-            <!-- JSON Accordion -->
+            <!-- Debug JSON -->
             <div id="raw-json-${index}" class="hidden bg-slate-900 text-slate-200 p-4 font-mono text-xs overflow-x-auto max-h-60 custom-scrollbar border-t border-slate-800">
               <pre>${JSON.stringify(item, null, 2)}</pre>
             </div>
