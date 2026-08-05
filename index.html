@@ -136,7 +136,7 @@
       "newProfileFlow": false,
       "premiumRequest": {
         "createdByCustomer": false,
-        "customerName": "  ",
+        "customerName": " ",
         "defaultedFields": [],
         "eldestMemberAge": 0,
         "initialReqFlag": true,
@@ -406,7 +406,7 @@
       } catch (error) {
         console.warn("API Fetch failed or timed out:", error);
 
-        // Fallback check: if user searched for default registration number
+        // Fallback check: if user searched for MH47BM9865
         if (regNo.toUpperCase().replace(/[^A-Z0-9]/g, '') === 'MH47BM9865') {
           masterVehicleData = FALLBACK_DATA;
           updateStatus('Fallback Data Loaded', 'bg-blue-500');
@@ -477,11 +477,11 @@
         const regRes = item?.registrationResult || {};
         const motorReq = item?.premiumRequest?.motorPremiumRequest || {};
 
-        const regNo = item?.registration_number || sz?.regNo || regRes?.registrationNo || motorReq?.registrationNo || 'NO REGISTRATION NO';
-        const model = sz?.model || motorReq?.cvVehicleType || 'Vehicle';
+        const regNo = regRes?.registrationNo || motorReq?.registrationNo || item?.registration_number || sz?.regNo || 'NO REGISTRATION NO';
+        const model = sz?.model || 'Vehicle';
         const manufacturer = sz?.vehicleManufacturerName || 'Unknown Manufacturer';
-        const ownerName = cust?.full_name || sz?.owner || item?.premiumRequest?.customerName || 'Unknown Owner';
-        const status = sz?.status || regRes?.status || 'ACTIVE';
+        const ownerName = cust?.full_name || sz?.owner || motorReq?.customerName || 'Unknown Owner';
+        const status = regRes?.status || sz?.status || 'ACTIVE';
 
         return `
           <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
@@ -610,7 +610,7 @@
                   <div class="space-y-2.5 text-sm">
                     <div class="flex justify-between">
                       <span class="text-slate-500">Reg Authority</span>
-                      <span class="font-medium text-slate-700">${val(sz?.regAuthority || regRes?.rto?.lntLoc || motorReq?.rtoDesp)} (${val(sz?.rtoCode || regRes?.rto?.rtoCode || motorReq?.rtoId)})</span>
+                      <span class="font-medium text-slate-700">${val(sz?.regAuthority || regRes?.rto?.lntLoc)} (${val(sz?.rtoCode || motorReq?.rtoId)})</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-slate-500">Registration Date</span>
@@ -686,7 +686,7 @@
       if (element) element.classList.toggle('hidden');
     }
 
-    // Initial Load (Lucide icons render only, no auto search)
+    // Initial Load - Icons initialized without default auto-search
     window.addEventListener('DOMContentLoaded', () => {
       if (window.lucide) lucide.createIcons();
     });
