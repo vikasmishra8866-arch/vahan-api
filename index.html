@@ -1,695 +1,253 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vehicle Details Portal</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <title>Vehicle Details Lookup</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    :root {
+      --primary-color: #2563eb;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #e2e8f0;
+    }
+
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 16px;
+      text-transform: uppercase;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary-color);
+    }
+
+    button {
+      padding: 12px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #1d4ed8;
+    }
+
+    .loader {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .error-card {
+      display: none;
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .result-card {
+      display: none;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-row:nth-child(even) {
       background-color: #f8fafc;
     }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.25rem 0.625rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
+
+    .label {
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      color: #64748b;
     }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+
+    .value {
+      font-weight: 600;
+      color: var(--text-color);
     }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #f1f5f9;
+
+    .status-badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 3px;
+
+    .status-warning {
+      background-color: #fef3c7;
+      color: #d97706;
+    }
+
+    .status-success {
+      background-color: #dcfce7;
+      color: #15803d;
     }
   </style>
 </head>
-<body class="min-h-screen text-slate-800 flex flex-col">
+<body>
 
-  <!-- Navigation Bar -->
-  <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="bg-blue-600 p-2 rounded-lg text-white">
-          <i data-lucide="shield-check" class="w-6 h-6"></i>
-        </div>
-        <div>
-          <h1 class="text-lg font-bold leading-tight">VahanVerify</h1>
-          <p class="text-xs text-slate-400">Vehicle Info & History Portal</p>
-        </div>
-      </div>
-      <div id="statusIndicator" class="flex items-center text-xs text-slate-300 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg">
-        <span class="w-2 h-2 rounded-full bg-slate-400 mr-2" id="statusDot"></span>
-        <span id="statusText">Ready</span>
-      </div>
+<div class="container">
+  <h2>Vehicle Detail Lookup</h2>
+  
+  <div class="search-box">
+    <input type="text" id="vehicleNum" placeholder="e.g. MH47BM9865" maxlength="15">
+    <button onclick="fetchVehicleDetails()">Search</button>
+  </div>
+
+  <div id="loader" class="loader">Fetching Details... Please wait</div>
+  <div id="errorMsg" class="error-card"></div>
+
+  <div id="resultCard" class="result-card">
+    <div class="info-row">
+      <span class="label">Registration No:</span>
+      <span class="value" id="resRegNo">-</span>
     </div>
-  </header>
-
-  <!-- Main Content Area -->
-  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    
-    <!-- Live Search Box Section -->
-    <div class="mb-8 max-w-2xl mx-auto">
-      <label class="block text-sm font-semibold text-slate-700 mb-2 text-center sm:text-left">
-        Enter Registration Number to Fetch Details
-      </label>
-      <form onsubmit="handleSearch(event)" class="flex flex-col sm:flex-row gap-3">
-        <div class="relative flex-1">
-          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-            <i data-lucide="search" class="w-5 h-5"></i>
-          </div>
-          <input 
-            type="text" 
-            id="vehicleInput" 
-            placeholder="e.g. MH47BM9865 or DL4SDH5925" 
-            value=""
-            required
-            class="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-base font-semibold uppercase placeholder-normal placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition"
-          />
-        </div>
-        <button 
-          type="submit" 
-          id="searchBtn"
-          class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold px-6 py-3 rounded-xl shadow-sm transition flex items-center justify-center space-x-2"
-        >
-          <i data-lucide="search" class="w-5 h-5" id="btnIcon"></i>
-          <span>Search Vehicle</span>
-        </button>
-      </form>
-      <p class="text-xs text-slate-400 mt-2 text-center sm:text-left">
-        Enter vehicle registration number with or without spaces/dashes.
-      </p>
+    <div class="info-row">
+      <span class="label">RTO Location:</span>
+      <span class="value" id="resRto">-</span>
     </div>
-
-    <!-- Dynamic Content Container -->
-    <div id="contentContainer">
-      <!-- Loading State -->
-      <div id="loadingState" class="hidden flex-col items-center justify-center py-20 text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
-        <p class="text-slate-600 font-medium text-lg">Fetching vehicle details...</p>
-        <p class="text-xs text-slate-400 mt-1">Calling API Server</p>
-      </div>
-
-      <!-- Error / Empty State -->
-      <div id="errorState" class="hidden flex-col items-center justify-center py-16 text-center bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-        <div class="bg-red-50 text-red-500 p-4 rounded-full mb-4">
-          <i data-lucide="alert-triangle" class="w-8 h-8"></i>
-        </div>
-        <h3 class="text-lg font-bold text-slate-800 mb-1" id="errorTitle">No Records Found</h3>
-        <p class="text-sm text-slate-500 max-w-md mb-6" id="errorMessage">We couldn't retrieve details for this vehicle number. Please check the number or verify if the API server is online.</p>
-      </div>
-
-      <!-- Data Display Section -->
-      <div id="dataList" class="hidden space-y-8">
-        <!-- Dynamic Cards rendered here -->
-      </div>
+    <div class="info-row">
+      <span class="label">RTO Code:</span>
+      <span class="value" id="resRtoCode">-</span>
     </div>
-  </main>
-
-  <!-- Footer -->
-  <footer class="bg-white border-t border-slate-200 py-6 mt-auto">
-    <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
-      <p>&copy; All Rights Reserved | Made with ❤️ by Vikas Mishra</p>
+    <div class="info-row">
+      <span class="label">State Code:</span>
+      <span class="value" id="resState">-</span>
     </div>
-  </footer>
+    <div class="info-row">
+      <span class="label">Vehicle Category:</span>
+      <span class="value" id="resVertical">-</span>
+    </div>
+    <div class="info-row">
+      <span class="label">Individual Owner:</span>
+      <span class="value" id="resIndividual">-</span>
+    </div>
+    <div class="info-row">
+      <span class="label">API Status:</span>
+      <span class="value" id="resStatus">-</span>
+    </div>
+  </div>
+</div>
 
-  <!-- Inline Application Logic JavaScript -->
-  <script>
-    // Base API Endpoint URL
-    const BASE_API_URL = "https://cjpindia.vercel.app/api/vehicle-details/";
+<script>
+  async function fetchVehicleDetails() {
+    const vehicleInput = document.getElementById('vehicleNum').value.trim().toUpperCase();
+    const loader = document.getElementById('loader');
+    const errorMsg = document.getElementById('errorMsg');
+    const resultCard = document.getElementById('resultCard');
 
-    // Fallback Data
-    const FALLBACK_DATA = [{
-      "newProfileFlow": false,
-      "premiumRequest": {
-        "createdByCustomer": false,
-        "customerName": " ",
-        "defaultedFields": [],
-        "eldestMemberAge": 0,
-        "initialReqFlag": true,
-        "isAsync": true,
-        "isB2C": false,
-        "membersCovered": 0,
-        "motorPremiumRequest": {
-          "accidentalHospitalization": false,
-          "applicableNCB": 0,
-          "businessType": 0,
-          "comprehensive": {
-            "accidentalHospitalization": false,
-            "antiTheft": false,
-            "batteryAndChargerProtect": false,
-            "consumableCover": false,
-            "consumableCoverEstimatedPremium": 0,
-            "dailyCashAllowance": false,
-            "drivingTuitionCoverage": false,
-            "emergencyTransportAndHotelExpense": false,
-            "engineProtect": false,
-            "engineProtectEstimatedPremium": 0,
-            "fibretank": false,
-            "fullInvoiceCover": false,
-            "fullInvoiceCoverEstimatedPremium": 0,
-            "geographicExt": false,
-            "hydrostaticLockCover": false,
-            "imt23": false,
-            "imt34": false,
-            "imt47": false,
-            "keyReplacement": false,
-            "keyReplacementEstimatedPremium": 0,
-            "ncbProtect": false,
-            "paOwnerDriver": 0,
-            "paOwnerDriverEstimatedPremium": 0,
-            "personalBaggage": false,
-            "repairOfGlassRubberPlasticParts": false,
-            "rimProtect": false,
-            "rodentCover": false,
-            "rsa": false,
-            "rsaEstimatedPremium": 0,
-            "secureTowing": false,
-            "secureTowingEstimatedPremium": 0,
-            "tppd": false,
-            "tyreSecure": false,
-            "tyreSecureEstimatedPremium": 0,
-            "zeroDep": false,
-            "zeroDepEstimatedPremium": 0
-          },
-          "consumableCover": false,
-          "cvVehicleType": "",
-          "cvWheels": "",
-          "dailyCashAllowance": false,
-          "drivingTuitionCoverage": false,
-          "eligibleForNCB": true,
-          "emergencyTransportAndHotelExpense": false,
-          "expiryFlag": false,
-          "expiryInTwoDays": false,
-          "fibretank": false,
-          "fullInvoiceCover": false,
-          "geographicExt": false,
-          "horseIdv": 0,
-          "hydrostaticLockCover": false,
-          "insTrailerIDV": 0,
-          "isExpiryDateSet": false,
-          "isGoodCustomerDiscountSelected": false,
-          "isIndividual": true,
-          "isMaxIdv": false,
-          "isMinIdv": false,
-          "isRegisteredOwnerDifferent": false,
-          "keyReplacement": false,
-          "od": {
-            "accidentalHospitalization": false,
-            "antiTheft": false,
-            "batteryAndChargerProtect": false,
-            "consumableCover": false,
-            "consumableCoverEstimatedPremium": 0,
-            "dailyCashAllowance": false,
-            "drivingTuitionCoverage": false,
-            "emergencyTransportAndHotelExpense": false,
-            "engineProtect": false,
-            "engineProtectEstimatedPremium": 0,
-            "fibretank": false,
-            "fullInvoiceCover": false,
-            "fullInvoiceCoverEstimatedPremium": 0,
-            "geographicExt": false,
-            "hydrostaticLockCover": false,
-            "imt23": false,
-            "imt34": false,
-            "imt47": false,
-            "keyReplacement": false,
-            "keyReplacementEstimatedPremium": 0,
-            "ncbProtect": false,
-            "paOwnerDriver": 0,
-            "paOwnerDriverEstimatedPremium": 0,
-            "personalBaggage": false,
-            "repairOfGlassRubberPlasticParts": false,
-            "rimProtect": false,
-            "rodentCover": false,
-            "rsa": false,
-            "rsaEstimatedPremium": 0,
-            "secureTowing": false,
-            "secureTowingEstimatedPremium": 0,
-            "tppd": false,
-            "tyreSecure": false,
-            "tyreSecureEstimatedPremium": 0,
-            "zeroDep": false,
-            "zeroDepEstimatedPremium": 0
-          },
-          "pastClient": false,
-          "personalBaggage": false,
-          "prevClaim": false,
-          "prevNCB": 0,
-          "previousPolicyDidntHadCNG": false,
-          "previousPolicyDidntHadRTI": false,
-          "previousPolicyDidntHadZeroDep": false,
-          "purchasePolicy": false,
-          "registrationNo": "MH47BM9865",
-          "repairOfGlassRubberPlasticParts": false,
-          "rtoDesp": "Borivali",
-          "rtoId": "MH47",
-          "secureTowing": false,
-          "shouldUpdateRenewalService": false,
-          "skippedRenewal": false,
-          "tp": {
-            "accidentalHospitalization": false,
-            "antiTheft": false,
-            "batteryAndChargerProtect": false,
-            "consumableCover": false,
-            "consumableCoverEstimatedPremium": 0,
-            "dailyCashAllowance": false,
-            "drivingTuitionCoverage": false,
-            "emergencyTransportAndHotelExpense": false,
-            "engineProtect": false,
-            "engineProtectEstimatedPremium": 0,
-            "fibretank": false,
-            "fullInvoiceCover": false,
-            "fullInvoiceCoverEstimatedPremium": 0,
-            "geographicExt": false,
-            "hydrostaticLockCover": false,
-            "imt23": false,
-            "imt34": false,
-            "imt47": false,
-            "keyReplacement": false,
-            "keyReplacementEstimatedPremium": 0,
-            "ncbProtect": false,
-            "paOwnerDriver": 0,
-            "paOwnerDriverEstimatedPremium": 0,
-            "personalBaggage": false,
-            "repairOfGlassRubberPlasticParts": false,
-            "rimProtect": false,
-            "rodentCover": false,
-            "rsa": false,
-            "rsaEstimatedPremium": 0,
-            "secureTowing": false,
-            "secureTowingEstimatedPremium": 0,
-            "tppd": false,
-            "tyreSecure": false,
-            "tyreSecureEstimatedPremium": 0,
-            "zeroDep": false,
-            "zeroDepEstimatedPremium": 0
-          },
-          "tyreSecure": false
-        },
-        "newCheckoutFlow": false,
-        "newProfileFlow": false,
-        "requestIssuanceClick": false,
-        "resultPageVisited": true,
-        "stateCode": "MH",
-        "utmParams": {
-          "fbclid": null,
-          "gclid": null,
-          "utmAdgroup": null,
-          "utmAdposition": null,
-          "utmAudience": null,
-          "utmCampaign": null,
-          "utmContent": null,
-          "utmDevice": null,
-          "utmLocation": null,
-          "utmMatchtype": null,
-          "utmMedium": null,
-          "utmNetwork": null,
-          "utmPlacement": null,
-          "utmPrice": null,
-          "utmPromotion": null,
-          "utmSitelink": null,
-          "utmSource": null,
-          "utmTerm": null,
-          "utmUrl": null
-        },
-        "vertical": "CV"
-      },
-      "registrationResult": {
-        "errorMsg": "Unauthorized",
-        "previousClaim": false,
-        "reg1": "MH",
-        "reg2": "47",
-        "reg3": "BM",
-        "reg4": "9865",
-        "registrationNo": "MH47BM9865",
-        "rto": {
-          "lntLoc": "Borivali",
-          "rtoCode": "MH47",
-          "rtoPlate": "MH-47",
-          "rtoPlateLntLoc": "MH-47-Borivali"
-        },
-        "status": "WARNING",
-        "vertical": "CV"
-      },
-      "renewal": false
-    }];
+    // UI Reset
+    errorMsg.style.display = 'none';
+    resultCard.style.display = 'none';
 
-    let masterVehicleData = [];
-
-    // Helper: Safe Value Formatting
-    function val(value, fallback = 'N/A') {
-      if (value === null || value === undefined || value === '' || value === 'NA') {
-        return `<span class="text-slate-400 font-normal">${fallback}</span>`;
-      }
-      return value;
+    if (!vehicleInput) {
+      errorMsg.textContent = 'Kripya gadi number enter karein.';
+      errorMsg.style.display = 'block';
+      return;
     }
 
-    // Search Submit Handler
-    function handleSearch(e) {
-      if (e) e.preventDefault();
-      const rawInput = document.getElementById('vehicleInput').value;
-      // Clean vehicle number: remove spaces, dashes, special chars
-      const cleanRegNo = rawInput.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    loader.style.display = 'block';
 
-      if (!cleanRegNo) {
-        alert("Please enter a valid vehicle number.");
-        return;
+    try {
+      const response = await fetch(`https://cjpindia.vercel.app/api/vehicle-details/${vehicleInput}`);
+      
+      if (!response.ok) {
+        throw new Error(`Server Error: ${response.status}`);
       }
 
-      fetchVehicleData(cleanRegNo);
-    }
+      const data = await response.json();
+      
+      // Deep Null-Safe Extraction
+      const motorReq = data?.premiumRequest?.motorPremiumRequest;
+      const regResult = data?.registrationResult;
 
-    // Fetch Vehicle Data from API
-    async function fetchVehicleData(regNo) {
-      showLoading(true);
-      updateStatus('Fetching...', 'bg-yellow-400');
-
-      const fullApiUrl = `${BASE_API_URL}${regNo}`;
-
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 second timeout
-
-        const response = await fetch(fullApiUrl, {
-          signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-
-        const data = await response.json();
-
-        if (Array.isArray(data) && data.length > 0) {
-          masterVehicleData = data;
-          updateStatus('Live API Data', 'bg-emerald-500');
-        } else if (typeof data === 'object' && data !== null && !data.error) {
-          masterVehicleData = [data];
-          updateStatus('Live API Data', 'bg-emerald-500');
-        } else {
-          throw new Error('Vehicle record not found.');
-        }
-      } catch (error) {
-        console.warn("API Fetch failed or timed out:", error);
-
-        // Fallback check: if user searched for MH47BM9865
-        if (regNo.toUpperCase().replace(/[^A-Z0-9]/g, '') === 'MH47BM9865') {
-          masterVehicleData = FALLBACK_DATA;
-          updateStatus('Fallback Data Loaded', 'bg-blue-500');
-        } else {
-          masterVehicleData = [];
-          updateStatus('Error / Offline', 'bg-red-500');
-          showError("Record Not Found", `Could not fetch details for vehicle "${regNo}". Please check if the API server is online or if the vehicle number is correct.`);
-        }
-      } finally {
-        showLoading(false);
-        renderCards(masterVehicleData);
-      }
-    }
-
-    // Update Status Badge
-    function updateStatus(text, dotClass) {
-      document.getElementById('statusText').innerText = text;
-      const dot = document.getElementById('statusDot');
-      dot.className = `w-2 h-2 rounded-full mr-2 ${dotClass}`;
-    }
-
-    // Toggle Loading UI
-    function showLoading(isLoading) {
-      const loading = document.getElementById('loadingState');
-      const error = document.getElementById('errorState');
-      const list = document.getElementById('dataList');
-
-      if (isLoading) {
-        loading.classList.remove('hidden');
-        loading.classList.add('flex');
-        error.classList.add('hidden');
-        error.classList.remove('flex');
-        list.classList.add('hidden');
-      } else {
-        loading.classList.add('hidden');
-        loading.classList.remove('flex');
-      }
-    }
-
-    // Show Error UI
-    function showError(title, message) {
-      const error = document.getElementById('errorState');
-      document.getElementById('errorTitle').innerText = title;
-      document.getElementById('errorMessage').innerText = message;
-      error.classList.remove('hidden');
-      error.classList.add('flex');
-    }
-
-    // Render Cards
-    function renderCards(records) {
-      const container = document.getElementById('dataList');
-      const errorState = document.getElementById('errorState');
-
-      if (!records || records.length === 0) {
-        container.classList.add('hidden');
-        return;
+      // Primary validation check
+      if (!motorReq && !regResult) {
+        throw new Error('Gadi ki detail nahi mili ya invalid vehicle number.');
       }
 
-      errorState.classList.add('hidden');
-      errorState.classList.remove('flex');
-      container.classList.remove('hidden');
+      // Values Mapping
+      document.getElementById('resRegNo').textContent = motorReq?.registrationNo || regResult?.registrationNo || vehicleInput;
+      document.getElementById('resRto').textContent = motorReq?.rtoDesp || regResult?.rto?.lntLoc || 'N/A';
+      document.getElementById('resRtoCode').textContent = motorReq?.rtoId || regResult?.rto?.rtoCode || 'N/A';
+      document.getElementById('resState').textContent = data?.premiumRequest?.stateCode || regResult?.reg1 || 'N/A';
+      document.getElementById('resVertical').textContent = data?.premiumRequest?.vertical || regResult?.vertical || 'N/A';
+      document.getElementById('resIndividual').textContent = motorReq?.isIndividual ? 'Yes' : 'No';
 
-      container.innerHTML = records.map((item, index) => {
-        const sz = item?.meta_data?.signzy_response?.result || {};
-        const cust = item?.customer_details || {};
-        const veh = item?.vehicle_details || {};
-        const nominee = item?.nominee_details || {};
-        const regRes = item?.registrationResult || {};
-        const motorReq = item?.premiumRequest?.motorPremiumRequest || {};
+      // Status handling
+      const statusEl = document.getElementById('resStatus');
+      const statusValue = regResult?.status || 'SUCCESS';
+      statusEl.textContent = statusValue;
+      statusEl.className = 'value status-badge ' + (statusValue === 'WARNING' ? 'status-warning' : 'status-success');
 
-        const regNo = regRes?.registrationNo || motorReq?.registrationNo || item?.registration_number || sz?.regNo || 'NO REGISTRATION NO';
-        const model = sz?.model || 'Vehicle';
-        const manufacturer = sz?.vehicleManufacturerName || 'Unknown Manufacturer';
-        const ownerName = cust?.full_name || sz?.owner || motorReq?.customerName || 'Unknown Owner';
-        const status = regRes?.status || sz?.status || 'ACTIVE';
+      resultCard.style.display = 'block';
 
-        return `
-          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
-            
-            <!-- Card Header -->
-            <div class="bg-slate-900 text-white p-6">
-              <div class="flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center space-x-4">
-                  <div class="bg-blue-600/20 text-blue-400 p-3 rounded-xl border border-blue-500/30">
-                    <i data-lucide="bike" class="w-8 h-8"></i>
-                  </div>
-                  <div>
-                    <div class="flex items-center space-x-3">
-                      <h2 class="text-2xl font-black tracking-wider text-amber-400">${regNo}</h2>
-                      <span class="badge ${status === 'ACTIVE' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400'}">
-                        ${status}
-                      </span>
-                    </div>
-                    <p class="text-slate-300 font-medium text-sm mt-0.5">${val(manufacturer)} • ${val(model)}</p>
-                  </div>
-                </div>
-
-                <div class="flex flex-wrap gap-2">
-                  <span class="bg-slate-800 text-slate-300 text-xs px-3 py-1.5 rounded-lg border border-slate-700">
-                    Fuel: <strong class="text-white">${val(sz?.type)}</strong>
-                  </span>
-                  <span class="bg-slate-800 text-slate-300 text-xs px-3 py-1.5 rounded-lg border border-slate-700">
-                    Norms: <strong class="text-white">${val(sz?.normsType)}</strong>
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card Body Content -->
-            <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-              
-              <!-- Owner & Address -->
-              <div class="space-y-6">
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
-                    <i data-lucide="user" class="w-4 h-4 mr-1.5 text-blue-600"></i> Owner Details
-                  </h3>
-                  <div class="space-y-2.5 text-sm">
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">Full Name</span>
-                      <span class="font-semibold text-slate-800">${val(ownerName)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">Father's Name</span>
-                      <span class="font-medium text-slate-700">${val(sz?.ownerFatherName)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">Owner Serial No</span>
-                      <span class="font-medium text-slate-700">${val(sz?.ownerCount)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">Nominee</span>
-                      <span class="font-medium text-slate-700">${val(nominee?.name)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
-                    <i data-lucide="map-pin" class="w-4 h-4 mr-1.5 text-blue-600"></i> Address Details
-                  </h3>
-                  <p class="text-xs text-slate-600 leading-relaxed">
-                    ${val(sz?.presentAddress || cust?.communication_address?.address_line)}
-                  </p>
-                </div>
-              </div>
-
-              <!-- Technical Specs -->
-              <div class="space-y-6">
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 h-full flex flex-col justify-between">
-                  <div>
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
-                      <i data-lucide="wrench" class="w-4 h-4 mr-1.5 text-blue-600"></i> Technical Specs
-                    </h3>
-                    <div class="space-y-2.5 text-sm">
-                      <div class="flex justify-between">
-                        <span class="text-slate-500">Chassis No</span>
-                        <span class="font-mono font-medium text-xs text-slate-800 bg-slate-200/60 px-1.5 py-0.5 rounded">${val(item?.chassis_number || sz?.chassis)}</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-slate-500">Engine No</span>
-                        <span class="font-mono font-medium text-xs text-slate-800 bg-slate-200/60 px-1.5 py-0.5 rounded">${val(item?.engine_number || sz?.engine)}</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-slate-500">Engine CC</span>
-                        <span class="font-medium text-slate-700">${val(sz?.vehicleCubicCapacity)} cc</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-slate-500">Mfg Month/Year</span>
-                        <span class="font-medium text-slate-700">${val(sz?.vehicleManufacturingMonthYear)}</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-slate-500">Color</span>
-                        <span class="font-medium text-slate-700">${val(sz?.vehicleColour)}</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-slate-500">Unladen Weight</span>
-                        <span class="font-medium text-slate-700">${val(sz?.unladenWeight)} kg</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="mt-4 pt-3 border-t border-slate-200/60">
-                    <div class="flex items-center justify-between">
-                      <span class="text-xs font-medium text-slate-500">Financed Status</span>
-                      ${veh?.is_vehicle_financed 
-                        ? `<span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Financed</span>` 
-                        : `<span class="text-xs font-bold text-slate-600">N/A</span>`}
-                    </div>
-                    ${sz?.rcFinancer ? `<p class="text-xs text-slate-500 mt-1">Bank: <span class="font-medium text-slate-700">${sz.rcFinancer}</span></p>` : ''}
-                  </div>
-                </div>
-              </div>
-
-              <!-- Compliance & Insurance -->
-              <div class="space-y-6">
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
-                    <i data-lucide="file-check" class="w-4 h-4 mr-1.5 text-blue-600"></i> RC & Compliance
-                  </h3>
-                  <div class="space-y-2.5 text-sm">
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">Reg Authority</span>
-                      <span class="font-medium text-slate-700">${val(sz?.regAuthority || regRes?.rto?.lntLoc)} (${val(sz?.rtoCode || motorReq?.rtoId)})</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">Registration Date</span>
-                      <span class="font-medium text-slate-700">${val(sz?.regDate)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">RC Valid Upto</span>
-                      <span class="font-medium text-emerald-600">${val(sz?.rcExpiryDate)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">PUCC Expiry</span>
-                      <span class="font-medium text-slate-700">${val(sz?.puccUpto)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">Tax Upto</span>
-                      <span class="font-medium text-slate-700">${val(sz?.vehicleTaxUpto)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                  <h3 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3 flex items-center">
-                    <i data-lucide="shield" class="w-4 h-4 mr-1.5 text-blue-600"></i> Insurance Info
-                  </h3>
-                  <div class="space-y-2 text-xs">
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">Insurer</span>
-                      <span class="font-semibold text-slate-800 text-right max-w-[150px] truncate">${val(sz?.vehicleInsuranceCompanyName)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">Policy No</span>
-                      <span class="font-mono text-slate-700">${val(item?.previous_policy_number || sz?.vehicleInsurancePolicyNumber)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">Policy Expiry</span>
-                      <span class="font-semibold text-slate-800">${val(item?.previous_policy_exp_date || sz?.vehicleInsuranceUpto)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500">Prev. NCB</span>
-                      <span class="font-semibold text-emerald-600">${val(item?.previous_year_ncb)}%</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- Card Footer -->
-            <div class="bg-slate-50 border-t border-slate-200/80 px-6 py-3 flex justify-between items-center text-xs">
-              <span class="text-slate-400">Status verified on: ${val(sz?.statusAsOn)}</span>
-              <button onclick="toggleRawData('${index}')" class="text-blue-600 hover:text-blue-800 font-medium flex items-center space-x-1">
-                <span>View Raw JSON</span>
-                <i data-lucide="code" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-
-            <!-- JSON Accordion -->
-            <div id="raw-json-${index}" class="hidden bg-slate-900 text-slate-200 p-4 font-mono text-xs overflow-x-auto max-h-60 custom-scrollbar border-t border-slate-800">
-              <pre>${JSON.stringify(item, null, 2)}</pre>
-            </div>
-
-          </div>
-        `;
-      }).join('');
-
-      if (window.lucide) {
-        lucide.createIcons();
-      }
+    } catch (err) {
+      errorMsg.textContent = err.message || 'Details fetch karne me dikkat aayi.';
+      errorMsg.style.display = 'block';
+    } finally {
+      loader.style.display = 'none';
     }
+  }
+</script>
 
-    function toggleRawData(index) {
-      const element = document.getElementById(`raw-json-${index}`);
-      if (element) element.classList.toggle('hidden');
-    }
-
-    // Initial Load - Icons initialized without default auto-search
-    window.addEventListener('DOMContentLoaded', () => {
-      if (window.lucide) lucide.createIcons();
-    });
-  </script>
 </body>
 </html>
