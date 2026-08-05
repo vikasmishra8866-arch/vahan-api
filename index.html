@@ -672,32 +672,53 @@
             loader.style.display = 'block';
 
             const targetUrl = `https://cjpindia.vercel.app/api/vehicle-details/${rawRegNo}`;
-            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+            
+            // Multiple Proxies to guarantee bypass of CORS restrictions in browser
+            const proxy1 = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+            const proxy2 = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+
+            let data = null;
 
             try {
-                let response;
-                // Attempt direct call first, fallback to proxy to fix CORS issue on Vercel
+                // Attempt 1: AllOrigins Proxy
                 try {
-                    response = await fetch(targetUrl);
-                    if (!response.ok) throw new Error();
-                } catch (err) {
-                    response = await fetch(proxyUrl);
+                    const res1 = await fetch(proxy1);
+                    if (res1.ok) {
+                        const json1 = await res1.json();
+                        data = typeof json1.contents === 'string' ? JSON.parse(json1.contents) : json1.contents;
+                    }
+                } catch(e) {}
+
+                // Attempt 2: CORSProxy
+                if (!data) {
+                    try {
+                        const res2 = await fetch(proxy2);
+                        if (res2.ok) {
+                            data = await res2.json();
+                        }
+                    } catch(e) {}
                 }
 
-                if(!response.ok) {
-                    throw new Error("HTTP Status " + response.status);
+                // Attempt 3: Direct API Call
+                if (!data) {
+                    const res3 = await fetch(targetUrl);
+                    if (res3.ok) {
+                        data = await res3.json();
+                    }
                 }
-
-                const data = await response.json();
-                rawApiResponse = data;
 
                 loader.style.display = 'none';
 
+                if (!data) {
+                    throw new Error("API Connection Failed");
+                }
+
+                rawApiResponse = data;
                 const regRes = data.registrationResult || {};
-                
-                // If API returns unauthorized or error message explicitly without valid data
-                if (regRes.errorMsg === "Unauthorized" && !regRes.ownerName && !regRes.makeModel) {
-                    document.getElementById('errorMsgSub').innerText = `(Error: Unauthorized / Warning Status)`;
+
+                // Check if API payload is valid or unauthorized error
+                if ((regRes.errorMsg === "Unauthorized" || regRes.status === "WARNING") && !regRes.ownerName && !regRes.makeModel) {
+                    document.getElementById('errorMsgSub').innerText = `(Error: ${regRes.errorMsg || 'Unauthorized Status'})`;
                     notFoundBox.style.display = 'block';
                 } else {
                     renderData(data, rawRegNo);
