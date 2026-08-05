@@ -459,7 +459,7 @@
             <div class="input-group">
                 <div class="input-wrapper">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="vehicleNumInput" value="MH47BM9865" placeholder="e.g. MH47BM9865">
+                    <input type="text" id="vehicleNumInput" value="GJ05HG7801" placeholder="e.g. GJ05HG7801">
                 </div>
                 <button class="btn-search" id="searchBtn" onclick="fetchVehicleDetails()">
                     <i class="fa-solid fa-magnifying-glass"></i> Search Vehicle
@@ -484,7 +484,7 @@
                     </div>
                     <div>
                         <div class="plate-number-box">
-                            <span class="plate-number" id="dispRegNo">MH47BM9865</span>
+                            <span class="plate-number" id="dispRegNo">--</span>
                             <span class="status-tag" id="dispStatus">ACTIVE</span>
                         </div>
                         <div class="vehicle-model" id="dispMakeModel">COMMERCIAL VEHICLE</div>
@@ -492,7 +492,7 @@
                 </div>
                 <div class="specs-pills">
                     <div class="pill">Vertical: <span id="dispVertical">CV</span></div>
-                    <div class="pill">RTO: <span id="dispRtoPlate">MH-47-Borivali</span></div>
+                    <div class="pill">RTO: <span id="dispRtoPlate">--</span></div>
                 </div>
             </div>
 
@@ -583,7 +583,7 @@
                         </div>
                         <div class="data-row">
                             <span class="data-label">Reg Authority</span>
-                            <span class="data-value" id="dispRto">Borivali (MH47)</span>
+                            <span class="data-value" id="dispRto">N/A</span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">Registration Date</span>
@@ -657,7 +657,7 @@
         let rawApiResponse = null;
 
         async function fetchVehicleDetails() {
-            const rawRegNo = document.getElementById('vehicleNumInput').value.trim();
+            const rawRegNo = document.getElementById('vehicleNumInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
             if(!rawRegNo) {
                 alert("Please enter a vehicle registration number.");
                 return;
@@ -671,39 +671,57 @@
             notFoundBox.style.display = 'none';
             loader.style.display = 'block';
 
+            const targetUrl = `https://cjpindia.vercel.app/api/vehicle-details/${rawRegNo}`;
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+
             try {
-                const response = await fetch(`https://cjpindia.vercel.app/api/vehicle-details/${rawRegNo}`);
+                let response;
+                // Attempt direct call first, fallback to proxy to fix CORS issue on Vercel
+                try {
+                    response = await fetch(targetUrl);
+                    if (!response.ok) throw new Error();
+                } catch (err) {
+                    response = await fetch(proxyUrl);
+                }
+
+                if(!response.ok) {
+                    throw new Error("HTTP Status " + response.status);
+                }
+
                 const data = await response.json();
-                rawApiResponse = data; // store for raw json inspection
+                rawApiResponse = data;
 
                 loader.style.display = 'none';
 
-                // Check API status or error message
-                const regResult = data.registrationResult || {};
+                const regRes = data.registrationResult || {};
                 
-                if (regResult.errorMsg || regResult.status === "WARNING" || !data.premiumRequest) {
-                    // Show animated details not found box with error message
-                    document.getElementById('errorMsgSub').innerText = `(Error: ${regResult.errorMsg || regResult.status || 'Data Not Found'})`;
+                // If API returns unauthorized or error message explicitly without valid data
+                if (regRes.errorMsg === "Unauthorized" && !regRes.ownerName && !regRes.makeModel) {
+                    document.getElementById('errorMsgSub').innerText = `(Error: Unauthorized / Warning Status)`;
                     notFoundBox.style.display = 'block';
                 } else {
-                    renderData(data);
+                    renderData(data, rawRegNo);
                     resultsBox.style.display = 'block';
                 }
+
             } catch (error) {
                 loader.style.display = 'none';
-                document.getElementById('errorMsgSub').innerText = `(Network or CORS Error)`;
+                document.getElementById('errorMsgSub').innerText = `(Unable to connect to API server)`;
                 notFoundBox.style.display = 'block';
             }
         }
 
-        function renderData(data) {
+        function renderData(data, regNo) {
             const regRes = data.registrationResult || {};
             const premReq = data.premiumRequest?.motorPremiumRequest || {};
 
-            document.getElementById('dispRegNo').innerText = regRes.registrationNo || document.getElementById('vehicleNumInput').value;
+            document.getElementById('dispRegNo').innerText = regRes.registrationNo || regNo;
             document.getElementById('dispStatus').innerText = regRes.status || 'ACTIVE';
-            document.getElementById('dispVertical').innerText = regRes.vertical || 'CV';
-            document.getElementById('dispRtoPlate').innerText = regRes.rto?.rtoPlateLntLoc || 'MH-47-Borivali';
+            document.getElementById('dispVertical').innerText = regRes.vertical || premReq.vertical || 'CV';
+            
+            const rtoLoc = regRes.rto?.rtoPlateLntLoc || (premReq.rtoDesp ? `${premReq.rtoId}-${premReq.rtoDesp}` : 'N/A');
+            document.getElementById('dispRtoPlate').innerText = rtoLoc;
+            document.getElementById('dispMakeModel').innerText = regRes.makeModel || (premReq.vertical === "CV" ? "COMMERCIAL VEHICLE" : "VEHICLE DETAILS");
             
             document.getElementById('dispOwnerName').innerText = regRes.ownerName || 'N/A';
             document.getElementById('dispFatherName').innerText = regRes.fatherName || 'N/A';
@@ -718,7 +736,7 @@
             document.getElementById('dispColor').innerText = regRes.color || 'N/A';
             document.getElementById('dispWeight').innerText = regRes.weight ? regRes.weight + ' kg' : 'N/A';
 
-            document.getElementById('dispRto').innerText = (premReq.rtoDesp || regRes.rto?.lntLoc || 'Borivali') + ` (${premReq.rtoId || regRes.rto?.rtoCode || 'MH47'})`;
+            document.getElementById('dispRto').innerText = (premReq.rtoDesp || regRes.rto?.lntLoc || 'N/A') + ` (${premReq.rtoId || regRes.rto?.rtoCode || ''})`;
             document.getElementById('dispRegDate').innerText = regRes.regDate || 'N/A';
             document.getElementById('dispRcValid').innerText = regRes.rcValidUpto || 'N/A';
             document.getElementById('dispPucc').innerText = regRes.puccExpiry || 'N/A';
@@ -730,10 +748,12 @@
             document.getElementById('dispNcb').innerText = (premReq.prevNCB || 0) + '%';
         }
 
-        // Run automatically for the default input value on load
-        window.onload = () => {
-            fetchVehicleDetails();
-        };
+        // Search trigger on Enter key press
+        document.getElementById('vehicleNumInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                fetchVehicleDetails();
+            }
+        });
     </script>
 </body>
 </html>
