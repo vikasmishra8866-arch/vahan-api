@@ -459,7 +459,7 @@
             <div class="input-group">
                 <div class="input-wrapper">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="vehicleNumInput" value="GJ05HG7801" placeholder="e.g. GJ05HG7801">
+                    <input type="text" id="vehicleNumInput" value="GJ05BY2328" placeholder="e.g. GJ05BY2328">
                 </div>
                 <button class="btn-search" id="searchBtn" onclick="fetchVehicleDetails()">
                     <i class="fa-solid fa-magnifying-glass"></i> Search Vehicle
@@ -480,18 +480,18 @@
             <div class="vehicle-header">
                 <div class="vehicle-title-area">
                     <div class="vehicle-icon">
-                        <i class="fa-solid fa-car" id="vehicleTypeIcon"></i>
+                        <i class="fa-solid fa-motorcycle" id="vehicleTypeIcon"></i>
                     </div>
                     <div>
                         <div class="plate-number-box">
                             <span class="plate-number" id="dispRegNo">--</span>
                             <span class="status-tag" id="dispStatus">ACTIVE</span>
                         </div>
-                        <div class="vehicle-model" id="dispMakeModel">COMMERCIAL VEHICLE</div>
+                        <div class="vehicle-model" id="dispMakeModel">VEHICLE DETAILS</div>
                     </div>
                 </div>
                 <div class="specs-pills">
-                    <div class="pill">Vertical: <span id="dispVertical">CV</span></div>
+                    <div class="pill">Vertical: <span id="dispVertical">TW</span></div>
                     <div class="pill">RTO: <span id="dispRtoPlate">--</span></div>
                 </div>
             </div>
@@ -632,7 +632,7 @@
             <!-- Footer Details inside Card -->
             <div class="card-footer-bar">
                 <span id="dispStatusVerified">Status verified via API response</span>
-                <a href="#" class="json-btn" onclick="alert(JSON.stringify(rawApiResponse, null, 2))">View Raw JSON &lt;&gt;</a>
+                <a href="javascript:void(0)" class="json-btn" onclick="alert(JSON.stringify(rawApiResponse, null, 2))">View Raw JSON &lt;&gt;</a>
             </div>
         </div>
 
@@ -643,7 +643,7 @@
             </div>
             <h3>Details Not Found</h3>
             <p>API returned a warning or unauthorized status for this vehicle number.</p>
-            <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px;" id="errorMsgSub">(Error: Unauthorized)</p>
+            <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px;" id="errorMsgSub">(Error: Connection Failed)</p>
         </div>
     </main>
 
@@ -673,77 +673,63 @@
 
             const targetUrl = `https://cjpindia.vercel.app/api/vehicle-details/${rawRegNo}`;
             
-            // Multiple Proxies to guarantee bypass of CORS restrictions in browser
-            const proxy1 = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-            const proxy2 = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+            // Ultra-Reliable Proxies Hierarchy
+            const proxies = [
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
+                targetUrl,
+                `https://cors-anywhere.herokuapp.com/${targetUrl}`
+            ];
 
             let data = null;
 
-            try {
-                // Attempt 1: AllOrigins Proxy
+            for (let url of proxies) {
                 try {
-                    const res1 = await fetch(proxy1);
-                    if (res1.ok) {
-                        const json1 = await res1.json();
-                        data = typeof json1.contents === 'string' ? JSON.parse(json1.contents) : json1.contents;
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        data = await res.json();
+                        if (data) break; // Break loop if successfully fetched data
                     }
-                } catch(e) {}
-
-                // Attempt 2: CORSProxy
-                if (!data) {
-                    try {
-                        const res2 = await fetch(proxy2);
-                        if (res2.ok) {
-                            data = await res2.json();
-                        }
-                    } catch(e) {}
+                } catch (e) {
+                    console.warn(`Failed fetching from ${url}`, e);
                 }
+            }
 
-                // Attempt 3: Direct API Call
-                if (!data) {
-                    const res3 = await fetch(targetUrl);
-                    if (res3.ok) {
-                        data = await res3.json();
-                    }
-                }
+            loader.style.display = 'none';
 
-                loader.style.display = 'none';
-
-                if (!data) {
-                    throw new Error("API Connection Failed");
-                }
-
-                rawApiResponse = data;
-                const regRes = data.registrationResult || {};
-
-                // Check if API payload is valid or unauthorized error
-                if ((regRes.errorMsg === "Unauthorized" || regRes.status === "WARNING") && !regRes.ownerName && !regRes.makeModel) {
-                    document.getElementById('errorMsgSub').innerText = `(Error: ${regRes.errorMsg || 'Unauthorized Status'})`;
-                    notFoundBox.style.display = 'block';
-                } else {
-                    renderData(data, rawRegNo);
-                    resultsBox.style.display = 'block';
-                }
-
-            } catch (error) {
-                loader.style.display = 'none';
+            if (!data) {
                 document.getElementById('errorMsgSub').innerText = `(Unable to connect to API server)`;
                 notFoundBox.style.display = 'block';
+                return;
             }
+
+            rawApiResponse = data;
+
+            // Extract data from response structure safely
+            const regRes = data.registrationResult || {};
+            const premReq = data.premiumRequest || {};
+
+            // Render output
+            renderData(data, rawRegNo);
+            resultsBox.style.display = 'block';
         }
 
         function renderData(data, regNo) {
             const regRes = data.registrationResult || {};
-            const premReq = data.premiumRequest?.motorPremiumRequest || {};
+            const premReq = data.premiumRequest || {};
+            const motorPrem = premReq.motorPremiumRequest || {};
 
             document.getElementById('dispRegNo').innerText = regRes.registrationNo || regNo;
             document.getElementById('dispStatus').innerText = regRes.status || 'ACTIVE';
-            document.getElementById('dispVertical').innerText = regRes.vertical || premReq.vertical || 'CV';
             
-            const rtoLoc = regRes.rto?.rtoPlateLntLoc || (premReq.rtoDesp ? `${premReq.rtoId}-${premReq.rtoDesp}` : 'N/A');
-            document.getElementById('dispRtoPlate').innerText = rtoLoc;
-            document.getElementById('dispMakeModel').innerText = regRes.makeModel || (premReq.vertical === "CV" ? "COMMERCIAL VEHICLE" : "VEHICLE DETAILS");
-            
+            // Extract Vehicle Name (e.g. SARK Honda Activa)
+            const vehicleTitle = regRes.makeModel || premReq.customerName || motorPrem.makeModel || "VEHICLE DETAILS";
+            document.getElementById('dispMakeModel').innerText = vehicleTitle;
+
+            // Extract Engine CC (e.g. 110 cc)
+            const ccVal = regRes.engineCc || premReq.cubicCapacity || motorPrem.cubicCapacity;
+            document.getElementById('dispCc').innerText = ccVal ? `${ccVal} cc` : 'N/A';
+
+            // Extract Owner & Specs
             document.getElementById('dispOwnerName').innerText = regRes.ownerName || 'N/A';
             document.getElementById('dispFatherName').innerText = regRes.fatherName || 'N/A';
             document.getElementById('dispOwnerSeq').innerText = regRes.ownerSerialNo || 'N/A';
@@ -752,24 +738,28 @@
 
             document.getElementById('dispChassis').innerText = regRes.chassisNo || 'NOT AVAILABLE';
             document.getElementById('dispEngine').innerText = regRes.engineNo || 'NOT AVAILABLE';
-            document.getElementById('dispCc').innerText = regRes.engineCc ? regRes.engineCc + ' cc' : 'N/A';
             document.getElementById('dispMfg').innerText = regRes.mfgDate || 'N/A';
             document.getElementById('dispColor').innerText = regRes.color || 'N/A';
             document.getElementById('dispWeight').innerText = regRes.weight ? regRes.weight + ' kg' : 'N/A';
 
-            document.getElementById('dispRto').innerText = (premReq.rtoDesp || regRes.rto?.lntLoc || 'N/A') + ` (${premReq.rtoId || regRes.rto?.rtoCode || ''})`;
+            // RTO & Compliance
+            const rtoLoc = regRes.rto?.rtoPlateLntLoc || (motorPrem.rtoDesp ? `${motorPrem.rtoId}-${motorPrem.rtoDesp}` : 'N/A');
+            document.getElementById('dispRtoPlate').innerText = rtoLoc;
+            document.getElementById('dispRto').innerText = (motorPrem.rtoDesp || regRes.rto?.lntLoc || 'N/A');
+            
             document.getElementById('dispRegDate').innerText = regRes.regDate || 'N/A';
             document.getElementById('dispRcValid').innerText = regRes.rcValidUpto || 'N/A';
             document.getElementById('dispPucc').innerText = regRes.puccExpiry || 'N/A';
             document.getElementById('dispTax').innerText = regRes.taxUpto || 'N/A';
 
+            // Insurance Info
             document.getElementById('dispInsurer').innerText = regRes.insurer || 'N/A';
             document.getElementById('dispPolicyNo').innerText = regRes.policyNo || 'N/A';
             document.getElementById('dispInsExpiry').innerText = regRes.policyExpiry || 'N/A';
-            document.getElementById('dispNcb').innerText = (premReq.prevNCB || 0) + '%';
+            document.getElementById('dispNcb').innerText = (motorPrem.prevNCB || 0) + '%';
         }
 
-        // Search trigger on Enter key press
+        // Trigger on Enter Key Press
         document.getElementById('vehicleNumInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 fetchVehicleDetails();
