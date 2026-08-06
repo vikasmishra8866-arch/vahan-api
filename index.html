@@ -128,10 +128,12 @@
 
   <!-- Inline Application Logic JavaScript -->
   <script>
-    // New API Base URL (path‑based)
+    // ============================================================
+    // NEW API BASE URL (path‑based)
+    // ============================================================
     const BASE_API_URL = "https://cjpindia.vercel.app/api/vehicle-details/";
 
-    // Fallback Data for DL4SDH5925 (old structure – kept for demonstration)
+    // Fallback Data for DL4SDH5925 (kept for offline demonstration)
     const FALLBACK_DATA = [{
       "chassis_number": "MBLHA10CGGHHB0460",
       "customer_details": {
@@ -187,7 +189,9 @@
 
     let masterVehicleData = [];
 
-    // Helper: Safe Value Formatting
+    // ============================================================
+    // HELPER: Safe Value Formatting
+    // ============================================================
     function val(value, fallback = 'N/A') {
       if (value === null || value === undefined || value === '' || value === 'NA') {
         return `<span class="text-slate-400 font-normal">${fallback}</span>`;
@@ -195,38 +199,36 @@
       return value;
     }
 
-    // Search Submit Handler
+    // ============================================================
+    // SEARCH HANDLER
+    // ============================================================
     function handleSearch(e) {
       if (e) e.preventDefault();
       const rawInput = document.getElementById('vehicleInput').value;
-      // Clean vehicle number: remove spaces, dashes, special chars
       const cleanRegNo = rawInput.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-
       if (!cleanRegNo) {
         alert("Please enter a valid vehicle number.");
         return;
       }
-
       fetchVehicleData(cleanRegNo);
     }
 
-    // Fetch Vehicle Data from New API (path‑based)
+    // ============================================================
+    // FETCH FROM NEW API
+    // ============================================================
     async function fetchVehicleData(regNo) {
       showLoading(true);
       updateStatus('Fetching...', 'bg-yellow-400');
 
-      // Build URL with regNo as path parameter
       const fullApiUrl = `${BASE_API_URL}${regNo}`;
 
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
 
         const response = await fetch(fullApiUrl, {
           signal: controller.signal,
-          headers: {
-            'ngrok-skip-browser-warning': 'true'
-          }
+          headers: { 'ngrok-skip-browser-warning': 'true' }
         });
 
         clearTimeout(timeoutId);
@@ -235,31 +237,29 @@
 
         const data = await response.json();
 
-        // Check if response contains registrationResult (new API)
+        // Check if the API returned a successful registration result
         if (data.registrationResult && data.registrationResult.status === 'SUCCESS') {
-          // Wrap in array to keep rendering consistent
           masterVehicleData = [{
-            // Keep the original structure, we'll extract from registrationResult in render
             registrationResult: data.registrationResult,
-            premiumRequest: data.premiumRequest, // optional, for extra info
-            // Also keep raw for JSON view
+            premiumRequest: data.premiumRequest,
             raw: data
           }];
           updateStatus('Live API Data (New)', 'bg-emerald-500');
         } else {
-          throw new Error('Vehicle record not found or API returned error.');
+          // API responded but no valid record
+          throw new Error('Vehicle record not found in API.');
         }
       } catch (error) {
-        console.warn("API Fetch failed or timed out:", error);
+        console.warn("API Fetch failed:", error);
 
-        // Fallback check: if user searched for default registration number
+        // Fallback to demo data only if the user searched for DL4SDH5925
         if (regNo.toUpperCase().replace(/[^A-Z0-9]/g, '') === 'DL4SDH5925') {
           masterVehicleData = FALLBACK_DATA;
           updateStatus('Fallback Data Loaded', 'bg-blue-500');
         } else {
           masterVehicleData = [];
-          updateStatus('Error / Offline', 'bg-red-500');
-          showError("Record Not Found", `Could not fetch details for vehicle "${regNo}". Please check if the API server is online or if the vehicle number is correct.`);
+          updateStatus('Not Found', 'bg-red-500');
+          showError("Record Not Found", `Could not fetch details for vehicle "${regNo}". The API does not have this vehicle number in its database. Please try a different number.`);
         }
       } finally {
         showLoading(false);
@@ -267,19 +267,18 @@
       }
     }
 
-    // Update Status Badge
+    // ============================================================
+    // UI HELPERS
+    // ============================================================
     function updateStatus(text, dotClass) {
       document.getElementById('statusText').innerText = text;
-      const dot = document.getElementById('statusDot');
-      dot.className = `w-2 h-2 rounded-full mr-2 ${dotClass}`;
+      document.getElementById('statusDot').className = `w-2 h-2 rounded-full mr-2 ${dotClass}`;
     }
 
-    // Toggle Loading UI
     function showLoading(isLoading) {
       const loading = document.getElementById('loadingState');
       const error = document.getElementById('errorState');
       const list = document.getElementById('dataList');
-
       if (isLoading) {
         loading.classList.remove('hidden');
         loading.classList.add('flex');
@@ -292,7 +291,6 @@
       }
     }
 
-    // Show Error UI
     function showError(title, message) {
       const error = document.getElementById('errorState');
       document.getElementById('errorTitle').innerText = title;
@@ -301,9 +299,11 @@
       error.classList.add('flex');
     }
 
-    // Unified Data Extraction – handles both new (registrationResult) and old (meta_data.signzy_response.result)
+    // ============================================================
+    // DATA EXTRACTION – NEW API STRUCTURE
+    // ============================================================
     function extractVehicleData(item) {
-      // Check if it's the new API format
+      // New API format: registrationResult
       if (item.registrationResult) {
         const reg = item.registrationResult;
         const rto = reg.rto || {};
@@ -312,13 +312,13 @@
           make: reg.make || 'N/A',
           model: reg.model || 'N/A',
           ownerName: `${reg.ownerFirstName || ''} ${reg.ownerLastName || ''}`.trim() || 'N/A',
-          ownerFatherName: 'N/A', // not provided in new API
+          ownerFatherName: 'N/A',
           ownerCount: 'N/A',
           nominee: 'N/A',
           chassis: reg.chasisno || 'N/A',
           engine: reg.engineno || 'N/A',
           cubicCapacity: reg.cubicCapacity || 'N/A',
-          mfgMonthYear: reg.year || 'N/A', // year only
+          mfgMonthYear: reg.year || 'N/A',
           color: 'N/A',
           unladenWeight: 'N/A',
           fuel: reg.fuel || 'N/A',
@@ -330,7 +330,7 @@
           presentAddress: reg.permanentAddress || reg.corrAddress || 'N/A',
           rtoCode: rto.rtoCode || reg.reg1 + reg.reg2 || 'N/A',
           regAuthority: rto.lntLoc || 'N/A',
-          rcExpiryDate: 'N/A', // not in new API
+          rcExpiryDate: 'N/A',
           pucNo: reg.pucNo || 'N/A',
           pucValidUpto: reg.pucValidDate || 'N/A',
           rcFinancer: reg.financierName || null,
@@ -346,19 +346,17 @@
           vehicleModel: reg.model || 'N/A',
           variant: reg.displayVariant || 'N/A',
           normsType: 'N/A',
-          // extra
           vertical: reg.vertical || 'N/A',
           bodyType: reg.bodyType || 'N/A',
         };
       } else {
-        // Old structure: use meta_data.signzy_response.result
+        // Fallback old structure (for DL4SDH5925)
         const sz = item?.meta_data?.signzy_response?.result || {};
         const cust = item?.customer_details || {};
         const veh = item?.vehicle_details || {};
         const nominee = item?.nominee_details || {};
-        const regNo = item?.registration_number || sz?.regNo || 'N/A';
         return {
-          registrationNo: regNo,
+          registrationNo: item?.registration_number || sz?.regNo || 'N/A',
           make: sz?.vehicleManufacturerName || 'N/A',
           model: sz?.model || 'N/A',
           ownerName: cust?.full_name || sz?.owner || 'N/A',
@@ -402,7 +400,9 @@
       }
     }
 
-    // Render Cards
+    // ============================================================
+    // RENDER CARDS
+    // ============================================================
     function renderCards(records) {
       const container = document.getElementById('dataList');
       const errorState = document.getElementById('errorState');
@@ -418,7 +418,6 @@
 
       container.innerHTML = records.map((item, index) => {
         const d = extractVehicleData(item);
-        // For raw JSON, use the original item
         const rawJson = item.raw || item;
 
         return `
@@ -624,7 +623,9 @@
       if (element) element.classList.toggle('hidden');
     }
 
-    // Initial Load – default to MH47BM9865 (new API)
+    // ============================================================
+    // INITIAL LOAD – default example that works
+    // ============================================================
     window.addEventListener('DOMContentLoaded', () => {
       if (window.lucide) lucide.createIcons();
       fetchVehicleData('MH47BM9865');
