@@ -263,6 +263,29 @@
             this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
         });
 
+        // Helper function for performing fetch with retries & Exponential Backoff
+        async function fetchWithRetry(url, options = {}, retries = 2, delay = 2000) {
+            try {
+                const response = await fetch(url, options);
+                
+                // Check if status is 503, 502, or 504 triggering auto-retry
+                if ([502, 503, 504].includes(response.status) && retries > 0) {
+                    console.warn(`Server returned HTTP ${response.status}. Retrying in ${delay}ms... (${retries} attempts left)`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchWithRetry(url, options, retries - 1, delay * 1.5);
+                }
+                
+                return response;
+            } catch (err) {
+                if (retries > 0 && err.name !== 'AbortError') {
+                    console.warn(`Fetch error encountered: ${err.message}. Retrying in ${delay}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchWithRetry(url, options, retries - 1, delay * 1.5);
+                }
+                throw err;
+            }
+        }
+
         async function searchVehicle(event) {
             event.preventDefault();
             const vehicleInput = document.getElementById('vehicleNumber');
@@ -297,16 +320,16 @@
             try {
                 let response;
                 try {
-                    response = await fetch(proxyUrl, {
+                    response = await fetchWithRetry(proxyUrl, {
                         method: 'GET',
                         mode: 'cors',
                         headers: { 'Accept': 'application/json' },
                         signal: controller.signal
-                    });
+                    }, 2, 2000);
                 } catch (proxyErr) {
                     if (proxyErr.name === 'AbortError') throw proxyErr;
                     
-                    response = await fetch(rawApiUrl, {
+                    response = await fetchWithRetry(rawApiUrl, {
                         method: 'GET',
                         mode: 'cors',
                         headers: { 
@@ -314,10 +337,15 @@
                             'Content-Type': 'application/json'
                         },
                         signal: controller.signal
-                    });
+                    }, 2, 2000);
                 }
 
                 clearTimeout(timeoutId);
+
+                // Specific Check for 503 & other HTTP server downtime errors
+                if (response.status === 503 || response.status === 502 || response.status === 504) {
+                    throw new Error(`HTTP_${response.status}`);
+                }
 
                 if (!response.ok) {
                     if (response.status === 404) {
@@ -367,10 +395,12 @@
                 resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
             } catch (err) {
-                console.error("Search Error Caught:", err);
+                console.error("Search Error Logged:", err);
                 let userFriendlyError = "An unexpected error occurred while fetching vehicle records.";
 
-                if (err.name === 'AbortError') {
+                if (err.message === "HTTP_503" || err.message === "HTTP_502" || err.message === "HTTP_504") {
+                    userFriendlyError = "The RTO database server is currently overloaded or undergoing maintenance (HTTP 503). Please try again in a moment.";
+                } else if (err.name === 'AbortError') {
                     userFriendlyError = "Request timed out after 25 seconds. The RTO server took too long to respond. Please check your connection and try again.";
                 } else if (err instanceof TypeError && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
                     userFriendlyError = "Network connection blocked or CORS policy restriction encountered. Please check your network stability.";
@@ -381,7 +411,7 @@
                 errorBox.innerText = userFriendlyError;
                 errorBox.classList.remove('hidden');
             } finally {
-                // Reset button state
+                // Reset button state completely
                 searchBtn.disabled = false;
                 searchBtn.classList.remove('opacity-80', 'cursor-not-allowed');
                 const spinnerDiv = document.getElementById('searchIcon');
