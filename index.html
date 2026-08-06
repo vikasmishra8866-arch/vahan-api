@@ -10,22 +10,48 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+    }
+
+    /* Custom CSS Animation for Warning Icon */
     @keyframes pulse-ring {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245,158,11,0.5); }
-      70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(245,158,11,0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5);
+      }
+      70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 20px rgba(245, 158, 11, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+      }
     }
+
     @keyframes float-icon {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-6px); }
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-6px);
+      }
     }
-    .animate-warning-glow { animation: pulse-ring 2s infinite ease-in-out; }
-    .animate-warning-float { animation: float-icon 2.5s infinite ease-in-out; }
+
+    .animate-warning-glow {
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+
+    .animate-warning-float {
+      animation: float-icon 2.5s infinite ease-in-out;
+    }
   </style>
 </head>
 <body class="min-h-screen text-slate-800 flex flex-col justify-between">
 
+  <!-- Header -->
   <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -44,32 +70,49 @@
     </div>
   </header>
 
+  <!-- Main Area -->
   <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    
+    <!-- Search Form -->
     <div class="mb-8 max-w-xl mx-auto">
       <form onsubmit="handleSearch(event)" class="flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1">
           <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
             <i data-lucide="search" class="w-5 h-5"></i>
           </div>
-          <input type="text" id="vehicleInput" placeholder="e.g. GJ05HG7801" value="GJ05HG7801" required
-            class="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-base font-bold uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition" />
+          <input 
+            type="text" 
+            id="vehicleInput" 
+            placeholder="e.g. GJ05HG7801" 
+            value="GJ05HG7801"
+            required
+            class="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-base font-bold uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition"
+          />
         </div>
-        <button type="submit" id="searchBtn"
-          class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold px-6 py-3 rounded-xl shadow-md transition flex items-center justify-center space-x-2">
+        <button 
+          type="submit" 
+          id="searchBtn"
+          class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold px-6 py-3 rounded-xl shadow-md transition flex items-center justify-center space-x-2"
+        >
           <i data-lucide="search" class="w-5 h-5"></i>
           <span>Search</span>
         </button>
       </form>
     </div>
 
+    <!-- Status Views -->
     <div id="contentArea">
+      <!-- Loading UI -->
       <div id="loadingState" class="hidden flex-col items-center justify-center py-20 text-center">
         <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mb-4"></div>
         <p class="text-slate-700 font-semibold text-lg">Fetching Vehicle Details...</p>
-        <p class="text-xs text-slate-400 mt-1">Trying multiple sources (max 5s each)</p>
+        <p class="text-xs text-slate-400 mt-1">Connecting to Government Records Endpoint (Timeout: 10s)</p>
       </div>
 
+      <!-- Animated Warning / Details Not Found UI -->
       <div id="errorState" class="hidden flex-col items-center justify-center py-14 text-center bg-white rounded-2xl border border-amber-200 p-8 shadow-md max-w-lg mx-auto">
+        
+        <!-- Animated Warning Badge -->
         <div class="relative mb-6">
           <div class="animate-warning-glow w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center">
             <div class="animate-warning-float bg-amber-500 text-white p-4 rounded-2xl shadow-lg shadow-amber-500/30">
@@ -77,28 +120,26 @@
             </div>
           </div>
         </div>
+
         <h3 class="text-xl font-bold text-slate-800 mb-2" id="errorTitle">Details Not Found</h3>
         <p class="text-sm text-slate-500 max-w-xs leading-relaxed" id="errorMessage">Unable to locate records for this vehicle number. Please verify and try again.</p>
       </div>
 
+      <!-- Main Display Cards -->
       <div id="resultContainer" class="hidden max-w-4xl mx-auto space-y-6"></div>
     </div>
   </main>
 
+  <!-- Modified Footer -->
   <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs font-semibold text-slate-600">
     <p>© Vehicle Info System | Authorized Verification Portal By Vikas Mishra ❤️</p>
   </footer>
 
+  <!-- Script Logic -->
   <script>
-    // ----- CONFIGURATION -----
     const API_BASE_URL = "https://cjpindia.vercel.app/api/vehicle-details/";
-    const TIMEOUT_MS = 5000;           // 5 seconds per fetch
-    const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-    // ----- CACHE (in-memory) -----
-    const cache = new Map();
-
-    // ----- UTILITY FUNCTIONS -----
+    // Utility to check valid non-null / non-empty values
     function isValid(val) {
       if (val === null || val === undefined || val === '' || val === false || val === 0 || val === '0' || val === 'NA' || val === 'null' || val === '0.0') {
         return false;
@@ -106,6 +147,7 @@
       return true;
     }
 
+    // Dynamic Helper Row generator (Only renders if value is valid)
     function renderRow(label, value, isCode = false) {
       if (!isValid(value)) return '';
       return `
@@ -114,6 +156,63 @@
           <span class="${isCode ? 'font-mono bg-slate-100 px-2 py-0.5 rounded text-xs text-slate-800 font-semibold' : 'font-semibold text-slate-800 text-right'}">${value}</span>
         </div>
       `;
+    }
+
+    function handleSearch(e) {
+      if (e) e.preventDefault();
+      const rawInput = document.getElementById('vehicleInput').value;
+      const cleanRegNo = rawInput.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+
+      if (!cleanRegNo) {
+        alert("Please enter a valid registration number.");
+        return;
+      }
+
+      fetchDetails(cleanRegNo);
+    }
+
+    async function fetchDetails(regNo) {
+      showState('loading');
+      updateStatus('Searching...', 'bg-yellow-400');
+
+      let jsonRes = null;
+      const targetUrl = `${API_BASE_URL}${regNo}`;
+
+      // Source URLs for fallback proxy handling
+      const sources = [
+        targetUrl,
+        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+      ];
+
+      for (let url of sources) {
+        try {
+          // Strict 10 Seconds Timeout Controller
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
+          
+          const res = await fetch(url, { signal: controller.signal });
+          clearTimeout(timeoutId);
+
+          if (res.ok) {
+            const parsed = await res.json();
+            if (parsed && typeof parsed === 'object') {
+              jsonRes = parsed;
+              break;
+            }
+          }
+        } catch (err) {
+          console.warn("Source failed or timed out (10s limit):", url, err);
+        }
+      }
+
+      if (jsonRes) {
+        updateStatus('Data Retrieved', 'bg-emerald-500');
+        renderVehicleDetails(jsonRes);
+      } else {
+        updateStatus('Not Found', 'bg-red-500');
+        showError("Details Not Found", `No vehicle records were returned within 10 seconds for "${regNo}". Please check the registration number and try again.`);
+      }
     }
 
     function updateStatus(text, dotClass) {
@@ -125,6 +224,7 @@
       const loading = document.getElementById('loadingState');
       const error = document.getElementById('errorState');
       const result = document.getElementById('resultContainer');
+
       loading.classList.add('hidden');
       loading.classList.remove('flex');
       error.classList.add('hidden');
@@ -148,72 +248,11 @@
       showState('error');
     }
 
-    // ----- FETCH WITH TIMEOUT -----
-    function fetchWithTimeout(url, timeout = TIMEOUT_MS) {
-      return Promise.race([
-        fetch(url),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Request timed out')), timeout)
-        )
-      ]);
-    }
-
-    // ----- MAIN FETCH LOGIC (concurrent) -----
-    async function fetchDetails(regNo) {
-      showState('loading');
-      updateStatus('Searching...', 'bg-yellow-400');
-
-      // Check cache first
-      const cached = cache.get(regNo);
-      if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
-        renderVehicleDetails(cached.data);
-        updateStatus('Cached', 'bg-emerald-500');
-        return;
-      }
-
-      const targetUrl = `${API_BASE_URL}${regNo}`;
-      const sources = [
-        targetUrl,
-        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
-      ];
-
-      // Create an array of fetch promises (each with timeout)
-      const fetchPromises = sources.map(url =>
-        fetchWithTimeout(url, TIMEOUT_MS)
-          .then(res => {
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            return res.json();
-          })
-          .then(data => {
-            // Validate that we have some data
-            if (data && (data.registrationResult || data.premiumRequest)) {
-              return data;
-            } else {
-              throw new Error('Empty or invalid response');
-            }
-          })
-      );
-
-      try {
-        // Use Promise.any to get the first successful response
-        const result = await Promise.any(fetchPromises);
-        // Cache it
-        cache.set(regNo, { data: result, timestamp: Date.now() });
-        renderVehicleDetails(result);
-        updateStatus('Data Retrieved', 'bg-emerald-500');
-      } catch (error) {
-        console.warn('All fetch attempts failed:', error);
-        updateStatus('Not Found', 'bg-red-500');
-        showError("Details Not Found", `No vehicle records were found for "${regNo}". Please check the registration number and try again.`);
-      }
-    }
-
-    // ----- RENDER VEHICLE DETAILS -----
     function renderVehicleDetails(data) {
       const container = document.getElementById('resultContainer');
       container.innerHTML = '';
 
+      // Clean Data Extraction from both registrationResult & motorPremiumRequest
       const regRes = data?.registrationResult || {};
       const reqRes = data?.premiumRequest?.motorPremiumRequest || {};
 
@@ -239,14 +278,15 @@
       const policyNo = regRes?.prePolicyNo || reqRes?.previousPolicyNumber || '';
       const address = regRes?.permanentAddress || regRes?.corrAddress || '';
 
-      // If even the registration number is missing, treat as no data
-      if (!isValid(regNo) || regNo === 'NO REGISTRATION NO') {
-        showError("No Data", "The API returned an empty record. Please try again with a different number.");
-        return;
-      }
+      // Dynamic Card Visibility Checks
+      const hasTechSpecs = isValid(chassis) || isValid(engine) || isValid(bodyType) || isValid(cc) || isValid(make) || isValid(model);
+      const hasOwnerDetails = isValid(ownerName) || isValid(regDate) || isValid(year) || isValid(rtoLoc) || isValid(rtoPlate) || isValid(seating);
 
+      // Construction of HTML
       const htmlContent = `
         <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden transition">
+          
+          <!-- Banner Header -->
           <div class="bg-slate-900 text-white p-6 sm:p-8">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
@@ -256,6 +296,7 @@
                 <h2 class="text-3xl sm:text-4xl font-black text-amber-400 tracking-wider mt-2">${regNo}</h2>
                 <p class="text-slate-300 font-medium text-base mt-1">${vehicleTitle} ${isValid(variant) ? `<span class="text-slate-400 text-sm">(${variant})</span>` : ''}</p>
               </div>
+
               ${isValid(fuelType) || isValid(cc) ? `
                 <div class="flex flex-wrap gap-2 sm:flex-col sm:items-end">
                   ${isValid(fuelType) ? `<span class="bg-slate-800 text-slate-200 border border-slate-700 font-semibold px-3 py-1 rounded-lg text-xs">Fuel: ${fuelType}</span>` : ''}
@@ -265,31 +306,40 @@
             </div>
           </div>
 
+          <!-- Content Grid -->
           <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/80 space-y-1">
-              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
-                <i data-lucide="user" class="w-4 h-4 mr-2 text-blue-600"></i> Owner & Registration
-              </h3>
-              ${renderRow("Owner Name", ownerName)}
-              ${renderRow("Registration Date", regDate)}
-              ${renderRow("Model Year", year)}
-              ${renderRow("RTO Location", rtoLoc)}
-              ${renderRow("RTO Code", rtoPlate, true)}
-              ${renderRow("Seating Capacity", seating)}
-            </div>
+            
+            <!-- Owner & Registration Box -->
+            ${hasOwnerDetails ? `
+              <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/80 space-y-1 ${!hasTechSpecs ? 'md:col-span-2' : ''}">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
+                  <i data-lucide="user" class="w-4 h-4 mr-2 text-blue-600"></i> Owner & Registration
+                </h3>
+                ${renderRow("Owner Name", ownerName)}
+                ${renderRow("Registration Date", regDate)}
+                ${renderRow("Model Year", year)}
+                ${renderRow("RTO Location", rtoLoc)}
+                ${renderRow("RTO Code", rtoPlate, true)}
+                ${renderRow("Seating Capacity", seating)}
+              </div>
+            ` : ''}
 
-            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/80 space-y-1">
-              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
-                <i data-lucide="cpu" class="w-4 h-4 mr-2 text-blue-600"></i> Technical Specifications
-              </h3>
-              ${renderRow("Chassis Number", chassis, true)}
-              ${renderRow("Engine Number", engine, true)}
-              ${renderRow("Body Type", bodyType)}
-              ${renderRow("Cubic Capacity", isValid(cc) ? `${cc} CC` : null)}
-              ${renderRow("Vehicle Make", make)}
-              ${renderRow("Vehicle Model", model)}
-            </div>
+            <!-- Technical & Engine Specs -->
+            ${hasTechSpecs ? `
+              <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/80 space-y-1 ${!hasOwnerDetails ? 'md:col-span-2' : ''}">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
+                  <i data-lucide="cpu" class="w-4 h-4 mr-2 text-blue-600"></i> Technical Specifications
+                </h3>
+                ${renderRow("Chassis Number", chassis, true)}
+                ${renderRow("Engine Number", engine, true)}
+                ${renderRow("Body Type", bodyType)}
+                ${renderRow("Cubic Capacity", isValid(cc) ? `${cc} CC` : null)}
+                ${renderRow("Vehicle Make", make)}
+                ${renderRow("Vehicle Model", model)}
+              </div>
+            ` : ''}
 
+            <!-- Compliance, Insurance & PUC -->
             ${(isValid(pucNo) || isValid(pucValid) || isValid(policyNo)) ? `
               <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/80 space-y-1 md:col-span-2">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
@@ -303,6 +353,7 @@
               </div>
             ` : ''}
 
+            <!-- Address Details -->
             ${isValid(address) ? `
               <div class="bg-blue-50/40 p-5 rounded-xl border border-blue-100 md:col-span-2">
                 <h3 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2 flex items-center">
@@ -311,6 +362,7 @@
                 <p class="text-sm font-medium text-slate-700 leading-relaxed">${address}</p>
               </div>
             ` : ''}
+
           </div>
         </div>
       `;
@@ -318,28 +370,14 @@
       container.innerHTML = htmlContent;
       showState('result');
 
-      // Re-initialize Lucide icons
       if (window.lucide) {
         lucide.createIcons();
       }
     }
 
-    // ----- SEARCH HANDLER -----
-    function handleSearch(e) {
-      e.preventDefault();
-      const rawInput = document.getElementById('vehicleInput').value;
-      const cleanRegNo = rawInput.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-      if (!cleanRegNo) {
-        alert("Please enter a valid registration number.");
-        return;
-      }
-      fetchDetails(cleanRegNo);
-    }
-
-    // ----- INITIAL LOAD -----
     window.addEventListener('DOMContentLoaded', () => {
       if (window.lucide) lucide.createIcons();
-      // Auto-fetch default vehicle
+      // Auto-fetch default vehicle on first load
       fetchDetails("GJ05HG7801");
     });
   </script>
