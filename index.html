@@ -97,17 +97,10 @@
                     <input type="text" id="vehicleNumber" placeholder="Enter Registration No. (e.g. MH47BM9865)" required autocomplete="off" autocapitalize="characters"
                         class="flex-1 px-4 py-3.5 bg-slate-950/80 border border-slate-700/80 rounded-xl uppercase tracking-wider text-white placeholder:normal-case placeholder:tracking-normal focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-sm font-semibold">
                     <button type="submit" id="searchBtn" class="px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2 text-sm active:scale-[0.98] border border-blue-400/30 cursor-pointer">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <span>Search Records</span>
+                        <svg id="searchIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <span id="searchBtnText">Search Records</span>
                     </button>
                 </form>
-            </div>
-
-            <!-- LOADING SPINNER -->
-            <div id="loadingIndicator" class="hidden text-center py-16">
-                <div class="inline-block w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4 shadow-lg shadow-blue-500/20"></div>
-                <p class="text-sm font-medium text-slate-300">Fetching official records via proxy channel...</p>
-                <p class="text-xs text-slate-500 mt-1">Please keep this window open.</p>
             </div>
 
             <!-- ERROR MESSAGE -->
@@ -274,54 +267,75 @@
             event.preventDefault();
             const vehicleInput = document.getElementById('vehicleNumber');
             const regNo = vehicleInput.value.trim().toUpperCase().replace(/\s+/g, '');
-            const loading = document.getElementById('loadingIndicator');
+            const searchBtn = document.getElementById('searchBtn');
+            const searchBtnText = document.getElementById('searchBtnText');
+            const searchIcon = document.getElementById('searchIcon');
             const errorBox = document.getElementById('errorMessage');
             const resultContainer = document.getElementById('resultContainer');
 
             if (!regNo) return;
 
-            // Dismiss mobile keyboard seamlessly
+            // Dismiss mobile keyboard smoothly
             vehicleInput.blur();
 
-            loading.classList.remove('hidden');
+            // Set loading state on button with spinner
+            searchBtn.disabled = true;
+            searchBtn.classList.add('opacity-80', 'cursor-not-allowed');
+            searchIcon.outerHTML = `<div id="searchIcon" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>`;
+            searchBtnText.innerText = "Searching RTO Database...";
+            
             errorBox.classList.add('hidden');
             resultContainer.classList.add('hidden');
 
-            // Target API URL
             const rawApiUrl = `https://cjpindia.vercel.app/api/vehicle-details/${regNo}`;
-            // Route through public CORS proxy (AllOrigins raw) to bypass strict browser CORS policies on mobile & PC
             const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawApiUrl)}`;
 
+            // Initialize AbortController with a safe extended timeout (20 seconds)
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 20000);
+
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-                let response = await fetch(proxyUrl, {
-                    method: 'GET',
-                    signal: controller.signal
-                });
-
-                // Fallback attempt to direct endpoint if proxy fails
-                if (!response.ok) {
+                let response;
+                try {
+                    // Try fetching through CORS proxy first
+                    response = await fetch(proxyUrl, {
+                        method: 'GET',
+                        mode: 'cors',
+                        headers: {
+                            'Accept': 'application/json'
+                        },
+                        signal: controller.signal
+                    });
+                } catch (proxyErr) {
+                    // Fallback to direct endpoint if proxy drops or blocks
+                    if (proxyErr.name === 'AbortError') throw proxyErr;
+                    
                     response = await fetch(rawApiUrl, {
                         method: 'GET',
                         mode: 'cors',
-                        headers: { 'Accept': 'application/json' },
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
                         signal: controller.signal
                     });
                 }
-                
+
                 clearTimeout(timeoutId);
 
                 if (!response.ok) {
-                    throw new Error(`Server returned HTTP status ${response.status}. Vehicle details could not be retrieved.`);
+                    if (response.status === 404) {
+                        throw new Error("Vehicle record not found (404). Please verify the registration number.");
+                    } else {
+                        throw new Error(`Server returned HTTP error status ${response.status}. Please try again later.`);
+                    }
                 }
-                
+
                 const data = await response.json();
                 const regRes = data.registrationResult || data;
 
                 if (!regRes || Object.keys(regRes).length === 0 || regRes.status === "ERROR") {
-                    throw new Error("No valid registration records found for this vehicle number.");
+                    throw new Error("No valid vehicle registration records found for this entry.");
                 }
 
                 // Populate UI fields safely
@@ -349,26 +363,32 @@
                 document.getElementById('resChassis').innerText = regRes.chasisno || regRes.chassis || "N/A";
                 document.getElementById('resEngine').innerText = regRes.engineno || regRes.engine || "N/A";
 
-                loading.classList.add('hidden');
                 resultContainer.classList.remove('hidden');
-
-                // Smooth scroll down to results view on mobile viewports
                 resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
             } catch (err) {
-                loading.classList.add('hidden');
-                console.error("Fetch Error Details:", err);
+                console.error("Search Error Caught:", err);
+                let userFriendlyError = "An unexpected error occurred while fetching vehicle records.";
 
-                let userFriendlyError = "Failed to fetch vehicle details. Please check your network connection and try again.";
-                
                 if (err.name === 'AbortError') {
-                    userFriendlyError = "Request timed out. The network or server took too long to respond.";
+                    userFriendlyError = "Request timed out after 20 seconds. The RTO server is taking longer than usual to respond. Please try again.";
+                } else if (err instanceof TypeError && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
+                    userFriendlyError = "Network connection blocked or CORS policy restriction encountered. Please check your internet connectivity.";
                 } else if (err.message) {
                     userFriendlyError = err.message;
                 }
 
                 errorBox.innerText = userFriendlyError;
                 errorBox.classList.remove('hidden');
+            } finally {
+                // Reset button state
+                searchBtn.disabled = false;
+                searchBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+                const spinnerDiv = document.getElementById('searchIcon');
+                if (spinnerDiv) {
+                    spinnerDiv.outerHTML = `<svg id="searchIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>`;
+                }
+                searchBtnText.innerText = "Search Records";
             }
         }
     </script>
