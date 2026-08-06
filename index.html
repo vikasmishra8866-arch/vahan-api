@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Vehicle Information Portal</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -10,43 +10,18 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f8fafc;
-    }
-
-    /* Custom CSS Animation for Warning Icon */
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
     @keyframes pulse-ring {
-      0% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5);
-      }
-      70% {
-        transform: scale(1.05);
-        box-shadow: 0 0 0 20px rgba(245, 158, 11, 0);
-      }
-      100% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
-      }
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245,158,11,0.5); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(245,158,11,0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245,158,11,0); }
     }
-
     @keyframes float-icon {
-      0%, 100% {
-        transform: translateY(0px);
-      }
-      50% {
-        transform: translateY(-6px);
-      }
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
     }
-
-    .animate-warning-glow {
-      animation: pulse-ring 2s infinite ease-in-out;
-    }
-
-    .animate-warning-float {
-      animation: float-icon 2.5s infinite ease-in-out;
-    }
+    .animate-warning-glow { animation: pulse-ring 2s infinite ease-in-out; }
+    .animate-warning-float { animation: float-icon 2.5s infinite ease-in-out; }
   </style>
 </head>
 <body class="min-h-screen text-slate-800 flex flex-col justify-between">
@@ -106,13 +81,11 @@
       <div id="loadingState" class="hidden flex-col items-center justify-center py-20 text-center">
         <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mb-4"></div>
         <p class="text-slate-700 font-semibold text-lg">Fetching Vehicle Details...</p>
-        <p class="text-xs text-slate-400 mt-1">Connecting to Government Records Endpoint (Timeout: 10s)</p>
+        <p class="text-xs text-slate-400 mt-1">Trying multiple sources (max 5s each)</p>
       </div>
 
       <!-- Animated Warning / Details Not Found UI -->
       <div id="errorState" class="hidden flex-col items-center justify-center py-14 text-center bg-white rounded-2xl border border-amber-200 p-8 shadow-md max-w-lg mx-auto">
-        
-        <!-- Animated Warning Badge -->
         <div class="relative mb-6">
           <div class="animate-warning-glow w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center">
             <div class="animate-warning-float bg-amber-500 text-white p-4 rounded-2xl shadow-lg shadow-amber-500/30">
@@ -120,7 +93,6 @@
             </div>
           </div>
         </div>
-
         <h3 class="text-xl font-bold text-slate-800 mb-2" id="errorTitle">Details Not Found</h3>
         <p class="text-sm text-slate-500 max-w-xs leading-relaxed" id="errorMessage">Unable to locate records for this vehicle number. Please verify and try again.</p>
       </div>
@@ -130,16 +102,22 @@
     </div>
   </main>
 
-  <!-- Modified Footer -->
+  <!-- Footer -->
   <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs font-semibold text-slate-600">
     <p>© Vehicle Info System | Authorized Verification Portal By Vikas Mishra ❤️</p>
   </footer>
 
-  <!-- Script Logic -->
+  <!-- Script Logic (Optimized) -->
   <script>
+    // ----- CONFIGURATION -----
     const API_BASE_URL = "https://cjpindia.vercel.app/api/vehicle-details/";
+    const TIMEOUT_MS = 5000;              // 5 seconds per fetch
+    const CACHE_TTL_MS = 5 * 60 * 1000;   // 5 minutes
 
-    // Utility to check valid non-null / non-empty values
+    // ----- CACHE (in-memory) -----
+    const cache = new Map();
+
+    // ----- UTILITY FUNCTIONS -----
     function isValid(val) {
       if (val === null || val === undefined || val === '' || val === false || val === 0 || val === '0' || val === 'NA' || val === 'null' || val === '0.0') {
         return false;
@@ -147,7 +125,6 @@
       return true;
     }
 
-    // Dynamic Helper Row generator (Only renders if value is valid)
     function renderRow(label, value, isCode = false) {
       if (!isValid(value)) return '';
       return `
@@ -156,63 +133,6 @@
           <span class="${isCode ? 'font-mono bg-slate-100 px-2 py-0.5 rounded text-xs text-slate-800 font-semibold' : 'font-semibold text-slate-800 text-right'}">${value}</span>
         </div>
       `;
-    }
-
-    function handleSearch(e) {
-      if (e) e.preventDefault();
-      const rawInput = document.getElementById('vehicleInput').value;
-      const cleanRegNo = rawInput.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-
-      if (!cleanRegNo) {
-        alert("Please enter a valid registration number.");
-        return;
-      }
-
-      fetchDetails(cleanRegNo);
-    }
-
-    async function fetchDetails(regNo) {
-      showState('loading');
-      updateStatus('Searching...', 'bg-yellow-400');
-
-      let jsonRes = null;
-      const targetUrl = `${API_BASE_URL}${regNo}`;
-
-      // Source URLs for fallback proxy handling
-      const sources = [
-        targetUrl,
-        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
-      ];
-
-      for (let url of sources) {
-        try {
-          // Strict 10 Seconds Timeout Controller
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 10000);
-          
-          const res = await fetch(url, { signal: controller.signal });
-          clearTimeout(timeoutId);
-
-          if (res.ok) {
-            const parsed = await res.json();
-            if (parsed && typeof parsed === 'object') {
-              jsonRes = parsed;
-              break;
-            }
-          }
-        } catch (err) {
-          console.warn("Source failed or timed out (10s limit):", url, err);
-        }
-      }
-
-      if (jsonRes) {
-        updateStatus('Data Retrieved', 'bg-emerald-500');
-        renderVehicleDetails(jsonRes);
-      } else {
-        updateStatus('Not Found', 'bg-red-500');
-        showError("Details Not Found", `No vehicle records were returned within 10 seconds for "${regNo}". Please check the registration number and try again.`);
-      }
     }
 
     function updateStatus(text, dotClass) {
@@ -224,7 +144,6 @@
       const loading = document.getElementById('loadingState');
       const error = document.getElementById('errorState');
       const result = document.getElementById('resultContainer');
-
       loading.classList.add('hidden');
       loading.classList.remove('flex');
       error.classList.add('hidden');
@@ -248,11 +167,72 @@
       showState('error');
     }
 
+    // ----- FETCH WITH TIMEOUT -----
+    function fetchWithTimeout(url, timeout = TIMEOUT_MS) {
+      return Promise.race([
+        fetch(url),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Request timed out')), timeout)
+        )
+      ]);
+    }
+
+    // ----- MAIN FETCH LOGIC (concurrent) -----
+    async function fetchDetails(regNo) {
+      showState('loading');
+      updateStatus('Searching...', 'bg-yellow-400');
+
+      // Check cache first
+      const cached = cache.get(regNo);
+      if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+        renderVehicleDetails(cached.data);
+        updateStatus('Cached', 'bg-emerald-500');
+        return;
+      }
+
+      const targetUrl = `${API_BASE_URL}${regNo}`;
+      const sources = [
+        targetUrl,
+        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+      ];
+
+      // Create an array of fetch promises (each with timeout)
+      const fetchPromises = sources.map(url =>
+        fetchWithTimeout(url, TIMEOUT_MS)
+          .then(res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+          })
+          .then(data => {
+            // Validate that we have some data
+            if (data && (data.registrationResult || data.premiumRequest)) {
+              return data;
+            } else {
+              throw new Error('Empty or invalid response');
+            }
+          })
+      );
+
+      try {
+        // Use Promise.any to get the first successful response
+        const result = await Promise.any(fetchPromises);
+        // Cache it
+        cache.set(regNo, { data: result, timestamp: Date.now() });
+        renderVehicleDetails(result);
+        updateStatus('Data Retrieved', 'bg-emerald-500');
+      } catch (error) {
+        console.warn('All fetch attempts failed:', error);
+        updateStatus('Not Found', 'bg-red-500');
+        showError("Details Not Found", `No vehicle records were found for "${regNo}". Please check the registration number and try again.`);
+      }
+    }
+
+    // ----- RENDER VEHICLE DETAILS -----
     function renderVehicleDetails(data) {
       const container = document.getElementById('resultContainer');
       container.innerHTML = '';
 
-      // Clean Data Extraction from both registrationResult & motorPremiumRequest
       const regRes = data?.registrationResult || {};
       const reqRes = data?.premiumRequest?.motorPremiumRequest || {};
 
@@ -278,14 +258,17 @@
       const policyNo = regRes?.prePolicyNo || reqRes?.previousPolicyNumber || '';
       const address = regRes?.permanentAddress || regRes?.corrAddress || '';
 
-      // Dynamic Card Visibility Checks
-      const hasTechSpecs = isValid(chassis) || isValid(engine) || isValid(bodyType) || isValid(cc) || isValid(make) || isValid(model);
-      const hasOwnerDetails = isValid(ownerName) || isValid(regDate) || isValid(year) || isValid(rtoLoc) || isValid(rtoPlate) || isValid(seating);
+      // If even the registration number is missing, treat as no data
+      if (!isValid(regNo) || regNo === 'NO REGISTRATION NO') {
+        showError("No Data", "The API returned an empty record. Please try again with a different number.");
+        return;
+      }
 
-      // Construction of HTML
+      const hasOwnerDetails = isValid(ownerName) || isValid(regDate) || isValid(year) || isValid(rtoLoc) || isValid(rtoPlate) || isValid(seating);
+      const hasTechSpecs = isValid(chassis) || isValid(engine) || isValid(bodyType) || isValid(cc) || isValid(make) || isValid(model);
+
       const htmlContent = `
         <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden transition">
-          
           <!-- Banner Header -->
           <div class="bg-slate-900 text-white p-6 sm:p-8">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -296,7 +279,6 @@
                 <h2 class="text-3xl sm:text-4xl font-black text-amber-400 tracking-wider mt-2">${regNo}</h2>
                 <p class="text-slate-300 font-medium text-base mt-1">${vehicleTitle} ${isValid(variant) ? `<span class="text-slate-400 text-sm">(${variant})</span>` : ''}</p>
               </div>
-
               ${isValid(fuelType) || isValid(cc) ? `
                 <div class="flex flex-wrap gap-2 sm:flex-col sm:items-end">
                   ${isValid(fuelType) ? `<span class="bg-slate-800 text-slate-200 border border-slate-700 font-semibold px-3 py-1 rounded-lg text-xs">Fuel: ${fuelType}</span>` : ''}
@@ -309,7 +291,6 @@
           <!-- Content Grid -->
           <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            <!-- Owner & Registration Box -->
             ${hasOwnerDetails ? `
               <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/80 space-y-1 ${!hasTechSpecs ? 'md:col-span-2' : ''}">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
@@ -324,7 +305,6 @@
               </div>
             ` : ''}
 
-            <!-- Technical & Engine Specs -->
             ${hasTechSpecs ? `
               <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/80 space-y-1 ${!hasOwnerDetails ? 'md:col-span-2' : ''}">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
@@ -339,7 +319,6 @@
               </div>
             ` : ''}
 
-            <!-- Compliance, Insurance & PUC -->
             ${(isValid(pucNo) || isValid(pucValid) || isValid(policyNo)) ? `
               <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/80 space-y-1 md:col-span-2">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
@@ -353,7 +332,6 @@
               </div>
             ` : ''}
 
-            <!-- Address Details -->
             ${isValid(address) ? `
               <div class="bg-blue-50/40 p-5 rounded-xl border border-blue-100 md:col-span-2">
                 <h3 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2 flex items-center">
@@ -362,7 +340,6 @@
                 <p class="text-sm font-medium text-slate-700 leading-relaxed">${address}</p>
               </div>
             ` : ''}
-
           </div>
         </div>
       `;
@@ -375,9 +352,21 @@
       }
     }
 
+    // ----- SEARCH HANDLER -----
+    function handleSearch(e) {
+      e.preventDefault();
+      const rawInput = document.getElementById('vehicleInput').value;
+      const cleanRegNo = rawInput.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+      if (!cleanRegNo) {
+        alert("Please enter a valid registration number.");
+        return;
+      }
+      fetchDetails(cleanRegNo);
+    }
+
+    // ----- INITIAL LOAD -----
     window.addEventListener('DOMContentLoaded', () => {
       if (window.lucide) lucide.createIcons();
-      // Auto-fetch default vehicle on first load
       fetchDetails("GJ05HG7801");
     });
   </script>
