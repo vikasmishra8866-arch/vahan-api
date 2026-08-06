@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Parivahan Service - Vehicle Detail Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,6 +37,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .container {
@@ -104,6 +105,8 @@
             font-size: 1rem;
             padding-left: 15px;
             text-transform: uppercase;
+            min-height: 44px;
+            -webkit-appearance: none;
         }
 
         .search-box input::placeholder {
@@ -120,11 +123,18 @@
             border-radius: 14px;
             cursor: pointer;
             transition: transform 0.2s, opacity 0.2s;
+            min-height: 44px;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         .search-box button:hover {
             opacity: 0.9;
             transform: translateY(-2px);
+        }
+
+        .search-box button:active {
+            transform: scale(0.95);
         }
 
         .loader-container {
@@ -278,6 +288,49 @@
             20%, 60% { transform: translateX(-8px); }
             40%, 80% { transform: translateX(8px); }
         }
+
+        @media (max-width: 600px) {
+            .brand-header h1 {
+                font-size: 1.7rem;
+            }
+            
+            .search-box {
+                flex-direction: column;
+                gap: 8px;
+                padding: 12px;
+            }
+            
+            .search-box input {
+                font-size: 0.95rem;
+                padding: 12px 15px;
+                text-align: center;
+            }
+            
+            .search-box button {
+                width: 100%;
+                padding: 14px;
+                font-size: 1rem;
+            }
+            
+            .result-card {
+                padding: 18px;
+            }
+            
+            .grid-info {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .vehicle-title-badge {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .vehicle-title-badge h2 {
+                font-size: 1.3rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -293,9 +346,9 @@
             <span id="statusText">System Ready</span>
         </div>
 
-        <form onsubmit="handleSearchSubmit(event)" class="search-box">
-            <input type="text" id="vehicleNumber" placeholder="Enter Vehicle No. (e.g., GJ05MS9717)" value="GJ05MS9717" required>
-            <button type="submit"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+        <form id="searchForm" onsubmit="handleSearchSubmit(event)" class="search-box">
+            <input type="text" id="vehicleNumber" placeholder="Enter Vehicle No. (e.g., GJ05MS9717)" value="GJ05MS9717" required autocomplete="off" enterkeyhint="search">
+            <button type="submit" id="searchBtn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
         </form>
 
         <div class="loader-container" id="loader">
@@ -322,9 +375,18 @@
         // Correct Original API Endpoint
         const API_BASE_URL = "https://cjpindia.vercel.app/api/vehicle-details";
 
+        // ============================================================
+        // FIX FOR MOBILE: Multiple event listeners for better compatibility
+        // ============================================================
+
         function handleSearchSubmit(e) {
-            if (e) e.preventDefault();
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
             const rawInput = document.getElementById('vehicleNumber').value.trim();
+            // FIX FOR MOBILE: Better cleanup for mobile keyboard inputs
             const cleanRegNo = rawInput.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
 
             if (!cleanRegNo) {
@@ -334,6 +396,55 @@
 
             fetchVehicleData(cleanRegNo);
         }
+
+        // FIX FOR MOBILE: Add keydown event for mobile enter key
+        document.getElementById('vehicleNumber').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === 'Go' || e.keyCode === 13) {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSearchSubmit(e);
+            }
+        });
+
+        // FIX FOR MOBILE: Add input event for real-time cleanup on mobile
+        document.getElementById('vehicleNumber').addEventListener('input', function(e) {
+            // This ensures the input is properly captured on mobile
+            this.value = this.value.toUpperCase().replace(/[^a-zA-Z0-9]/g, '');
+        });
+
+        // FIX FOR MOBILE: Enhanced button click handling for mobile
+        const searchBtn = document.getElementById('searchBtn');
+        searchBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            handleSearchSubmit(e);
+        });
+
+        // FIX FOR MOBILE: Touch event for better mobile response
+        searchBtn.addEventListener('touchstart', function(e) {
+            // This ensures touch events work properly on mobile
+            this.style.transform = 'scale(0.95)';
+        });
+
+        searchBtn.addEventListener('touchend', function(e) {
+            this.style.transform = 'scale(1)';
+            // Small delay to ensure the click registers
+            setTimeout(() => {
+                handleSearchSubmit(e);
+            }, 50);
+        });
+
+        // FIX FOR MOBILE: Form submit prevention
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            handleSearchSubmit(e);
+            return false;
+        });
+
+        // ============================================================
+        // END OF MOBILE FIXES
+        // ============================================================
 
         async function fetchVehicleData(regNo) {
             const loader = document.getElementById('loader');
@@ -346,15 +457,20 @@
             updateSystemStatus('Fetching data...', '#f59e0b');
 
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
 
             const targetUrl = `${API_BASE_URL}/${regNo}`;
 
             try {
+                // Try direct API call first
                 const response = await fetch(targetUrl, {
                     method: 'GET',
-                    headers: { 'Accept': 'application/json' },
-                    signal: controller.signal
+                    headers: { 
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    signal: controller.signal,
+                    mode: 'cors'
                 });
 
                 clearTimeout(timeoutId);
@@ -374,22 +490,45 @@
                 clearTimeout(timeoutId);
                 console.warn("Direct fetch failed, trying proxy fallback:", error);
 
+                // Try proxy fallback
                 try {
                     const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-                    const proxyRes = await fetch(proxyUrl);
+                    const proxyRes = await fetch(proxyUrl, {
+                        signal: AbortSignal.timeout(8000)
+                    });
                     const proxyData = await proxyRes.json();
                     
                     if (proxyData && proxyData.contents) {
                         const parsedData = JSON.parse(proxyData.contents);
-                        updateSystemStatus('Proxy Connected', '#10b981');
-                        renderVehicleData(parsedData, regNo);
-                        return;
+                        if (parsedData) {
+                            updateSystemStatus('Proxy Connected', '#10b981');
+                            renderVehicleData(parsedData, regNo);
+                            return;
+                        }
                     }
                 } catch (proxyErr) {
                     console.error("Proxy fallback failed:", proxyErr);
                 }
 
-                showNotFound(`Could not fetch data for "${regNo}". Please check the vehicle number.`);
+                // Try alternative proxy
+                try {
+                    const altProxyUrl = `https://cors-anywhere.herokuapp.com/${targetUrl}`;
+                    const altRes = await fetch(altProxyUrl, {
+                        signal: AbortSignal.timeout(8000)
+                    });
+                    if (altRes.ok) {
+                        const altData = await altRes.json();
+                        if (altData) {
+                            updateSystemStatus('Alt Proxy Connected', '#10b981');
+                            renderVehicleData(altData, regNo);
+                            return;
+                        }
+                    }
+                } catch (altErr) {
+                    console.error("Alt proxy failed:", altErr);
+                }
+
+                showNotFound(`Could not fetch data for "${regNo}". Please check the vehicle number and try again.`);
                 updateSystemStatus('Connection Failed', '#ef4444');
             } finally {
                 loader.style.display = 'none';
@@ -473,9 +612,18 @@
             resultCard.style.display = 'block';
         }
 
+        // Auto-load on page load
         window.addEventListener('DOMContentLoaded', () => {
-            fetchVehicleData('GJ05MS9717');
+            // Small delay to ensure everything is loaded
+            setTimeout(() => {
+                fetchVehicleData('GJ05MS9717');
+            }, 300);
         });
+
+        // FIX FOR MOBILE: Prevent zoom on double tap (optional)
+        document.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
