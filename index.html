@@ -14,6 +14,39 @@
       font-family: 'Inter', sans-serif;
       background-color: #f8fafc;
     }
+
+    /* Custom CSS Animation for Warning Icon */
+    @keyframes pulse-ring {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5);
+      }
+      70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 20px rgba(245, 158, 11, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+      }
+    }
+
+    @keyframes float-icon {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-6px);
+      }
+    }
+
+    .animate-warning-glow {
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+
+    .animate-warning-float {
+      animation: float-icon 2.5s infinite ease-in-out;
+    }
   </style>
 </head>
 <body class="min-h-screen text-slate-800 flex flex-col justify-between">
@@ -73,16 +106,23 @@
       <div id="loadingState" class="hidden flex-col items-center justify-center py-20 text-center">
         <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mb-4"></div>
         <p class="text-slate-700 font-semibold text-lg">Fetching Vehicle Details...</p>
-        <p class="text-xs text-slate-400 mt-1">Connecting to Government Records Endpoint</p>
+        <p class="text-xs text-slate-400 mt-1">Connecting to Government Records Endpoint (Timeout: 10s)</p>
       </div>
 
-      <!-- Error / Not Found UI -->
-      <div id="errorState" class="hidden flex-col items-center justify-center py-14 text-center bg-white rounded-2xl border border-slate-200 p-8 shadow-sm max-w-lg mx-auto">
-        <div class="bg-red-50 text-red-500 p-4 rounded-full mb-4">
-          <i data-lucide="alert-circle" class="w-8 h-8"></i>
+      <!-- Animated Warning / Details Not Found UI -->
+      <div id="errorState" class="hidden flex-col items-center justify-center py-14 text-center bg-white rounded-2xl border border-amber-200 p-8 shadow-md max-w-lg mx-auto">
+        
+        <!-- Animated Warning Badge -->
+        <div class="relative mb-6">
+          <div class="animate-warning-glow w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center">
+            <div class="animate-warning-float bg-amber-500 text-white p-4 rounded-2xl shadow-lg shadow-amber-500/30">
+              <i data-lucide="alert-triangle" class="w-9 h-9"></i>
+            </div>
+          </div>
         </div>
-        <h3 class="text-lg font-bold text-slate-800 mb-1" id="errorTitle">Details Not Found</h3>
-        <p class="text-sm text-slate-500" id="errorMessage">Unable to locate records for this vehicle number. Please verify and try again.</p>
+
+        <h3 class="text-xl font-bold text-slate-800 mb-2" id="errorTitle">Details Not Found</h3>
+        <p class="text-sm text-slate-500 max-w-xs leading-relaxed" id="errorMessage">Unable to locate records for this vehicle number. Please verify and try again.</p>
       </div>
 
       <!-- Main Display Cards -->
@@ -90,9 +130,9 @@
     </div>
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
-    <p>&copy; Vehicle Info System | Authorized Verification Portal</p>
+  <!-- Modified Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs font-semibold text-slate-600">
+    <p>© Vehicle Info System | Authorized Verification Portal By Vikas Mishra ❤️</p>
   </footer>
 
   <!-- Script Logic -->
@@ -147,6 +187,7 @@
 
       for (let url of sources) {
         try {
+          // Strict 10 Seconds Timeout Controller
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 10000);
           
@@ -161,7 +202,7 @@
             }
           }
         } catch (err) {
-          console.warn("Source failed:", url, err);
+          console.warn("Source failed or timed out (10s limit):", url, err);
         }
       }
 
@@ -170,7 +211,7 @@
         renderVehicleDetails(jsonRes);
       } else {
         updateStatus('Not Found', 'bg-red-500');
-        showError("Record Not Found", `No details found for vehicle number "${regNo}". Please check the vehicle number.`);
+        showError("Details Not Found", `No vehicle records were returned within 10 seconds for "${regNo}". Please check the registration number and try again.`);
       }
     }
 
