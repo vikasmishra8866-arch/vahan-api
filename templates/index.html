@@ -106,7 +106,7 @@
       <div id="loadingState" class="hidden flex-col items-center justify-center py-20 text-center">
         <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mb-4"></div>
         <p class="text-slate-700 font-semibold text-lg">Fetching Vehicle Details...</p>
-        <p class="text-xs text-slate-400 mt-1">Connecting to Government Records Endpoint (Timeout: 10s)</p>
+        <p class="text-xs text-slate-400 mt-1">Connecting to Server Endpoint...</p>
       </div>
 
       <!-- Animated Warning / Details Not Found UI -->
@@ -137,7 +137,8 @@
 
   <!-- Script Logic -->
   <script>
-    const API_BASE_URL = "https://cjpindia.vercel.app/api/vehicle-details/";
+    // Flask Backend API Endpoint (Relatively routes to your Flask app)
+    const API_BASE_URL = "/api/vahan/";
 
     // Utility to check valid non-null / non-empty values
     function isValid(val) {
@@ -147,7 +148,7 @@
       return true;
     }
 
-    // Dynamic Helper Row generator (Only renders if value is valid)
+    // Dynamic Helper Row generator
     function renderRow(label, value, isCode = false) {
       if (!isValid(value)) return '';
       return `
@@ -161,7 +162,9 @@
     function handleSearch(e) {
       if (e) e.preventDefault();
       const rawInput = document.getElementById('vehicleInput').value;
-      const cleanRegNo = rawInput.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+      
+      // Mobile keyboard spaces/special characters ko clean karna
+      const cleanRegNo = rawInput.trim().replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
 
       if (!cleanRegNo) {
         alert("Please enter a valid registration number.");
@@ -175,43 +178,45 @@
       showState('loading');
       updateStatus('Searching...', 'bg-yellow-400');
 
-      let jsonRes = null;
       const targetUrl = `${API_BASE_URL}${regNo}`;
 
-      // Source URLs for fallback proxy handling
-      const sources = [
-        targetUrl,
-        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
-      ];
+      try {
+        // Mobile slow networks ke liye 25 Seconds Timeout Controller
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 25000);
 
-      for (let url of sources) {
-        try {
-          // Strict 10 Seconds Timeout Controller
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const res = await fetch(targetUrl, { 
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          signal: controller.signal 
+        });
+        
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const parsed = await res.json();
           
-          const res = await fetch(url, { signal: controller.signal });
-          clearTimeout(timeoutId);
-
-          if (res.ok) {
-            const parsed = await res.json();
-            if (parsed && typeof parsed === 'object') {
-              jsonRes = parsed;
-              break;
-            }
+          // Data validation check
+          if (parsed && (parsed.registrationResult || parsed.premiumRequest)) {
+            updateStatus('Data Retrieved', 'bg-emerald-500');
+            renderVehicleDetails(parsed);
+            return;
           }
-        } catch (err) {
-          console.warn("Source failed or timed out (10s limit):", url, err);
         }
-      }
-
-      if (jsonRes) {
-        updateStatus('Data Retrieved', 'bg-emerald-500');
-        renderVehicleDetails(jsonRes);
-      } else {
+        
+        // Agar response 200 na ho ya json valid na mile
         updateStatus('Not Found', 'bg-red-500');
-        showError("Details Not Found", `No vehicle records were returned within 10 seconds for "${regNo}". Please check the registration number and try again.`);
+        showError("Details Not Found", `No vehicle records found for "${regNo}". Please check the registration number and try again.`);
+
+      } catch (err) {
+        console.error("Fetch Error:", err);
+        updateStatus('Error', 'bg-red-500');
+        
+        if (err.name === 'AbortError') {
+          showError("Request Timeout", "Server took too long to respond. Please check your mobile network connection and try again.");
+        } else {
+          showError("Details Not Found", `Unable to fetch details for "${regNo}". Please check your connection.`);
+        }
       }
     }
 
@@ -252,7 +257,7 @@
       const container = document.getElementById('resultContainer');
       container.innerHTML = '';
 
-      // Clean Data Extraction from both registrationResult & motorPremiumRequest
+      // Clean Data Extraction
       const regRes = data?.registrationResult || {};
       const reqRes = data?.premiumRequest?.motorPremiumRequest || {};
 
