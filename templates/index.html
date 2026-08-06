@@ -92,10 +92,10 @@
         <button 
           type="submit" 
           id="searchBtn"
-          class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold px-6 py-3 rounded-xl shadow-md transition flex items-center justify-center space-x-2"
+          class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold px-6 py-3 rounded-xl shadow-md transition flex items-center justify-center space-x-2 disabled:bg-slate-400 disabled:cursor-not-allowed"
         >
           <i data-lucide="search" class="w-5 h-5"></i>
-          <span>Search</span>
+          <span id="btnText">Search</span>
         </button>
       </form>
     </div>
@@ -137,7 +137,7 @@
 
   <!-- Script Logic -->
   <script>
-    // Flask Backend API Endpoint (Relatively routes to your Flask app)
+    // Flask Backend API Endpoint
     const API_BASE_URL = "/api/vahan/";
 
     // Utility to check valid non-null / non-empty values
@@ -159,6 +159,27 @@
       `;
     }
 
+    // Function to handle 7 Seconds Cooldown on Search Button
+    function startCooldown() {
+      const searchBtn = document.getElementById('searchBtn');
+      const btnText = document.getElementById('btnText');
+      
+      searchBtn.disabled = true;
+      let timeLeft = 7;
+      btnText.innerText = `Wait ${timeLeft}s...`;
+
+      const timer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft > 0) {
+          btnText.innerText = `Wait ${timeLeft}s...`;
+        } else {
+          clearInterval(timer);
+          searchBtn.disabled = false;
+          btnText.innerText = "Search";
+        }
+      }, 1000);
+    }
+
     function handleSearch(e) {
       if (e) e.preventDefault();
       const rawInput = document.getElementById('vehicleInput').value;
@@ -171,6 +192,9 @@
         return;
       }
 
+      // Start 7-second cooldown on search button
+      startCooldown();
+
       fetchDetails(cleanRegNo);
     }
 
@@ -181,7 +205,6 @@
       const targetUrl = `${API_BASE_URL}${regNo}`;
 
       try {
-        // Mobile slow networks ke liye 25 Seconds Timeout Controller
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 25000);
 
@@ -196,7 +219,6 @@
         if (res.ok) {
           const parsed = await res.json();
           
-          // Data validation check
           if (parsed && (parsed.registrationResult || parsed.premiumRequest)) {
             updateStatus('Data Retrieved', 'bg-emerald-500');
             renderVehicleDetails(parsed);
@@ -204,7 +226,6 @@
           }
         }
         
-        // Agar response 200 na ho ya json valid na mile
         updateStatus('Not Found', 'bg-red-500');
         showError("Details Not Found", `No vehicle records found for "${regNo}". Please check the registration number and try again.`);
 
