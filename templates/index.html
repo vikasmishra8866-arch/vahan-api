@@ -83,8 +83,9 @@
           <input 
             type="text" 
             id="vehicleInput" 
-            placeholder="e.g. GJ05HG7801" 
-            value="GJ05HG7801"
+            placeholder="Enter Registration No. (e.g. GJ05HG7801)" 
+            value=""
+            oninput="formatInput(this)"
             required
             class="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-base font-bold uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition"
           />
@@ -140,6 +141,11 @@
     // Flask Backend API Endpoint
     const API_BASE_URL = "/api/vahan/";
 
+    // Space & Small Letter Lock Function
+    function formatInput(input) {
+      input.value = input.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    }
+
     // Utility to check valid non-null / non-empty values
     function isValid(val) {
       if (val === null || val === undefined || val === '' || val === false || val === 0 || val === '0' || val === 'NA' || val === 'null' || val === '0.0') {
@@ -184,7 +190,6 @@
       if (e) e.preventDefault();
       const rawInput = document.getElementById('vehicleInput').value;
       
-      // Mobile keyboard spaces/special characters ko clean karna
       const cleanRegNo = rawInput.trim().replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
 
       if (!cleanRegNo) {
@@ -403,8 +408,6 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       if (window.lucide) lucide.createIcons();
-      // Auto-fetch default vehicle on first load
-      fetchDetails("GJ05HG7801");
     });
   </script>
 </body>
