@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <style>
-        /* ===== RESET & BASE (same as before) ===== */
+        /* ===== RESET & BASE ===== */
         *,
         *::before,
         *::after {
@@ -29,7 +29,7 @@
             color: #e8edf5;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             padding: 20px;
             position: relative;
             overflow-x: hidden;
@@ -146,13 +146,15 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            max-width: 1280px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 20px 15px 40px;
         }
+
+        /* ===== HEADER ===== */
         .app-header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 35px;
             animation: fadeDown 0.9s ease forwards;
         }
         .app-header .logo-icon {
@@ -191,6 +193,7 @@
             letter-spacing: 0.3px;
         }
 
+        /* ===== SEARCH ===== */
         .search-section {
             max-width: 700px;
             margin: 0 auto 25px;
@@ -274,7 +277,7 @@
             font-size: 16px;
         }
 
-        /* ===== WARNING BANNER (NEW) ===== */
+        /* ===== WARNING BANNER ===== */
         .warning-banner {
             display: none;
             max-width: 700px;
@@ -306,6 +309,7 @@
             color: #fff;
         }
 
+        /* ===== LOADING ===== */
         .loading-wrapper {
             display: none;
             justify-content: center;
@@ -340,6 +344,7 @@
             animation: pulseText 1.6s ease-in-out infinite;
         }
 
+        /* ===== ERROR ===== */
         .error-wrapper {
             display: none;
             max-width: 560px;
@@ -366,6 +371,7 @@
             font-weight: 500;
         }
 
+        /* ===== RESULTS ===== */
         .results-container {
             display: none;
             animation: fadeUp 0.7s ease forwards;
@@ -374,13 +380,14 @@
             display: block;
         }
 
+        /* ===== HERO CARD ===== */
         .vehicle-hero {
             background: rgba(255, 255, 255, 0.04);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.07);
             border-radius: 28px;
-            padding: 30px 35px;
+            padding: 28px 35px;
             margin-bottom: 30px;
             display: flex;
             flex-wrap: wrap;
@@ -418,11 +425,14 @@
             font-size: 0.8em;
         }
         .vehicle-hero .hero-title {
-            font-size: clamp(1.3rem, 2vw, 1.8rem);
+            font-size: clamp(1.1rem, 1.6vw, 1.5rem);
             font-weight: 700;
             color: #e8edf5;
         }
-        .vehicle-hero .hero-title span {
+        .vehicle-hero .hero-title .make-model {
+            color: #e8edf5;
+        }
+        .vehicle-hero .hero-title .variant {
             color: rgba(255, 255, 255, 0.45);
             font-weight: 400;
             font-size: 0.7em;
@@ -464,143 +474,137 @@
             background: #ff6b6b;
         }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        /* ===== SEQUENCE CARDS ===== */
+        .sequence-grid {
+            display: flex;
+            flex-direction: column;
             gap: 22px;
-            margin-bottom: 28px;
         }
-        .info-card {
+
+        .seq-card {
             background: rgba(255, 255, 255, 0.04);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 22px;
-            padding: 24px 26px;
+            padding: 24px 30px;
             transition: all 0.35s ease;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             animation: fadeUp 0.6s ease forwards;
             opacity: 0;
+            width: 100%;
         }
-        .info-card:nth-child(1) {
+        .seq-card:nth-child(1) {
             animation-delay: 0.05s;
         }
-        .info-card:nth-child(2) {
+        .seq-card:nth-child(2) {
             animation-delay: 0.12s;
         }
-        .info-card:nth-child(3) {
+        .seq-card:nth-child(3) {
             animation-delay: 0.19s;
         }
-        .info-card:nth-child(4) {
+        .seq-card:nth-child(4) {
             animation-delay: 0.26s;
         }
-        .info-card:nth-child(5) {
+        .seq-card:nth-child(5) {
             animation-delay: 0.33s;
         }
-        .info-card:nth-child(6) {
-            animation-delay: 0.40s;
-        }
-        .info-card:nth-child(7) {
-            animation-delay: 0.47s;
-        }
-        .info-card:nth-child(8) {
-            animation-delay: 0.54s;
-        }
-        .info-card:hover {
-            transform: translateY(-6px) scale(1.01);
+        .seq-card:hover {
+            transform: translateY(-4px);
             border-color: rgba(120, 160, 255, 0.15);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30);
             background: rgba(255, 255, 255, 0.07);
         }
-        .info-card .card-header {
+
+        .seq-card .card-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            gap: 14px;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
-        .info-card .card-header i {
+        .seq-card .card-header i {
             font-size: 20px;
             color: #7a9aff;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 10px;
             background: rgba(100, 140, 255, 0.10);
         }
-        .info-card .card-header h3 {
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: rgba(255, 255, 255, 0.40);
-        }
-        .info-card .card-body {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .info-card .detail-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            padding: 4px 0;
+        .seq-card .card-header h3 {
             font-size: 0.95rem;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .info-card .detail-row .label {
-            color: rgba(255, 255, 255, 0.40);
-            font-weight: 400;
-            font-size: 0.82rem;
-            letter-spacing: 0.2px;
+            font-weight: 700;
             text-transform: uppercase;
-        }
-        .info-card .detail-row .value {
-            font-weight: 600;
-            color: #f0f4ff;
-            text-align: right;
-            word-break: break-word;
-            flex: 1;
-            min-width: 100px;
-        }
-        .info-card .detail-row .value.highlight {
-            color: #8ab4ff;
-        }
-        .info-card .detail-row .value.gold {
-            color: #f7c948;
-        }
-        .info-card .detail-row .value.green {
-            color: #4ae0a0;
-        }
-        .info-card .detail-row .value.pink {
-            color: #ff7eb3;
-        }
-        .info-card.full-width {
-            grid-column: 1 / -1;
-        }
-        .address-card .card-body .address-text {
-            color: rgba(255, 255, 255, 0.75);
-            font-size: 0.95rem;
-            line-height: 1.7;
-            padding: 6px 0;
-            font-weight: 400;
-        }
-        .address-card .card-body .address-text i {
-            color: #7a9aff;
-            margin-right: 10px;
-            width: 18px;
-        }
-        .no-data {
-            color: rgba(255, 255, 255, 0.25);
-            font-size: 0.85rem;
-            font-weight: 400;
-            font-style: italic;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.60);
         }
 
+        .seq-card .card-body {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px 30px;
+        }
+
+        .seq-card .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 4px 0;
+        }
+        .seq-card .detail-item .label {
+            font-size: 0.72rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: rgba(255, 255, 255, 0.30);
+        }
+        .seq-card .detail-item .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #f0f4ff;
+            word-break: break-word;
+        }
+        .seq-card .detail-item .value.highlight {
+            color: #8ab4ff;
+        }
+        .seq-card .detail-item .value.gold {
+            color: #f7c948;
+        }
+        .seq-card .detail-item .value.green {
+            color: #4ae0a0;
+        }
+        .seq-card .detail-item .value.pink {
+            color: #ff7eb3;
+        }
+        .seq-card .detail-item .value.small {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .seq-card .detail-item .value.address {
+            font-weight: 400;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 0.95rem;
+        }
+        .seq-card .detail-item .value.address i {
+            color: #7a9aff;
+            margin-right: 8px;
+            width: 18px;
+        }
+
+        /* Full width for address card */
+        .seq-card.address-card .card-body {
+            grid-template-columns: 1fr;
+        }
+        .seq-card.address-card .detail-item .value.address {
+            padding: 4px 0;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             body {
                 padding: 12px;
@@ -609,7 +613,7 @@
                 padding: 12px 8px 30px;
             }
             .app-header {
-                margin-bottom: 28px;
+                margin-bottom: 25px;
             }
             .app-header .logo-icon {
                 width: 56px;
@@ -643,7 +647,7 @@
                 font-size: 18px;
             }
             .vehicle-hero {
-                padding: 22px 20px;
+                padding: 20px;
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 14px;
@@ -658,35 +662,31 @@
                 padding: 8px 16px;
             }
             .vehicle-hero .hero-title {
-                font-size: 1.1rem;
+                font-size: 1rem;
             }
             .vehicle-hero .hero-status {
                 font-size: 0.75rem;
                 padding: 6px 14px;
             }
-            .info-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-            .info-card {
-                padding: 18px 18px;
+            .seq-card {
+                padding: 18px 16px;
                 border-radius: 18px;
             }
-            .info-card .detail-row {
-                font-size: 0.88rem;
-                flex-wrap: wrap;
+            .seq-card .card-body {
+                grid-template-columns: 1fr;
+                gap: 10px;
             }
-            .info-card .detail-row .value {
-                text-align: left;
-                min-width: 0;
-                flex: 1 1 100%;
-                margin-top: 2px;
+            .seq-card .detail-item .value {
+                font-size: 0.92rem;
             }
-            .info-card .detail-row .label {
-                flex: 0 0 auto;
+            .seq-card .card-header h3 {
+                font-size: 0.8rem;
             }
-            .info-card.full-width {
-                grid-column: 1;
+            .warning-banner {
+                padding: 12px 18px;
+                font-size: 0.85rem;
+                flex-direction: column;
+                align-items: flex-start;
             }
             .loader-spinner {
                 width: 48px;
@@ -696,33 +696,30 @@
                 padding: 16px 20px;
                 margin: 16px 10px 0;
             }
-            .warning-banner {
-                padding: 12px 18px;
-                font-size: 0.85rem;
-                flex-direction: column;
-                align-items: flex-start;
-            }
         }
+
         @media (min-width: 769px) and (max-width: 1024px) {
-            .info-grid {
+            .seq-card .card-body {
                 grid-template-columns: repeat(2, 1fr);
             }
-            .info-card.full-width {
-                grid-column: 1 / -1;
+            .seq-card.address-card .card-body {
+                grid-template-columns: 1fr;
             }
             .vehicle-hero {
                 padding: 26px 28px;
             }
         }
+
         @media (min-width: 1025px) {
-            .info-grid {
+            .seq-card .card-body {
                 grid-template-columns: repeat(3, 1fr);
             }
-            .info-card.full-width {
-                grid-column: 1 / -1;
+            .seq-card.address-card .card-body {
+                grid-template-columns: 1fr;
             }
         }
 
+        /* ===== ANIMATIONS ===== */
         @keyframes fadeDown {
             from {
                 opacity: 0;
@@ -810,17 +807,6 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(120, 160, 255, 0.40);
         }
-        .text-ellipsis {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .mt-1 {
-            margin-top: 6px;
-        }
-        .gap-1 {
-            gap: 6px;
-        }
     </style>
 </head>
 <body>
@@ -832,6 +818,7 @@
 
     <div class="app-container">
 
+        <!-- HEADER -->
         <header class="app-header">
             <div class="logo-icon">
                 <i class="fas fa-car-side"></i>
@@ -840,6 +827,7 @@
             <p>Enter any vehicle number to fetch complete information</p>
         </header>
 
+        <!-- SEARCH -->
         <section class="search-section">
             <form class="search-box" id="searchForm" autocomplete="off">
                 <div class="search-icon">
@@ -860,7 +848,7 @@
             </form>
         </section>
 
-        <!-- ===== WARNING BANNER (NEW) ===== -->
+        <!-- WARNING BANNER -->
         <div class="warning-banner" id="warningBanner">
             <i class="fas fa-exclamation-triangle"></i>
             <div class="warning-text" id="warningText">
@@ -868,6 +856,7 @@
             </div>
         </div>
 
+        <!-- LOADING -->
         <div class="loading-wrapper" id="loadingWrapper">
             <div class="loader">
                 <div class="loader-spinner"></div>
@@ -875,13 +864,16 @@
             </div>
         </div>
 
+        <!-- ERROR -->
         <div class="error-wrapper" id="errorWrapper">
             <i class="fas fa-exclamation-circle"></i>
             <p id="errorMessage">Something went wrong. Please try again.</p>
         </div>
 
+        <!-- ===== RESULTS ===== -->
         <div class="results-container" id="resultsContainer">
 
+            <!-- HERO -->
             <div class="vehicle-hero" id="vehicleHero">
                 <div class="hero-left">
                     <div class="reg-badge">
@@ -889,9 +881,8 @@
                         <span id="heroReg">GJ05HG7801</span>
                     </div>
                     <div class="hero-title">
-                        <span id="heroMake">Hero Motocorp</span>
-                        <span id="heroModel">Pleasure</span>
-                        <span id="heroVariant">STD (102 CC)</span>
+                        <span class="make-model" id="heroMakeModel">Hero Motocorp Pleasure</span>
+                        <span class="variant" id="heroVariant">STD (102 CC)</span>
                     </div>
                 </div>
                 <div class="hero-status" id="heroStatus">
@@ -900,148 +891,150 @@
                 </div>
             </div>
 
-            <div class="info-grid" id="infoGrid">
+            <!-- SEQUENCE CARDS -->
+            <div class="sequence-grid" id="sequenceGrid">
 
-                <div class="info-card">
+                <!-- CARD 1: REGISTRATION DETAILS -->
+                <div class="seq-card" id="cardRegistration">
                     <div class="card-header">
-                        <i class="fas fa-cog"></i>
-                        <h3>Specifications</h3>
+                        <i class="fas fa-calendar-check"></i>
+                        <h3>Registration Details</h3>
                     </div>
                     <div class="card-body">
-                        <div class="detail-row">
+                        <div class="detail-item">
+                            <span class="label">Registration Number</span>
+                            <span class="value highlight" id="regNumber">GJ05HG7801</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Registration Date</span>
+                            <span class="value gold" id="regDate">18/11/2011</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">RTO</span>
+                            <span class="value" id="regRTO">Surat</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">RTO Code</span>
+                            <span class="value" id="regRTOCode">GJ05</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: OWNER DETAILS -->
+                <div class="seq-card" id="cardOwner">
+                    <div class="card-header">
+                        <i class="fas fa-user"></i>
+                        <h3>Owner Details</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="detail-item">
+                            <span class="label">Owner Name</span>
+                            <span class="value highlight" id="ownerName">RAJENDRA</span>
+                        </div>
+                        <div class="detail-item" style="grid-column: 1 / -1;">
+                            <span class="label">Permanent Address</span>
+                            <span class="value address" id="ownerAddress">
+                                <i class="fas fa-location-dot"></i> PLOT NO-109. RANCHHOD NAGAR, OPP. CITY IND.UDHNA MAIN ROAD, SURAT, -394210
+                            </span>
+                        </div>
+                        <div class="detail-item" style="grid-column: 1 / -1;" id="corrAddressWrapper">
+                            <span class="label">Correspondence Address</span>
+                            <span class="value address" id="corrAddress">
+                                <i class="fas fa-envelope"></i> PLOT NO-109. RANCHHOD NAGAR, OPP. CITY IND.UDHNA MAIN ROAD, SURAT, -394210
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3: VEHICLE SPECIFICATIONS -->
+                <div class="seq-card" id="cardSpecs">
+                    <div class="card-header">
+                        <i class="fas fa-cog"></i>
+                        <h3>Vehicle Specifications</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="detail-item">
+                            <span class="label">Make</span>
+                            <span class="value" id="specMake">Hero Motocorp</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Model</span>
+                            <span class="value" id="specModel">Pleasure</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Variant</span>
+                            <span class="value" id="specVariant">STD (102 CC)</span>
+                        </div>
+                        <div class="detail-item">
                             <span class="label">Year</span>
                             <span class="value highlight" id="specYear">2011</span>
                         </div>
-                        <div class="detail-row">
+                        <div class="detail-item">
                             <span class="label">Fuel</span>
                             <span class="value" id="specFuel">Petrol</span>
                         </div>
-                        <div class="detail-row">
+                        <div class="detail-item">
                             <span class="label">Cubic Capacity</span>
                             <span class="value" id="specCC">102 CC</span>
                         </div>
-                        <div class="detail-row">
-                            <span class="label">Seating</span>
+                        <div class="detail-item">
+                            <span class="label">Seating Capacity</span>
                             <span class="value" id="specSeating">2</span>
                         </div>
-                        <div class="detail-row">
+                        <div class="detail-item">
                             <span class="label">Body Type</span>
                             <span class="value" id="specBody">SOLWPR SOLO+PILL. RIDER</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="info-card">
-                    <div class="card-header">
-                        <i class="fas fa-calendar-check"></i>
-                        <h3>Registration</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="detail-row">
-                            <span class="label">Reg. Date</span>
-                            <span class="value gold" id="regDate">18/11/2011</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">RTO</span>
-                            <span class="value" id="regRTO">Surat (GJ-05)</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">RTO Code</span>
-                            <span class="value" id="regRTOCode">GJ05</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Owner</span>
-                            <span class="value highlight" id="regOwner">RAJENDRA</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="info-card">
+                <!-- CARD 4: TECHNICAL DETAILS -->
+                <div class="seq-card" id="cardTechnical">
                     <div class="card-header">
                         <i class="fas fa-microchip"></i>
-                        <h3>Technical</h3>
+                        <h3>Technical Details</h3>
                     </div>
                     <div class="card-body">
-                        <div class="detail-row">
-                            <span class="label">Chassis No.</span>
+                        <div class="detail-item">
+                            <span class="label">Chassis Number</span>
                             <span class="value" id="techChassis">MBLJF16EDBGL04042</span>
                         </div>
-                        <div class="detail-row">
-                            <span class="label">Engine No.</span>
+                        <div class="detail-item">
+                            <span class="label">Engine Number</span>
                             <span class="value" id="techEngine">JF16EBBGL04419</span>
                         </div>
-                        <div class="detail-row">
+                        <div class="detail-item">
                             <span class="label">Vehicle ID</span>
                             <span class="value" id="techVehicleId">1180</span>
                         </div>
-                        <div class="detail-row">
+                        <div class="detail-item">
                             <span class="label">Vertical</span>
                             <span class="value" id="techVertical">TW</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="info-card">
-                    <div class="card-header">
-                        <i class="fas fa-shield-alt"></i>
-                        <h3>Insurance</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="detail-row">
-                            <span class="label">Previous Policy</span>
-                            <span class="value" id="insPolicy">D272845008</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">NCB</span>
-                            <span class="value green" id="insNCB">0%</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Previous Claim</span>
-                            <span class="value" id="insClaim">No</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Eligible for NCB</span>
-                            <span class="value green" id="insEligible">Yes</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="info-card">
+                <!-- CARD 5: PUC DETAILS -->
+                <div class="seq-card" id="cardPUC">
                     <div class="card-header">
                         <i class="fas fa-leaf"></i>
                         <h3>PUC Details</h3>
                     </div>
                     <div class="card-body">
-                        <div class="detail-row">
-                            <span class="label">PUC No.</span>
+                        <div class="detail-item">
+                            <span class="label">PUC Number</span>
                             <span class="value" id="pucNumber">GJ00504380003920</span>
                         </div>
-                        <div class="detail-row">
+                        <div class="detail-item">
                             <span class="label">Valid Till</span>
                             <span class="value gold" id="pucValid">06-Sep-2026</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="info-card full-width address-card">
-                    <div class="card-header">
-                        <i class="fas fa-map-pin"></i>
-                        <h3>Address</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="address-text" id="addressText">
-                            <i class="fas fa-location-dot"></i>
-                            PLOT NO-109. RANCHHOD NAGAR, OPP. CITY IND.UDHNA MAIN ROAD, SURAT, -394210
-                        </div>
-                        <div class="address-text" id="addressCorr" style="margin-top:6px; color: rgba(255,255,255,0.45); font-size:0.85rem;">
-                            <i class="fas fa-envelope"></i>
-                            Correspondence: PLOT NO-109. RANCHHOD NAGAR, OPP. CITY IND.UDHNA MAIN ROAD, SURAT, -394210
-                        </div>
-                    </div>
-                </div>
+            </div><!-- /sequence-grid -->
 
-            </div>
-
+            <!-- HIDDEN DATA (for reference) -->
             <div style="display:none;" id="hiddenData">
                 <span id="hdnReg1">GJ</span>
                 <span id="hdnReg2">05</span>
@@ -1078,17 +1071,17 @@
                 <span id="hdnEligibleForNCB">true</span>
             </div>
 
-        </div>
+        </div><!-- /results-container -->
 
-    </div>
+    </div><!-- /app-container -->
 
     <script>
         (function() {
             'use strict';
 
+            // ===== DOM REFS =====
             const form = document.getElementById('searchForm');
             const input = document.getElementById('vehicleInput');
-            const searchBtn = document.getElementById('searchBtn');
             const loading = document.getElementById('loadingWrapper');
             const errorWrapper = document.getElementById('errorWrapper');
             const errorMsg = document.getElementById('errorMessage');
@@ -1098,24 +1091,32 @@
 
             // Hero
             const heroReg = document.getElementById('heroReg');
-            const heroMake = document.getElementById('heroMake');
-            const heroModel = document.getElementById('heroModel');
+            const heroMakeModel = document.getElementById('heroMakeModel');
             const heroVariant = document.getElementById('heroVariant');
             const heroStatusText = document.getElementById('heroStatusText');
             const heroStatus = document.getElementById('heroStatus');
 
+            // Registration
+            const regNumber = document.getElementById('regNumber');
+            const regDate = document.getElementById('regDate');
+            const regRTO = document.getElementById('regRTO');
+            const regRTOCode = document.getElementById('regRTOCode');
+
+            // Owner
+            const ownerName = document.getElementById('ownerName');
+            const ownerAddress = document.getElementById('ownerAddress');
+            const corrAddress = document.getElementById('corrAddress');
+            const corrAddressWrapper = document.getElementById('corrAddressWrapper');
+
             // Specs
+            const specMake = document.getElementById('specMake');
+            const specModel = document.getElementById('specModel');
+            const specVariant = document.getElementById('specVariant');
             const specYear = document.getElementById('specYear');
             const specFuel = document.getElementById('specFuel');
             const specCC = document.getElementById('specCC');
             const specSeating = document.getElementById('specSeating');
             const specBody = document.getElementById('specBody');
-
-            // Registration
-            const regDate = document.getElementById('regDate');
-            const regRTO = document.getElementById('regRTO');
-            const regRTOCode = document.getElementById('regRTOCode');
-            const regOwner = document.getElementById('regOwner');
 
             // Technical
             const techChassis = document.getElementById('techChassis');
@@ -1123,19 +1124,9 @@
             const techVehicleId = document.getElementById('techVehicleId');
             const techVertical = document.getElementById('techVertical');
 
-            // Insurance
-            const insPolicy = document.getElementById('insPolicy');
-            const insNCB = document.getElementById('insNCB');
-            const insClaim = document.getElementById('insClaim');
-            const insEligible = document.getElementById('insEligible');
-
             // PUC
             const pucNumber = document.getElementById('pucNumber');
             const pucValid = document.getElementById('pucValid');
-
-            // Address
-            const addressText = document.getElementById('addressText');
-            const addressCorr = document.getElementById('addressCorr');
 
             // Hidden
             const hdn = {
@@ -1174,6 +1165,7 @@
                 eligibleForNCB: document.getElementById('hdnEligibleForNCB'),
             };
 
+            // ===== HELPERS =====
             function showLoading(show) {
                 loading.classList.toggle('active', show);
             }
@@ -1205,11 +1197,6 @@
                 return String(val);
             }
 
-            function formatNCB(val) {
-                if (val === undefined || val === null || val === '') return '0%';
-                return val + '%';
-            }
-
             function formatBool(val) {
                 if (val === undefined || val === null) return '—';
                 if (typeof val === 'boolean') return val ? 'Yes' : 'No';
@@ -1222,6 +1209,7 @@
                 return String(val);
             }
 
+            // ===== RENDER =====
             function renderData(data) {
                 hideError();
                 hideWarning();
@@ -1234,8 +1222,9 @@
                 // --- Hero ---
                 const regNo = reg.registrationNo || prem.registrationNo || input.value.trim() || 'GJ05HG7801';
                 heroReg.textContent = regNo;
-                heroMake.textContent = reg.make || prem.make || '—';
-                heroModel.textContent = reg.model || prem.model || '—';
+                const make = reg.make || prem.make || '—';
+                const model = reg.model || prem.model || '—';
+                heroMakeModel.textContent = make + ' ' + model;
                 heroVariant.textContent = reg.displayVariant || prem.variant || '—';
 
                 const statusVal = reg.status || 'SUCCESS';
@@ -1250,7 +1239,30 @@
                     heroStatus.className = 'hero-status badge-warning';
                 }
 
+                // --- Registration ---
+                regNumber.textContent = regNo;
+                regDate.textContent = reg.registrationDate || prem.registrationDate || '—';
+                const rtoName = reg.rto?.lntLoc || prem.rtoDesp || '—';
+                const rtoCode = reg.rto?.rtoCode || prem.rtoId || '—';
+                regRTO.textContent = rtoName;
+                regRTOCode.textContent = rtoCode;
+
+                // --- Owner ---
+                ownerName.textContent = reg.ownerFirstName || '—';
+                const permAddr = reg.permanentAddress || '—';
+                ownerAddress.innerHTML = '<i class="fas fa-location-dot"></i> ' + permAddr;
+                const corrAddr = reg.corrAddress || permAddr;
+                if (corrAddr !== permAddr && corrAddr !== '—') {
+                    corrAddress.innerHTML = '<i class="fas fa-envelope"></i> ' + corrAddr;
+                    corrAddressWrapper.style.display = 'block';
+                } else {
+                    corrAddressWrapper.style.display = 'none';
+                }
+
                 // --- Specs ---
+                specMake.textContent = make;
+                specModel.textContent = model;
+                specVariant.textContent = reg.displayVariant || prem.variant || '—';
                 specYear.textContent = reg.year || prem.year || '—';
                 specFuel.textContent = reg.fuel || prem.fuel || '—';
                 const cc = reg.cubicCapacity || prem.cubicCapacity || '—';
@@ -1258,48 +1270,17 @@
                 specSeating.textContent = reg.seatingCapacity || '—';
                 specBody.textContent = reg.bodyType || '—';
 
-                // --- Registration ---
-                regDate.textContent = reg.registrationDate || prem.registrationDate || '—';
-                const rtoName = reg.rto?.lntLoc || prem.rtoDesp || '—';
-                const rtoCode = reg.rto?.rtoCode || prem.rtoId || '—';
-                regRTO.textContent = rtoName + ' (' + rtoCode + ')';
-                regRTOCode.textContent = rtoCode;
-                regOwner.textContent = reg.ownerFirstName || '—';
-
                 // --- Technical ---
                 techChassis.textContent = reg.chasisno || '—';
                 techEngine.textContent = reg.engineno || '—';
                 techVehicleId.textContent = reg.vehicleId || prem.makeModelId || '—';
                 techVertical.textContent = reg.vertical || '—';
 
-                // --- Insurance ---
-                insPolicy.textContent = reg.prePolicyNo || prem.previousPolicyNumber || '—';
-                const ncb = motor.applicableNCB !== undefined ? motor.applicableNCB :
-                    (prem.prevNCB !== undefined ? prem.prevNCB : 0);
-                insNCB.textContent = formatNCB(ncb);
-                const claim = reg.previousClaim !== undefined ? reg.previousClaim :
-                    (prem.prevClaim !== undefined ? prem.prevClaim : false);
-                insClaim.textContent = formatBool(claim);
-                const eligible = motor.eligibleForNCB !== undefined ? motor.eligibleForNCB :
-                    (prem.eligibleForNCB !== undefined ? prem.eligibleForNCB : true);
-                insEligible.textContent = formatBool(eligible);
-
                 // --- PUC ---
                 pucNumber.textContent = reg.pucNo || '—';
                 pucValid.textContent = reg.pucValidDate || '—';
 
-                // --- Address ---
-                const permAddr = reg.permanentAddress || '—';
-                const corrAddr = reg.corrAddress || permAddr;
-                addressText.innerHTML = '<i class="fas fa-location-dot"></i> ' + permAddr;
-                if (corrAddr !== permAddr) {
-                    addressCorr.innerHTML = '<i class="fas fa-envelope"></i> Correspondence: ' + corrAddr;
-                    addressCorr.style.display = 'block';
-                } else {
-                    addressCorr.style.display = 'none';
-                }
-
-                // --- Hidden fields ---
+                // --- Hidden ---
                 if (reg.reg1) hdn.reg1.textContent = reg.reg1;
                 if (reg.reg2) hdn.reg2.textContent = reg.reg2;
                 if (reg.reg3) hdn.reg3.textContent = reg.reg3;
@@ -1334,10 +1315,10 @@
                 if (prem.prevNCB !== undefined) hdn.prevNCB.textContent = prem.prevNCB;
                 if (motor.eligibleForNCB !== undefined) hdn.eligibleForNCB.textContent = String(motor.eligibleForNCB);
 
-                // Show results
                 results.classList.add('active');
             }
 
+            // ===== FETCH =====
             async function fetchVehicleDetails(vehicleNumber) {
                 if (!vehicleNumber || vehicleNumber.trim().length < 4) {
                     showError('Please enter a valid vehicle number.');
@@ -1371,7 +1352,6 @@
                         throw new Error('Invalid response from server.');
                     }
 
-                    // Check for validation errors but we will still show data if registrationResult exists
                     const validation = data.validateRegistrationResult;
                     let mismatchMsg = '';
 
@@ -1382,14 +1362,12 @@
                         mismatchMsg = mismatches.join('; ');
                     }
 
-                    // If registrationResult exists, render data regardless of validation error
                     if (data.registrationResult && Object.keys(data.registrationResult).length > 0) {
                         renderData(data);
                         if (mismatchMsg) {
                             showWarning(mismatchMsg);
                         }
                     } else {
-                        // No registrationResult, show error
                         if (mismatchMsg) {
                             throw new Error('Data mismatch: ' + mismatchMsg);
                         } else {
@@ -1406,6 +1384,7 @@
                 }
             }
 
+            // ===== EVENTS =====
             function handleSearch(e) {
                 e.preventDefault();
                 const val = input.value.trim();
