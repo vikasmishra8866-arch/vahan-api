@@ -3,158 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parivahan Vehicle Audit Portal</title>
+    <title>Parivahan Service | Professional Vehicle Audit Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(1deg); }
         }
         @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5), inset 0 0 15px rgba(59, 130, 246, 0.2); }
-            50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.8), inset 0 0 25px rgba(59, 130, 246, 0.4); }
+            0%, 100% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.3), inset 0 0 15px rgba(59, 130, 246, 0.1); }
+            50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6), inset 0 0 25px rgba(59, 130, 246, 0.3); }
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
         .animated-box {
-            animation: float 4s ease-in-out infinite, pulseGlow 3s ease-in-out infinite;
+            animation: floatSlow 5s ease-in-out infinite, pulseGlow 4s ease-in-out infinite;
         }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between font-sans selection:bg-blue-500 selection:text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between font-sans selection:bg-blue-500 selection:text-white relative overflow-x-hidden">
+
+    <!-- Ambient background glows -->
+    <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
     <!-- LOGIN OVERLAY -->
-    <div id="loginOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md px-4">
-        <div class="animated-box bg-slate-900/90 border border-blue-500/50 p-8 rounded-2xl w-full max-w-md text-center relative overflow-hidden">
-            <div class="absolute -top-12 -right-12 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
-            <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
+    <div id="loginOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-xl px-4 transition-opacity duration-300">
+        <div class="animated-box glass-panel p-8 sm:p-10 rounded-3xl w-full max-w-md text-center relative overflow-hidden shadow-2xl">
+            <div class="absolute -top-16 -right-16 w-36 h-36 bg-blue-500/20 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-16 -left-16 w-36 h-36 bg-indigo-500/20 rounded-full blur-3xl"></div>
             
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600/20 text-blue-400 rounded-full mb-4 border border-blue-500/30">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl mb-5 shadow-lg shadow-blue-500/30 border border-blue-400/30">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             </div>
             
-            <h2 class="text-2xl font-bold tracking-tight mb-2 text-white">Secure Access Portal</h2>
-            <p class="text-slate-400 text-sm mb-6">Enter your authorized secret PIN to access the vehicle lookup system.</p>
+            <h2 class="text-2xl font-black tracking-tight mb-2 text-white">Secure Portal Access</h2>
+            <p class="text-slate-400 text-xs sm:text-sm mb-6">Enter your authorized Secret PIN to initialize the vehicle audit session.</p>
             
             <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <input type="password" id="secretPin" placeholder="Enter Secret PIN" required autocomplete="current-password"
-                        class="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-center tracking-widest text-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                <div class="relative">
+                    <input type="password" id="secretPin" placeholder="••••••••••" required autocomplete="current-password"
+                        class="w-full px-4 py-3.5 bg-slate-900/90 border border-slate-700/80 rounded-2xl text-center tracking-[0.3em] text-lg text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all shadow-inner">
                 </div>
-                <div id="loginError" class="text-rose-500 text-xs hidden font-medium">Invalid Secret PIN. Please try again.</div>
-                <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-[0.98]">
-                    Authenticate & Access
+                <div id="loginError" class="text-rose-400 text-xs hidden font-medium bg-rose-500/10 py-2 rounded-lg border border-rose-500/20">Invalid Secret PIN. Please try again.</div>
+                <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-2xl shadow-lg shadow-blue-600/30 transition-all active:scale-[0.98] border border-blue-400/30">
+                    Authenticate & Enter
                 </button>
             </form>
         </div>
     </div>
 
     <!-- MAIN APP CONTAINER -->
-    <div id="mainApp" class="hidden flex-1 flex flex-col">
+    <div id="mainApp" class="hidden flex-1 flex flex-col opacity-0 transition-opacity duration-500">
         <!-- HEADER -->
-        <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-40">
-            <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+        <header class="border-b border-slate-800/80 glass-panel sticky top-0 z-40">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-bold text-xl shadow-lg shadow-blue-600/30">V</div>
+                    <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center font-black text-xl shadow-lg shadow-blue-600/30 border border-blue-400/30">V</div>
                     <div>
-                        <h1 class="font-bold text-lg leading-tight text-white">Parivahan Service</h1>
-                        <p class="text-xs text-slate-400">Professional Vehicle Audit System</p>
+                        <h1 class="font-bold text-base sm:text-lg leading-tight text-white tracking-tight">Parivahan Service</h1>
+                        <p class="text-[11px] text-blue-400 font-medium tracking-wide">ENTERPRISE AUDIT SYSTEM</p>
                     </div>
                 </div>
-                <button onclick="logout()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg border border-slate-700 transition-all">Lock Portal</button>
+                <button onclick="logout()" class="text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 px-3.5 py-2 rounded-xl border border-slate-700/80 transition-all shadow-sm flex items-center space-x-1.5">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    <span>Lock Session</span>
+                </button>
             </div>
         </header>
 
         <!-- CONTENT -->
-        <main class="max-w-3xl mx-auto w-full px-4 py-8 flex-1 flex flex-col">
+        <main class="max-w-3xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-12 flex-1 flex flex-col">
             <div class="text-center mb-8">
-                <h2 class="text-3xl font-extrabold tracking-tight text-white mb-2">Vehicle Information Lookup</h2>
-                <p class="text-slate-400 text-sm">Instant official database lookup using advanced high-speed API.</p>
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-3">
+                    <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                    <span>Live RTO Database Connected</span>
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-black tracking-tight text-white mb-2">Vehicle Information Lookup</h2>
+                <p class="text-slate-400 text-sm">Query complete registration, fitness, and insurance data securely.</p>
             </div>
 
             <!-- SEARCH FORM -->
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-xl mb-8">
+            <div class="glass-panel p-3 sm:p-4 rounded-2xl shadow-2xl mb-8 border border-slate-800">
                 <form id="searchForm" onsubmit="searchVehicle(event)" class="flex flex-col sm:flex-row gap-3">
-                    <input type="text" id="vehicleNumber" placeholder="e.g. MH47BM9865" required
-                        class="flex-1 px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl uppercase tracking-wider text-white placeholder:normal-case placeholder:tracking-normal focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
-                    <button type="submit" id="searchBtn" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2">
-                        <span>Search Details</span>
+                    <input type="text" id="vehicleNumber" placeholder="Enter Registration No. (e.g. MH47BM9865)" required autocomplete="off" autocapitalize="characters"
+                        class="flex-1 px-4 py-3.5 bg-slate-950/80 border border-slate-700/80 rounded-xl uppercase tracking-wider text-white placeholder:normal-case placeholder:tracking-normal focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-sm font-semibold">
+                    <button type="submit" id="searchBtn" class="px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2 text-sm active:scale-[0.98] border border-blue-400/30 cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <span>Search Records</span>
                     </button>
                 </form>
             </div>
 
             <!-- LOADING SPINNER -->
-            <div id="loadingIndicator" class="hidden text-center py-12">
-                <div class="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-                <p class="text-sm text-slate-400">Querying official records... Please wait...</p>
+            <div id="loadingIndicator" class="hidden text-center py-16">
+                <div class="inline-block w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4 shadow-lg shadow-blue-500/20"></div>
+                <p class="text-sm font-medium text-slate-300">Fetching official records via high-speed API...</p>
+                <p class="text-xs text-slate-500 mt-1">Please keep this window open.</p>
             </div>
 
             <!-- ERROR MESSAGE -->
-            <div id="errorMessage" class="hidden bg-rose-500/10 border border-rose-500/30 text-rose-400 p-4 rounded-xl text-center text-sm mb-6"></div>
+            <div id="errorMessage" class="hidden bg-rose-500/10 border border-rose-500/30 text-rose-300 p-4 rounded-2xl text-center text-sm mb-6 shadow-lg shadow-rose-500/5"></div>
 
             <!-- RESULT CARD CONTAINER -->
             <div id="resultContainer" class="hidden space-y-6">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                <div class="glass-panel rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 border border-slate-800">
                     
                     <!-- TOP BADGE & REGISTRATION -->
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/80 pb-5 gap-3">
                         <div>
-                            <span class="text-xs uppercase font-bold tracking-widest text-blue-400">Registration Number</span>
-                            <h3 id="resRegNo" class="text-2xl font-black text-white tracking-wider">--</h3>
+                            <span class="text-[11px] uppercase font-bold tracking-widest text-blue-400">Registration Number</span>
+                            <h3 id="resRegNo" class="text-2xl sm:text-3xl font-black text-white tracking-wider font-mono">--</h3>
                         </div>
-                        <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 w-max">
+                        <div class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 w-max shadow-sm">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                             <span id="resStatus">SUCCESS</span>
                         </div>
                     </div>
 
                     <!-- GRID DETAILS -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                            <span class="block text-slate-500 text-xs uppercase mb-1">Owner Name</span>
-                            <span id="resOwner" class="font-semibold text-white">--</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-sm">
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60 hover:border-slate-700 transition-colors">
+                            <span class="block text-slate-400 text-xs uppercase tracking-wider font-medium mb-1">Owner Name</span>
+                            <span id="resOwner" class="font-bold text-white text-base">--</span>
                         </div>
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                            <span class="block text-slate-500 text-xs uppercase mb-1">Vehicle Make & Model</span>
-                            <span id="resModel" class="font-semibold text-white">--</span>
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60 hover:border-slate-700 transition-colors">
+                            <span class="block text-slate-400 text-xs uppercase tracking-wider font-medium mb-1">Vehicle Make & Model</span>
+                            <span id="resModel" class="font-bold text-white text-base">--</span>
                         </div>
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                            <span class="block text-slate-500 text-xs uppercase mb-1">Fuel Type / Class</span>
-                            <span id="resFuel" class="font-semibold text-white">--</span>
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60 hover:border-slate-700 transition-colors">
+                            <span class="block text-slate-400 text-xs uppercase tracking-wider font-medium mb-1">Fuel Type / Class</span>
+                            <span id="resFuel" class="font-bold text-white">--</span>
                         </div>
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                            <span class="block text-slate-500 text-xs uppercase mb-1">Cubic Capacity (CC)</span>
-                            <span id="resCc" class="font-semibold text-white">--</span>
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60 hover:border-slate-700 transition-colors">
+                            <span class="block text-slate-400 text-xs uppercase tracking-wider font-medium mb-1">Cubic Capacity (CC)</span>
+                            <span id="resCc" class="font-bold text-white">--</span>
                         </div>
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                            <span class="block text-slate-500 text-xs uppercase mb-1">Manufacturing Year</span>
-                            <span id="resYear" class="font-semibold text-white">--</span>
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60 hover:border-slate-700 transition-colors">
+                            <span class="block text-slate-400 text-xs uppercase tracking-wider font-medium mb-1">Manufacturing Year</span>
+                            <span id="resYear" class="font-bold text-white">--</span>
                         </div>
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                            <span class="block text-slate-500 text-xs uppercase mb-1">Registration Date</span>
-                            <span id="resRegDate" class="font-semibold text-white">--</span>
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60 hover:border-slate-700 transition-colors">
+                            <span class="block text-slate-400 text-xs uppercase tracking-wider font-medium mb-1">Registration Date</span>
+                            <span id="resRegDate" class="font-bold text-white">--</span>
                         </div>
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                            <span class="block text-slate-500 text-xs uppercase mb-1">Financier Name</span>
-                            <span id="resFinancier" class="font-semibold text-white">--</span>
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60 hover:border-slate-700 transition-colors">
+                            <span class="block text-slate-400 text-xs uppercase tracking-wider font-medium mb-1">Financier Name</span>
+                            <span id="resFinancier" class="font-bold text-white">--</span>
                         </div>
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                            <span class="block text-slate-500 text-xs uppercase mb-1">PUC Valid Date</span>
-                            <span id="resPuc" class="font-semibold text-white">--</span>
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60 hover:border-slate-700 transition-colors">
+                            <span class="block text-slate-400 text-xs uppercase tracking-wider font-medium mb-1">PUC Valid Date</span>
+                            <span id="resPuc" class="font-bold text-white">--</span>
                         </div>
                     </div>
 
                     <!-- ADDRESS & ENGINE/CHASSIS -->
-                    <div class="space-y-4 border-t border-slate-800 pt-4 text-sm">
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                            <span class="block text-slate-500 text-xs uppercase mb-1">Permanent Address</span>
-                            <span id="resAddress" class="text-slate-300">--</span>
+                    <div class="space-y-3.5 border-t border-slate-800/80 pt-5 text-sm">
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60">
+                            <span class="block text-slate-400 text-xs uppercase tracking-wider font-medium mb-1">Permanent Address</span>
+                            <span id="resAddress" class="text-slate-300 font-medium leading-relaxed">--</span>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                                <span class="block text-slate-500 text-xs uppercase mb-1">Chassis Number</span>
-                                <span id="resChassis" class="font-mono text-xs text-blue-400">--</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60">
+                                <span class="block text-slate-400 text-xs uppercase tracking-wider font-medium mb-1">Chassis Number</span>
+                                <span id="resChassis" class="font-mono text-xs text-blue-400 font-semibold tracking-wider">--</span>
                             </div>
-                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                                <span class="block text-slate-500 text-xs uppercase mb-1">Engine Number</span>
-                                <span id="resEngine" class="font-mono text-xs text-blue-400">--</span>
+                            <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60">
+                                <span class="block text-slate-400 text-xs uppercase tracking-wider font-medium mb-1">Engine Number</span>
+                                <span id="resEngine" class="font-mono text-xs text-blue-400 font-semibold tracking-wider">--</span>
                             </div>
                         </div>
                     </div>
@@ -164,20 +189,21 @@
         </main>
 
         <!-- FOOTER -->
-        <footer class="border-t border-slate-800 bg-slate-900/50 py-4 text-center text-xs text-slate-500">
-            Parivahan Service &copy; 2026. All rights reserved.
+        <footer class="border-t border-slate-800/80 glass-panel py-6 text-center text-xs text-slate-400">
+            <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-2">
+                <span class="font-medium tracking-wide">© All Rights Reserved - Vikas Mishra ❤️</span>
+            </div>
         </footer>
     </div>
 
     <script>
         const CORRECT_PIN = "9696159863";
-        // Telegram Bot Credentials to send login notification
-        const TG_BOT_TOKEN = "8643283794:AAF7A0nxM_AAukQOy51J9kKTdfOEu-gOGXQ";
+        const TG_BOT_TOKEN = "8426663183:AAG1CFm0PiC7DN1zOsFqjEEEdzi7IcvdC7k";
         const TG_ADMIN_ID = "8204069256";
 
-        // Check persistent login session on load
+        // Session validation (Tab-close auto logout via sessionStorage)
         window.addEventListener('DOMContentLoaded', () => {
-            if (localStorage.getItem('portal_authenticated') === 'true') {
+            if (sessionStorage.getItem('portal_authenticated') === 'true') {
                 unlockPortal(false);
             }
         });
@@ -208,7 +234,7 @@
             const errorDiv = document.getElementById('loginError');
 
             if (pinInput === CORRECT_PIN) {
-                localStorage.setItem('portal_authenticated', 'true');
+                sessionStorage.setItem('portal_authenticated', 'true');
                 sendTelegramAlert(pinInput);
                 unlockPortal(true);
             } else {
@@ -222,48 +248,73 @@
             const mainApp = document.getElementById('mainApp');
 
             if (withAnimation) {
-                loginOverlay.style.transition = 'opacity 0.4s ease';
                 loginOverlay.style.opacity = '0';
                 setTimeout(() => {
                     loginOverlay.classList.add('hidden');
                     mainApp.classList.remove('hidden');
-                }, 400);
+                    setTimeout(() => mainApp.style.opacity = '1', 20);
+                }, 300);
             } else {
                 loginOverlay.classList.add('hidden');
                 mainApp.classList.remove('hidden');
+                mainApp.style.opacity = '1';
             }
         }
 
         function logout() {
-            localStorage.removeItem('portal_authenticated');
+            sessionStorage.removeItem('portal_authenticated');
             location.reload();
         }
 
+        // Auto uppercase formatting as user types in vehicle input
+        document.getElementById('vehicleNumber').addEventListener('input', function(e) {
+            this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        });
+
         async function searchVehicle(event) {
             event.preventDefault();
-            const regNo = document.getElementById('vehicleNumber').value.trim().toUpperCase().replace(/\s+/g, '');
+            const vehicleInput = document.getElementById('vehicleNumber');
+            const regNo = vehicleInput.value.trim().toUpperCase().replace(/\s+/g, '');
             const loading = document.getElementById('loadingIndicator');
             const errorBox = document.getElementById('errorMessage');
             const resultContainer = document.getElementById('resultContainer');
 
             if (!regNo) return;
 
+            // Blur keyboard on mobile
+            vehicleInput.blur();
+
             loading.classList.remove('hidden');
             errorBox.classList.add('hidden');
             resultContainer.classList.add('hidden');
 
             try {
-                const response = await fetch(`https://cjpindia.vercel.app/api/vehicle-details/${regNo}`);
-                if (!response.ok) throw new Error("Vehicle details not found or API error.");
+                // Using CORS proxy fallback or direct fetch with appropriate options for robust mobile handling
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+                const response = await fetch(`https://cjpindia.vercel.app/api/vehicle-details/${regNo}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`Server returned status ${response.status}. Vehicle details not found.`);
+                }
                 
                 const data = await response.json();
                 const regRes = data.registrationResult || data;
 
-                if (!regRes || Object.keys(regRes).length === 0) {
-                    throw new Error("No registration records found for this vehicle number.");
+                if (!regRes || Object.keys(regRes).length === 0 || regRes.status === "ERROR") {
+                    throw new Error("No valid registration records found for this vehicle number.");
                 }
 
-                // Populate fields
+                // Populate UI fields safely
                 document.getElementById('resRegNo').innerText = regRes.registrationNo || regNo;
                 document.getElementById('resStatus').innerText = regRes.status || "SUCCESS";
                 
@@ -291,9 +342,18 @@
                 loading.classList.add('hidden');
                 resultContainer.classList.remove('hidden');
 
+                // Smooth scroll to results on mobile viewports
+                resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
             } catch (err) {
                 loading.classList.add('hidden');
-                errorBox.innerText = err.message || "Failed to fetch vehicle details. Please verify the registration number.";
+                let errorMsg = "Failed to fetch vehicle details. Please check your internet connection and try again.";
+                if (err.name === 'AbortError') {
+                    errorMsg = "Request timed out. The API server took too long to respond.";
+                } else if (err.message) {
+                    errorMsg = err.message;
+                }
+                errorBox.innerText = errorMsg;
                 errorBox.classList.remove('hidden');
             }
         }
