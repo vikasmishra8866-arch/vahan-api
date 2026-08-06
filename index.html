@@ -16,6 +16,7 @@
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --success: #10b981;
+            --warning: #f59e0b;
         }
 
         * {
@@ -157,13 +158,22 @@
         }
 
         .badge {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 600;
+        }
+
+        .badge.success {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
             border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge.warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
         }
 
         .grid-info {
@@ -262,7 +272,7 @@
         </div>
 
         <div class="search-box">
-            <input type="text" id="vehicleNumber" placeholder="Enter Vehicle No. (e.g., GJ05HG7B01 or MH47BM9865)" value="GJ05HG7B01">
+            <input type="text" id="vehicleNumber" placeholder="Enter Vehicle No. (e.g., GJ05MS9717)" value="GJ05MS9717">
             <button onclick="fetchVehicleData()"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
         </div>
 
@@ -299,43 +309,28 @@
             notFound.style.display = 'none';
             resultCard.style.display = 'none';
 
-            // Abort controller for 10 seconds timeout
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-            // Using your given API endpoint
             const targetUrl = `https://cjpindia.vercel.app/api/vehicle-details/${regNo}`;
 
             try {
-                // Direct fetch with fallback/CORS handling simulation
                 const response = await fetch(targetUrl, {
                     method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    },
+                    headers: { 'Accept': 'application/json' },
                     signal: controller.signal
                 });
 
                 clearTimeout(timeoutId);
 
-                if (!response.ok) {
-                    throw new Error(`Server returned status ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`Server returned status ${response.status}`);
 
                 const data = await response.json();
-
-                // Safely validate if registrationResult exists and status is success or data is valid
-                if (data && (data.registrationResult || data.status === "SUCCESS" || data.make)) {
-                    renderVehicleData(data);
-                } else {
-                    showNotFound("Vehicle records are empty or invalid format.");
-                }
+                renderVehicleData(data, regNo);
 
             } catch (error) {
                 clearTimeout(timeoutId);
-                console.error("Fetch Error:", error);
                 
-                // Fallback check: try via corsproxy if direct fetch was blocked by browser CORS
                 try {
                     const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
                     const proxyRes = await fetch(proxyUrl);
@@ -343,16 +338,14 @@
                     
                     if (proxyData && proxyData.contents) {
                         const parsedData = JSON.parse(proxyData.contents);
-                        if (parsedData && (parsedData.registrationResult || parsedData.make)) {
-                            renderVehicleData(parsedData);
-                            return;
-                        }
+                        renderVehicleData(parsedData, regNo);
+                        return;
                     }
                 } catch (proxyErr) {
-                    console.error("Proxy Fallback Failed:", proxyErr);
+                    console.error("Proxy Error:", proxyErr);
                 }
 
-                showNotFound("Request timed out or API blocked connection (CORS/Network error).");
+                showNotFound("Request timed out or connection blocked.");
             } finally {
                 loader.style.display = 'none';
             }
@@ -365,58 +358,74 @@
             if(msg) document.getElementById('errorDesc').innerText = msg;
         }
 
-        function renderVehicleData(data) {
+        function renderVehicleData(data, inputRegNo) {
             document.getElementById('loader').style.display = 'none';
             const resultCard = document.getElementById('resultCard');
             const infoGrid = document.getElementById('infoGrid');
             
-            // Handle variations in JSON structure (whether nested under registrationResult or direct)
+            // Extract core details safely checking multiple possible keys
             const reg = data.registrationResult || data;
-            
-            document.getElementById('regNumberTitle').innerText = reg.registrationNo || document.getElementById('vehicleNumber').value;
-            document.getElementById('statusBadge').innerText = reg.status || 'VERIFIED';
+            const req = data.premiumRequest || {};
+            const motorReq = req.motorPremiumRequest || {};
 
+            let regNo = reg.registrationNo || motorReq.registrationNo || inputRegNo;
+            document.getElementById('regNumberTitle').innerText = regNo;
+
+            // Badge status handling
+            const statusBadge = document.getElementById('statusBadge');
+            const statusText = reg.status || (reg.rto ? 'VERIFIED' : 'WARNING');
+            statusBadge.innerText = statusText;
+            
+            if(statusText === "SUCCESS" || statusText === "VERIFIED") {
+                statusBadge.className = "badge success";
+            } else {
+                statusBadge.className = "badge warning";
+            }
+
+            // Comprehensive fields list mapping from all parts of JSON
             const fields = [
-                { label: 'Owner Name', value: reg.ownerName || `${reg.ownerFirstName || ''} ${reg.ownerLastName || ''}`.trim() },
-                { label: 'Maker / Model', value: `${reg.make || ''} ${reg.model || ''} (${reg.displayVariant || reg.variant || ''})` },
-                { label: 'Fuel Type', value: reg.fuel },
-                { label: 'Cubic Capacity', value: reg.cubicCapacity ? `${reg.cubicCapacity} CC` : null },
-                { label: 'Registration Date', value: reg.registrationDate },
+                { label: 'Owner Name', value: reg.ownerName || `${reg.ownerFirstName || ''} ${reg.ownerLastName || ''}`.trim() || req.customerName },
+                { label: 'Maker / Model', value: `${reg.make || motorReq.make || ''} ${reg.model || motorReq.model || ''} (${reg.displayVariant || reg.variant || motorReq.variant || ''})` },
+                { label: 'Fuel Type', value: reg.fuel || motorReq.fuel },
+                { label: 'Cubic Capacity', value: (reg.cubicCapacity || motorReq.cubicCapacity) ? `${reg.cubicCapacity || motorReq.cubicCapacity} CC` : null },
+                { label: 'Registration Date', value: reg.registrationDate || motorReq.registrationDate },
                 { label: 'Financier Name', value: reg.financierName },
                 { label: 'Chassis Number', value: reg.chasisno || reg.chassisNo },
                 { label: 'Engine Number', value: reg.engineno || reg.engineNo },
                 { label: 'Body Type', value: reg.bodyType },
                 { label: 'Seating Capacity', value: reg.seatingCapacity },
-                { label: 'RTO Location', value: reg.rto ? (reg.rto.rtoPlateLntLoc || reg.rto.lntLoc) : reg.rtoDesp },
+                { label: 'RTO Location', value: reg.rto ? (reg.rto.rtoPlateLntLoc || reg.rto.lntLoc || reg.rto.lntLoc) : (motorReq.rtoDesp ? `${motorReq.rtoId} - ${motorReq.rtoDesp}` : null) },
                 { label: 'PUC Valid Date', value: reg.pucValidDate },
+                { label: 'Previous Policy No', value: reg.prePolicyNo || motorReq.previousPolicyNumber },
                 { label: 'Permanent Address', value: reg.corrAddress || reg.permanentAddress, full: true }
             ];
 
             let htmlContent = '';
             fields.forEach(item => {
-                if (item.value && item.value !== "undefined" && item.value.trim() !== "" && item.value.trim() !== "()") {
+                let val = item.value ? String(item.value).trim() : "";
+                if (val && val !== "undefined" && val !== "null" && val !== "()" && val !== "") {
                     htmlContent += `
                         <div class="info-item ${item.full ? 'full-width' : ''}">
                             <label>${item.label}</label>
-                            <span>${item.value}</span>
+                            <span>${val}</span>
                         </div>
                     `;
                 }
             });
 
-            if(!htmlContent) {
-                showNotFound("No displayable fields found in response.");
-                return;
+            // Fallback if structured fields are less, print whatever raw info is available
+            if (!htmlContent && data) {
+                htmlContent = `
+                    <div class="info-item full-width">
+                        <label>Raw Response Data</label>
+                        <span>${JSON.stringify(data)}</span>
+                    </div>
+                `;
             }
 
             infoGrid.innerHTML = htmlContent;
             resultCard.style.display = 'block';
         }
-
-        // Run default search on load if wanted
-        window.onload = () => {
-            // fetchVehicleData();
-        };
     </script>
 </body>
 </html>
