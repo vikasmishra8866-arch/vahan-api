@@ -11,8 +11,8 @@
             --primary: #6366f1;
             --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
             --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --border-color: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(30, 41, 59, 0.75);
+            --border-color: rgba(255, 255, 255, 0.12);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --success: #10b981;
@@ -28,37 +28,35 @@
         body {
             background-color: var(--bg-dark);
             background-image: 
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.15) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.2) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.2) 0px, transparent 50%);
             color: var(--text-main);
             min-height: 100vh;
             padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow-x: hidden;
         }
 
         .container {
             width: 100%;
-            max-width: 800px;
+            max-width: 850px;
             margin: auto;
         }
 
-        /* Header Branding */
         .brand-header {
             text-align: center;
-            margin-bottom: 35px;
+            margin-bottom: 30px;
             animation: fadeInDown 0.8s ease-out;
         }
 
         .brand-header h1 {
-            font-size: 2.2rem;
+            font-size: 2.3rem;
             font-weight: 800;
             background: var(--primary-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .brand-header p {
@@ -66,7 +64,6 @@
             font-size: 0.95rem;
         }
 
-        /* Search Bar Box */
         .search-box {
             background: var(--card-bg);
             backdrop-filter: blur(16px);
@@ -88,10 +85,12 @@
             color: var(--text-main);
             font-size: 1rem;
             padding-left: 15px;
+            text-transform: uppercase;
         }
 
         .search-box input::placeholder {
             color: var(--text-muted);
+            text-transform: none;
         }
 
         .search-box button {
@@ -110,12 +109,10 @@
             transform: translateY(-2px);
         }
 
-        /* Loader Animation */
         .loader-container {
             display: none;
             text-align: center;
-            padding: 60px 20px;
-            animation: fadeIn 0.4s ease-out;
+            padding: 50px 20px;
         }
 
         .spinner {
@@ -125,7 +122,7 @@
             border-top: 4px solid #6366f1;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px auto;
+            margin: 0 auto 15px auto;
         }
 
         @keyframes spin {
@@ -133,7 +130,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Result View Grid */
         .result-card {
             display: none;
             background: var(--card-bg);
@@ -142,7 +138,7 @@
             border-radius: 24px;
             padding: 30px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: scaleUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: scaleUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .vehicle-title-badge {
@@ -172,29 +168,29 @@
 
         .grid-info {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
             gap: 20px;
         }
 
         .info-item {
-            background: rgba(15, 23, 42, 0.4);
+            background: rgba(15, 23, 42, 0.5);
             border: 1px solid var(--border-color);
             padding: 16px 20px;
             border-radius: 16px;
-            transition: transform 0.3s;
+            transition: transform 0.3s, border-color 0.3s;
         }
 
         .info-item:hover {
             transform: translateY(-3px);
-            border-color: rgba(99, 102, 241, 0.4);
+            border-color: rgba(99, 102, 241, 0.5);
         }
 
         .info-item label {
             display: block;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
             margin-bottom: 6px;
         }
 
@@ -202,18 +198,17 @@
             font-size: 1.05rem;
             font-weight: 600;
             color: var(--text-main);
-            word-break: break-all;
+            word-break: break-word;
         }
 
         .full-width {
             grid-column: 1 / -1;
         }
 
-        /* Error / Not Found View */
         .not-found-card {
             display: none;
             text-align: center;
-            padding: 50px 20px;
+            padding: 45px 20px;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 24px;
@@ -221,7 +216,7 @@
         }
 
         .not-found-card i {
-            font-size: 3.5rem;
+            font-size: 3.2rem;
             color: #ef4444;
             margin-bottom: 15px;
         }
@@ -236,7 +231,6 @@
             font-size: 0.95rem;
         }
 
-        /* Keyframe Animations */
         @keyframes fadeInDown {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -252,107 +246,123 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             20%, 60% { transform: translateX(-8px); }
             40%, 80% { transform: translateX(8px); }
-        }
-
-        @media(max-width: 600px) {
-            .brand-header h1 { font-size: 1.8rem; }
-            .result-card { padding: 20px; }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Header -->
         <div class="brand-header">
             <h1>Parivahan Service</h1>
             <p>Advanced Vehicle Information & Analytics Portal</p>
         </div>
 
-        <!-- Search Input Bar -->
         <div class="search-box">
-            <input type="text" id="vehicleNumber" placeholder="Enter Vehicle No. (e.g., MH47BM9865)" value="MH47BM9865">
+            <input type="text" id="vehicleNumber" placeholder="Enter Vehicle No. (e.g., GJ05HG7B01 or MH47BM9865)" value="GJ05HG7B01">
             <button onclick="fetchVehicleData()"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
         </div>
 
-        <!-- Loader Component -->
         <div class="loader-container" id="loader">
             <div class="spinner"></div>
-            <p style="color: var(--text-muted);">Fetching secure vehicle records (Timeout in 10s)...</p>
+            <p style="color: var(--text-muted);">Fetching vehicle details from server...</p>
         </div>
 
-        <!-- Details Not Found Component -->
         <div class="not-found-card" id="notFound">
             <i class="fa-solid fa-circle-exclamation"></i>
             <h3>Details Not Found</h3>
-            <p>The API request took longer than 10 seconds or returned invalid details.</p>
+            <p id="errorDesc">The API request took longer than 10 seconds or returned no data.</p>
         </div>
 
-        <!-- Result Card Component -->
         <div class="result-card" id="resultCard">
             <div class="vehicle-title-badge">
                 <h2 id="regNumberTitle">--</h2>
                 <span class="badge" id="statusBadge">SUCCESS</span>
             </div>
-            <div class="grid-info" id="infoGrid">
-                <!-- Dynamically injected active fields only (avoiding nulls) -->
-            </div>
+            <div class="grid-info" id="infoGrid"></div>
         </div>
     </div>
 
     <script>
         async function fetchVehicleData() {
-            const regNo = document.getElementById('vehicleNumber').value.trim();
+            let regNo = document.getElementById('vehicleNumber').value.trim().toUpperCase();
             const loader = document.getElementById('loader');
             const notFound = document.getElementById('notFound');
             const resultCard = document.getElementById('resultCard');
             
             if(!regNo) return;
 
-            // Reset UI states
             loader.style.display = 'block';
             notFound.style.display = 'none';
             resultCard.style.display = 'none';
 
-            // 10 Seconds Timeout Controller
+            // Abort controller for 10 seconds timeout
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 10000);
 
+            // Using your given API endpoint
+            const targetUrl = `https://cjpindia.vercel.app/api/vehicle-details/${regNo}`;
+
             try {
-                const response = await fetch(`https://cjpindia.vercel.app/api/vehicle-details/${regNo}`, {
+                // Direct fetch with fallback/CORS handling simulation
+                const response = await fetch(targetUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
                     signal: controller.signal
                 });
+
                 clearTimeout(timeoutId);
 
-                if (!response.ok) throw new Error("API Error");
+                if (!response.ok) {
+                    throw new Error(`Server returned status ${response.status}`);
+                }
+
                 const data = await response.json();
 
-                if (data && data.registrationResult && data.registrationResult.status === "SUCCESS") {
+                // Safely validate if registrationResult exists and status is success or data is valid
+                if (data && (data.registrationResult || data.status === "SUCCESS" || data.make)) {
                     renderVehicleData(data);
                 } else {
-                    showNotFound();
+                    showNotFound("Vehicle records are empty or invalid format.");
                 }
+
             } catch (error) {
                 clearTimeout(timeoutId);
-                showNotFound();
+                console.error("Fetch Error:", error);
+                
+                // Fallback check: try via corsproxy if direct fetch was blocked by browser CORS
+                try {
+                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+                    const proxyRes = await fetch(proxyUrl);
+                    const proxyData = await proxyRes.json();
+                    
+                    if (proxyData && proxyData.contents) {
+                        const parsedData = JSON.parse(proxyData.contents);
+                        if (parsedData && (parsedData.registrationResult || parsedData.make)) {
+                            renderVehicleData(parsedData);
+                            return;
+                        }
+                    }
+                } catch (proxyErr) {
+                    console.error("Proxy Fallback Failed:", proxyErr);
+                }
+
+                showNotFound("Request timed out or API blocked connection (CORS/Network error).");
             } finally {
                 loader.style.display = 'none';
             }
         }
 
-        function showNotFound() {
+        function showNotFound(msg) {
             document.getElementById('loader').style.display = 'none';
             document.getElementById('notFound').style.display = 'block';
             document.getElementById('resultCard').style.display = 'none';
+            if(msg) document.getElementById('errorDesc').innerText = msg;
         }
 
         function renderVehicleData(data) {
@@ -360,31 +370,31 @@
             const resultCard = document.getElementById('resultCard');
             const infoGrid = document.getElementById('infoGrid');
             
-            const reg = data.registrationResult;
-            document.getElementById('regNumberTitle').innerText = reg.registrationNo || 'Vehicle Details';
-            document.getElementById('statusBadge').innerText = reg.status || 'ACTIVE';
+            // Handle variations in JSON structure (whether nested under registrationResult or direct)
+            const reg = data.registrationResult || data;
+            
+            document.getElementById('regNumberTitle').innerText = reg.registrationNo || document.getElementById('vehicleNumber').value;
+            document.getElementById('statusBadge').innerText = reg.status || 'VERIFIED';
 
-            // Clean, non-null field mapping dictionary
             const fields = [
-                { label: 'Owner Name', value: `${reg.ownerFirstName || ''} ${reg.ownerLastName || ''}`.trim() },
-                { label: 'Maker / Model', value: `${reg.make} ${reg.model} (${reg.displayVariant || ''})` },
+                { label: 'Owner Name', value: reg.ownerName || `${reg.ownerFirstName || ''} ${reg.ownerLastName || ''}`.trim() },
+                { label: 'Maker / Model', value: `${reg.make || ''} ${reg.model || ''} (${reg.displayVariant || reg.variant || ''})` },
                 { label: 'Fuel Type', value: reg.fuel },
                 { label: 'Cubic Capacity', value: reg.cubicCapacity ? `${reg.cubicCapacity} CC` : null },
                 { label: 'Registration Date', value: reg.registrationDate },
                 { label: 'Financier Name', value: reg.financierName },
-                { label: 'Chassis Number', value: reg.chasisno },
-                { label: 'Engine Number', value: reg.engineno },
+                { label: 'Chassis Number', value: reg.chasisno || reg.chassisNo },
+                { label: 'Engine Number', value: reg.engineno || reg.engineNo },
                 { label: 'Body Type', value: reg.bodyType },
                 { label: 'Seating Capacity', value: reg.seatingCapacity },
-                { label: 'RTO Location', value: reg.rto ? reg.rto.rtoPlateLntLoc : null },
+                { label: 'RTO Location', value: reg.rto ? (reg.rto.rtoPlateLntLoc || reg.rto.lntLoc) : reg.rtoDesp },
                 { label: 'PUC Valid Date', value: reg.pucValidDate },
-                { label: 'Permanent Address', value: reg.corrAddress, full: true }
+                { label: 'Permanent Address', value: reg.corrAddress || reg.permanentAddress, full: true }
             ];
 
-            // Render only valid/non-null fields dynamically
             let htmlContent = '';
             fields.forEach(item => {
-                if (item.value && item.value !== "undefined" && item.value.trim() !== "") {
+                if (item.value && item.value !== "undefined" && item.value.trim() !== "" && item.value.trim() !== "()") {
                     htmlContent += `
                         <div class="info-item ${item.full ? 'full-width' : ''}">
                             <label>${item.label}</label>
@@ -394,13 +404,18 @@
                 }
             });
 
+            if(!htmlContent) {
+                showNotFound("No displayable fields found in response.");
+                return;
+            }
+
             infoGrid.innerHTML = htmlContent;
             resultCard.style.display = 'block';
         }
 
-        // Auto load on start for testing with the default vehicle code
+        // Run default search on load if wanted
         window.onload = () => {
-            fetchVehicleData();
+            // fetchVehicleData();
         };
     </script>
 </body>
