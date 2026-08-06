@@ -23,7 +23,6 @@
         .animated-box {
             animation: floatSlow 5s ease-in-out infinite, pulseGlow 4s ease-in-out infinite;
         }
-        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #020617; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
@@ -198,7 +197,7 @@
 
     <script>
         const CORRECT_PIN = "9696159863";
-        const TG_BOT_TOKEN = "8643283794:AAF7A0nxM_AAukQOy51J9kKTdfOEu-gOGXQ";
+        const TG_BOT_TOKEN = "8426663183:AAG1CFm0PiC7DN1zOsFqjEEEdzi7IcvdC7k";
         const TG_ADMIN_ID = "8204069256";
 
         // Session validation (Tab-close auto logout via sessionStorage)
@@ -266,7 +265,7 @@
             location.reload();
         }
 
-        // Auto uppercase formatting as user types in vehicle input
+        // Auto uppercase formatting and whitespace removal as user types
         document.getElementById('vehicleNumber').addEventListener('input', function(e) {
             this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
         });
@@ -281,30 +280,35 @@
 
             if (!regNo) return;
 
-            // Blur keyboard on mobile
+            // Dismiss mobile keyboard seamlessly
             vehicleInput.blur();
 
             loading.classList.remove('hidden');
             errorBox.classList.add('hidden');
             resultContainer.classList.add('hidden');
 
+            // Secure HTTPS Endpoint URL
+            const targetUrl = `https://cjpindia.vercel.app/api/vehicle-details/${regNo}`;
+
             try {
-                // Using CORS proxy fallback or direct fetch with appropriate options for robust mobile handling
+                // Abort controller to handle mobile network timeouts (Jio/Airtel latency)
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-                const response = await fetch(`https://cjpindia.vercel.app/api/vehicle-details/${regNo}`, {
+                const response = await fetch(targetUrl, {
                     method: 'GET',
                     headers: {
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
                     },
+                    mode: 'cors',
                     signal: controller.signal
                 });
                 
                 clearTimeout(timeoutId);
 
                 if (!response.ok) {
-                    throw new Error(`Server returned status ${response.status}. Vehicle details not found.`);
+                    throw new Error(`Server returned HTTP status ${response.status}. Vehicle details could not be retrieved.`);
                 }
                 
                 const data = await response.json();
@@ -342,18 +346,24 @@
                 loading.classList.add('hidden');
                 resultContainer.classList.remove('hidden');
 
-                // Smooth scroll to results on mobile viewports
+                // Smooth scroll down to results view on mobile viewports
                 resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
             } catch (err) {
                 loading.classList.add('hidden');
-                let errorMsg = "Failed to fetch vehicle details. Please check your internet connection and try again.";
+                console.error("Mobile Fetch Error Details:", err);
+
+                let userFriendlyError = "Failed to fetch vehicle details. Please check your mobile network connection and try again.";
+                
                 if (err.name === 'AbortError') {
-                    errorMsg = "Request timed out. The API server took too long to respond.";
+                    userFriendlyError = "Request timed out. The mobile cellular network or server took too long to respond.";
+                } else if (err instanceof TypeError && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
+                    userFriendlyError = "Network connection blocked or CORS restriction encountered. Please ensure you are on a stable connection or try switching networks.";
                 } else if (err.message) {
-                    errorMsg = err.message;
+                    userFriendlyError = err.message;
                 }
-                errorBox.innerText = errorMsg;
+
+                errorBox.innerText = userFriendlyError;
                 errorBox.classList.remove('hidden');
             }
         }
