@@ -1,720 +1,1858 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Parivahan Service - Vehicle Detail Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #6366f1;
-            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
-            --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.75);
-            --border-color: rgba(255, 255, 255, 0.12);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --success: #10b981;
-            --warning: #f59e0b;
-        }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>AutoVerify — Premium Vehicle &amp; IFSC Lookup</title>
 
-        * {
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome 6 (Free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    <style>
+        /* ============================================================
+           GLOBAL RESET & BASE
+           ============================================================ */
+        *,
+        *::before,
+        *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        :root {
+            --bg-primary: #0b0b1a;
+            --bg-secondary: #111128;
+            --glass-bg: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.07);
+            --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            --text-primary: #f0f0ff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-muted: rgba(255, 255, 255, 0.35);
+            --accent-1: #7c6aff;
+            --accent-2: #a855f7;
+            --accent-3: #f472b6;
+            --gradient-main: linear-gradient(135deg, #7c6aff 0%, #a855f7 50%, #f472b6 100%);
+            --gradient-glow: linear-gradient(135deg, rgba(124, 106, 255, 0.25), rgba(168, 85, 247, 0.25), rgba(244, 114, 182, 0.25));
+            --radius-card: 20px;
+            --radius-input: 14px;
+            --radius-btn: 14px;
+            --transition-smooth: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.2) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.2) 0px, transparent 50%);
-            color: var(--text-main);
+            font-family: var(--font);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
-            padding: 20px;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            position: relative;
+            line-height: 1.6;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* ---- Animated Background ---- */
+        .bg-glow {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bg-glow .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.5;
+            animation: orbFloat 18s ease-in-out infinite alternate;
+        }
+
+        .bg-glow .orb:nth-child(1) {
+            width: 600px;
+            height: 600px;
+            top: -15%;
+            left: -10%;
+            background: radial-gradient(circle, rgba(124, 106, 255, 0.4), transparent 70%);
+            animation-duration: 22s;
+        }
+
+        .bg-glow .orb:nth-child(2) {
+            width: 500px;
+            height: 500px;
+            bottom: -10%;
+            right: -10%;
+            background: radial-gradient(circle, rgba(244, 114, 182, 0.3), transparent 70%);
+            animation-duration: 26s;
+            animation-delay: -4s;
+        }
+
+        .bg-glow .orb:nth-child(3) {
+            width: 400px;
+            height: 400px;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.25), transparent 70%);
+            animation-duration: 20s;
+            animation-delay: -8s;
+        }
+
+        @keyframes orbFloat {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(40px, -30px) scale(1.1);
+            }
+            66% {
+                transform: translate(-20px, 40px) scale(0.9);
+            }
+            100% {
+                transform: translate(30px, -10px) scale(1.05);
+            }
+        }
+
+        /* ---- Scrollbar ---- */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-2);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-1);
+        }
+
+        /* ============================================================
+           LAYOUT
+           ============================================================ */
+        .app-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 24px 40px;
+            min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+        }
+
+        /* ============================================================
+           HEADER
+           ============================================================ */
+        .header {
+            display: flex;
             align-items: center;
-            -webkit-tap-highlight-color: transparent;
+            justify-content: space-between;
+            padding: 16px 28px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-card);
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
-        .container {
-            width: 100%;
-            max-width: 850px;
-            margin: auto;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
         }
 
-        .brand-header {
-            text-align: center;
-            margin-bottom: 30px;
-            animation: fadeInDown 0.8s ease-out;
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: var(--gradient-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(124, 106, 255, 0.35);
+            flex-shrink: 0;
         }
 
-        .brand-header h1 {
-            font-size: 2.3rem;
-            font-weight: 800;
-            background: var(--primary-gradient);
+        .brand-text {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: var(--gradient-main);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 6px;
+            background-clip: text;
         }
 
-        .brand-header p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
+        .brand-sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            -webkit-text-fill-color: var(--text-secondary);
+            background: none;
+            display: block;
+            margin-top: -2px;
         }
 
-        .status-bar {
+        .header-actions {
             display: flex;
             align-items: center;
-            justify-content: flex-end;
-            gap: 8px;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-bottom: 20px;
+            gap: 10px;
         }
 
-        .status-dot {
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px 6px 12px;
+            border-radius: 40px;
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            font-size: 12px;
+            font-weight: 500;
+            color: #4ade80;
+        }
+
+        .status-badge .dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: var(--warning);
+            background: #4ade80;
+            animation: pulseDot 2s ease-in-out infinite;
         }
 
-        .search-box {
-            background: var(--card-bg);
+        @keyframes pulseDot {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+        }
+
+        /* ============================================================
+           TABS
+           ============================================================ */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            background: var(--glass-bg);
             backdrop-filter: blur(16px);
-            border: 1px solid var(--border-color);
-            padding: 12px;
-            border-radius: 20px;
-            display: flex;
-            gap: 12px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            margin-bottom: 25px;
-            animation: fadeInUp 0.8s ease-out;
-        }
-
-        .search-box input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--text-main);
-            font-size: 1rem;
-            padding-left: 15px;
-            text-transform: uppercase;
-            min-height: 44px;
-            -webkit-appearance: none;
-        }
-
-        .search-box input::placeholder {
-            color: var(--text-muted);
-            text-transform: none;
-        }
-
-        .search-box button {
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-            padding: 12px 28px;
-            font-weight: 600;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: transform 0.2s, opacity 0.2s;
-            min-height: 44px;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-        }
-
-        .search-box button:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-
-        .search-box button:active {
-            transform: scale(0.95);
-        }
-
-        .loader-container {
-            display: none;
-            text-align: center;
-            padding: 50px 20px;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top: 4px solid #6366f1;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .result-card {
-            display: none;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: scaleUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .vehicle-title-badge {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 20px;
-            margin-bottom: 25px;
-        }
-
-        .vehicle-title-badge h2 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .badge {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .badge.success {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .badge.warning {
-            background: rgba(245, 158, 11, 0.15);
-            color: var(--warning);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .grid-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-            gap: 20px;
-        }
-
-        .info-item {
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid var(--border-color);
-            padding: 16px 20px;
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
             border-radius: 16px;
-            transition: transform 0.3s, border-color 0.3s;
+            padding: 6px;
+            margin-bottom: 28px;
+            box-shadow: var(--glass-shadow);
+            overflow-x: auto;
+            flex-shrink: 0;
         }
 
-        .info-item:hover {
-            transform: translateY(-3px);
-            border-color: rgba(99, 102, 241, 0.5);
-        }
-
-        .info-item label {
-            display: block;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            margin-bottom: 6px;
-        }
-
-        .info-item span {
-            font-size: 1.05rem;
+        .tab-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: var(--font);
+            font-size: 15px;
             font-weight: 600;
-            color: var(--text-main);
+            cursor: pointer;
+            transition: all var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .tab-btn i {
+            font-size: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .tab-btn.active {
+            background: var(--gradient-main);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(124, 106, 255, 0.35);
+        }
+
+        .tab-btn.active i {
+            transform: scale(1.1);
+        }
+
+        .tab-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* ============================================================
+           PANELS
+           ============================================================ */
+        .panel {
+            display: none;
+            animation: panelFade 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        @keyframes panelFade {
+            0% {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================
+           CARDS
+           ============================================================ */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-card);
+            padding: 28px 32px;
+            box-shadow: var(--glass-shadow);
+            transition: all var(--transition-smooth);
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-title i {
+            color: var(--accent-2);
+            font-size: 20px;
+        }
+
+        /* ============================================================
+           INPUT GROUP
+           ============================================================ */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .input-row .field-wrap {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .input-row .field-wrap .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 16px;
+            pointer-events: none;
+            transition: color 0.3s ease;
+        }
+
+        .input-row .field-wrap:focus-within .input-icon {
+            color: var(--accent-1);
+        }
+
+        .input-row input,
+        .input-row select {
+            width: 100%;
+            padding: 14px 18px 14px 46px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-input);
+            color: var(--text-primary);
+            font-family: var(--font);
+            font-size: 15px;
+            transition: all var(--transition-smooth);
+            outline: none;
+        }
+
+        .input-row input::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .input-row input:focus,
+        .input-row select:focus {
+            border-color: var(--accent-1);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 0 4px rgba(124, 106, 255, 0.12);
+        }
+
+        .input-row select {
+            padding: 14px 18px 14px 46px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.4)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            cursor: pointer;
+        }
+
+        .input-row select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .btn-primary {
+            padding: 14px 32px;
+            border: none;
+            border-radius: var(--radius-btn);
+            background: var(--gradient-main);
+            color: #fff;
+            font-family: var(--font);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 24px rgba(124, 106, 255, 0.3);
+            flex-shrink: 0;
+            min-height: 56px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 36px rgba(124, 106, 255, 0.45);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.96);
+        }
+
+        .btn-primary i {
+            font-size: 16px;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ============================================================
+           RESULT AREA
+           ============================================================ */
+        .result-area {
+            margin-top: 24px;
+            min-height: 120px;
+            position: relative;
+        }
+
+        .result-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 20px;
+            text-align: center;
+            color: var(--text-muted);
+            border: 1.5px dashed rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-card);
+            background: rgba(255, 255, 255, 0.01);
+            transition: all 0.3s ease;
+        }
+
+        .result-placeholder i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.4;
+        }
+
+        .result-placeholder p {
+            font-size: 14px;
+            max-width: 280px;
+        }
+
+        /* ---- Result Card ---- */
+        .result-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-card);
+            padding: 24px 28px;
+            animation: resultSlide 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes resultSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px 24px;
+        }
+
+        .result-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .result-item .label {
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+        }
+
+        .result-item .value {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
             word-break: break-word;
         }
 
-        .full-width {
-            grid-column: 1 / -1;
+        .result-item .value.highlight {
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .not-found-card {
-            display: none;
+        .result-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+            margin: 16px 0;
+        }
+
+        /* ---- Server badge ---- */
+        .server-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 14px 4px 10px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 500;
+            background: rgba(124, 106, 255, 0.12);
+            border: 1px solid rgba(124, 106, 255, 0.15);
+            color: var(--accent-1);
+            margin-bottom: 16px;
+        }
+
+        .server-badge i {
+            font-size: 12px;
+        }
+
+        /* ============================================================
+           NOT FOUND — PREMIUM WARNING
+           ============================================================ */
+        .not-found {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 28px;
             text-align: center;
-            padding: 45px 20px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            animation: shake 0.5s ease-in-out;
+            background: rgba(244, 67, 54, 0.04);
+            border: 1.5px solid rgba(244, 67, 54, 0.15);
+            border-radius: var(--radius-card);
+            animation: notFoundPulse 2s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
         }
 
-        .not-found-card i {
-            font-size: 3.2rem;
-            color: #ef4444;
-            margin-bottom: 15px;
+        .not-found::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: var(--radius-card);
+            background: conic-gradient(from 0deg, transparent, rgba(244, 67, 54, 0.15), transparent, rgba(244, 67, 54, 0.15), transparent);
+            z-index: -1;
+            animation: spinGlow 6s linear infinite;
         }
 
-        .not-found-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 8px;
+        @keyframes spinGlow {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
-        .not-found-card p {
+        @keyframes notFoundPulse {
+            0%,
+            100% {
+                border-color: rgba(244, 67, 54, 0.15);
+                box-shadow: 0 0 30px rgba(244, 67, 54, 0.05);
+            }
+            50% {
+                border-color: rgba(244, 67, 54, 0.3);
+                box-shadow: 0 0 60px rgba(244, 67, 54, 0.12);
+            }
+        }
+
+        .not-found .warning-icon {
+            font-size: 56px;
+            color: #f44336;
+            margin-bottom: 16px;
+            animation: warningBounce 1.8s ease-in-out infinite;
+        }
+
+        @keyframes warningBounce {
+            0%,
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+            25% {
+                transform: scale(1.1) rotate(-6deg);
+            }
+            75% {
+                transform: scale(1.1) rotate(6deg);
+            }
+        }
+
+        .not-found h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #f44336;
+            margin-bottom: 6px;
+        }
+
+        .not-found p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            max-width: 360px;
+        }
+
+        /* ============================================================
+           LOADER
+           ============================================================ */
+        .loader-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            gap: 16px;
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.05);
+            border-top-color: var(--accent-1);
+            border-right-color: var(--accent-2);
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loader-wrap p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* ============================================================
+           FOOTER
+           ============================================================ */
+        .footer {
+            margin-top: auto;
+            padding-top: 32px;
+            text-align: center;
+            font-size: 13px;
             color: var(--text-muted);
-            font-size: 0.95rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px 24px;
         }
 
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
         }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .footer a:hover {
+            color: var(--accent-1);
         }
 
-        @keyframes scaleUp {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+        .footer .sep {
+            color: var(--text-muted);
+            opacity: 0.3;
         }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-8px); }
-            40%, 80% { transform: translateX(8px); }
-        }
-
-        @media (max-width: 600px) {
-            .brand-header h1 {
-                font-size: 1.7rem;
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 768px) {
+            .app-wrapper {
+                padding: 12px 14px 24px;
             }
-            
-            .search-box {
+
+            .header {
+                padding: 14px 18px;
                 flex-direction: column;
-                gap: 8px;
-                padding: 12px;
+                align-items: stretch;
+                gap: 10px;
             }
-            
-            .search-box input {
-                font-size: 0.95rem;
-                padding: 12px 15px;
-                text-align: center;
+
+            .brand-text {
+                font-size: 18px;
             }
-            
-            .search-box button {
+            .brand-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+            .brand-sub {
+                font-size: 10px;
+            }
+
+            .header-actions {
+                justify-content: flex-start;
+            }
+            .status-badge {
+                font-size: 10px;
+                padding: 4px 12px 4px 8px;
+            }
+
+            .tabs {
+                border-radius: 12px;
+                padding: 4px;
+                gap: 4px;
+            }
+            .tab-btn {
+                min-width: 0;
+                padding: 10px 14px;
+                font-size: 13px;
+                gap: 6px;
+                flex: 1;
+            }
+            .tab-btn i {
+                font-size: 14px;
+            }
+
+            .card {
+                padding: 18px 16px;
+                border-radius: 16px;
+            }
+            .card-title {
+                font-size: 16px;
+            }
+
+            .input-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .input-row .field-wrap {
+                min-width: 0;
+            }
+            .btn-primary {
                 width: 100%;
-                padding: 14px;
-                font-size: 1rem;
+                justify-content: center;
+                padding: 14px 20px;
+                min-height: 50px;
             }
-            
-            .result-card {
-                padding: 18px;
-            }
-            
-            .grid-info {
-                grid-template-columns: 1fr;
+
+            .result-grid {
+                grid-template-columns: 1fr 1fr;
                 gap: 12px;
             }
-            
-            .vehicle-title-badge {
+
+            .not-found {
+                padding: 32px 18px;
+            }
+            .not-found .warning-icon {
+                font-size: 44px;
+            }
+            .not-found h3 {
+                font-size: 18px;
+            }
+
+            .footer {
+                font-size: 11px;
                 flex-direction: column;
-                gap: 10px;
-                align-items: flex-start;
+                gap: 4px;
             }
-            
-            .vehicle-title-badge h2 {
-                font-size: 1.3rem;
+            .footer .sep {
+                display: none;
             }
+        }
+
+        @media (max-width: 420px) {
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+            .brand-text {
+                font-size: 16px;
+            }
+            .tab-btn {
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+            .tab-btn i {
+                font-size: 12px;
+            }
+            .card {
+                padding: 14px 12px;
+            }
+            .input-row input,
+            .input-row select {
+                padding: 12px 14px 12px 40px;
+                font-size: 14px;
+            }
+            .btn-primary {
+                font-size: 14px;
+                padding: 12px 16px;
+                min-height: 46px;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .app-wrapper {
+                padding: 16px 28px 32px;
+            }
+            .result-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .result-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* ============================================================
+           UTILITIES
+           ============================================================ */
+        .text-gradient {
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gap-8 {
+            gap: 8px;
+        }
+        .gap-12 {
+            gap: 12px;
+        }
+
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mt-16 {
+            margin-top: 16px;
+        }
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+        .mb-16 {
+            margin-bottom: 16px;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        /* ---- toast / notification ---- */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(20, 20, 40, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 14px 28px;
+            color: var(--text-primary);
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            z-index: 9999;
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            opacity: 0;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 90vw;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+
+        .toast i {
+            font-size: 20px;
+        }
+
+        .toast.error i {
+            color: #f44336;
+        }
+        .toast.success i {
+            color: #4ade80;
+        }
+        .toast.info i {
+            color: var(--accent-1);
+        }
+
+        /* ---- input lock indicators ---- */
+        .input-lock-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .input-lock-hint i {
+            font-size: 12px;
+        }
+
+        /* ============================================================
+           SELECT SERVER WRAPPER (Vehicle)
+           ============================================================ */
+        .server-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .server-selector label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .server-selector .btn-server {
+            padding: 8px 20px;
+            border-radius: 40px;
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: var(--font);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-smooth);
+        }
+
+        .server-selector .btn-server:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+        }
+
+        .server-selector .btn-server.active {
+            background: var(--gradient-main);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(124, 106, 255, 0.3);
+        }
+
+        .server-selector .btn-server:active {
+            transform: scale(0.96);
+        }
+
+        .server-selector .btn-server i {
+            margin-right: 6px;
         }
     </style>
 </head>
+
 <body>
 
-    <div class="container">
-        <div class="brand-header">
-            <h1>Parivahan Service</h1>
-            <p>Advanced Vehicle Information & Analytics Portal</p>
-        </div>
-
-        <div class="status-bar">
-            <span class="status-dot" id="statusDot"></span>
-            <span id="statusText">System Ready</span>
-        </div>
-
-        <form id="searchForm" onsubmit="handleSearchSubmit(event)" class="search-box">
-            <input type="text" id="vehicleNumber" placeholder="Enter Vehicle No. (e.g., GJ05MS9717)" value="GJ05MS9717" required autocomplete="off" enterkeyhint="search">
-            <button type="submit" id="searchBtn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
-        </form>
-
-        <div class="loader-container" id="loader">
-            <div class="spinner"></div>
-            <p style="color: var(--text-muted);">Fetching vehicle details...</p>
-        </div>
-
-        <div class="not-found-card" id="notFound">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <h3>Details Not Found</h3>
-            <p id="errorDesc">Could not retrieve details for this vehicle number.</p>
-        </div>
-
-        <div class="result-card" id="resultCard">
-            <div class="vehicle-title-badge">
-                <h2 id="regNumberTitle">--</h2>
-                <span class="badge" id="statusBadge">SUCCESS</span>
-            </div>
-            <div class="grid-info" id="infoGrid"></div>
-        </div>
+    <!-- ============================================================
+    ANIMATED BACKGROUND
+    ============================================================ -->
+    <div class="bg-glow" aria-hidden="true">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
     </div>
 
+    <!-- ============================================================
+    TOAST
+    ============================================================ -->
+    <div class="toast" id="toast" role="alert">
+        <i class="fas fa-info-circle"></i>
+        <span id="toastMsg">Message</span>
+    </div>
+
+    <!-- ============================================================
+    APP WRAPPER
+    ============================================================ -->
+    <div class="app-wrapper">
+
+        <!-- ============================================================
+        HEADER
+        ============================================================ -->
+        <header class="header">
+            <a class="brand" href="#">
+                <div class="brand-icon">
+                    <i class="fas fa-car"></i>
+                </div>
+                <div>
+                    <span class="brand-text">AutoVerify</span>
+                    <span class="brand-sub">Premium Vehicle &amp; IFSC Lookup</span>
+                </div>
+            </a>
+            <div class="header-actions">
+                <div class="status-badge">
+                    <span class="dot"></span>
+                    <span>Live</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ============================================================
+        TABS
+        ============================================================ -->
+        <nav class="tabs" role="tablist">
+            <button class="tab-btn active" data-tab="vehicle" role="tab" aria-selected="true">
+                <i class="fas fa-truck"></i> Vehicle Details
+            </button>
+            <button class="tab-btn" data-tab="ifsc" role="tab" aria-selected="false">
+                <i class="fas fa-university"></i> IFSC Code
+            </button>
+        </nav>
+
+        <!-- ============================================================
+        PANEL: VEHICLE
+        ============================================================ -->
+        <section class="panel active" id="panel-vehicle" role="tabpanel">
+
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-search"></i>
+                    Lookup Vehicle Details
+                </div>
+
+                <!-- Server Selector -->
+                <div class="server-selector">
+                    <label><i class="fas fa-server"></i> Select Server:</label>
+                    <button class="btn-server active" data-server="1" id="svr1Btn">
+                        <i class="fas fa-database"></i> Server 1
+                    </button>
+                    <button class="btn-server" data-server="2" id="svr2Btn">
+                        <i class="fas fa-database"></i> Server 2
+                    </button>
+                </div>
+
+                <!-- Input -->
+                <div class="input-group">
+                    <div class="input-row">
+                        <div class="field-wrap">
+                            <i class="fas fa-license-plate input-icon"></i>
+                            <input
+                            type="text"
+                            id="vehicleInput"
+                            placeholder="Enter Vehicle Number (e.g. MH47BM9865)"
+                            autocomplete="off"
+                            spellcheck="false"
+                            maxlength="20"
+                            />
+                        </div>
+                        <button class="btn-primary" id="vehicleSearchBtn">
+                            <i class="fas fa-arrow-right"></i> Search
+                        </button>
+                    </div>
+                    <div class="input-lock-hint">
+                        <i class="fas fa-lock"></i>
+                        Auto-uppercase · No spaces allowed
+                    </div>
+                </div>
+
+                <!-- Result Area -->
+                <div class="result-area" id="vehicleResult">
+                    <div class="result-placeholder" id="vehiclePlaceholder">
+                        <i class="fas fa-car"></i>
+                        <p>Enter a vehicle number and click Search<br />to fetch details from the selected server.</p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ============================================================
+        PANEL: IFSC
+        ============================================================ -->
+        <section class="panel" id="panel-ifsc" role="tabpanel">
+
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-building-columns"></i>
+                    IFSC Code Lookup
+                </div>
+
+                <div class="input-group">
+                    <div class="input-row">
+                        <div class="field-wrap">
+                            <i class="fas fa-code input-icon"></i>
+                            <input
+                            type="text"
+                            id="ifscInput"
+                            placeholder="Enter IFSC Code (e.g. SBIN0001234)"
+                            autocomplete="off"
+                            spellcheck="false"
+                            maxlength="20"
+                            />
+                        </div>
+                        <button class="btn-primary" id="ifscSearchBtn">
+                            <i class="fas fa-arrow-right"></i> Search
+                        </button>
+                    </div>
+                    <div class="input-lock-hint">
+                        <i class="fas fa-lock"></i>
+                        Auto-uppercase · No spaces allowed
+                    </div>
+                </div>
+
+                <div class="result-area" id="ifscResult">
+                    <div class="result-placeholder" id="ifscPlaceholder">
+                        <i class="fas fa-university"></i>
+                        <p>Enter an IFSC code and click Search<br />to fetch bank branch details.</p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ============================================================
+        FOOTER
+        ============================================================ -->
+        <footer class="footer">
+            <span>&copy; 2026 AutoVerify — Premium Lookup</span>
+            <span class="sep">·</span>
+            <span>Powered by <span class="text-gradient">3 APIs</span></span>
+            <span class="sep">·</span>
+            <a href="#" onclick="return false;">Privacy</a>
+            <a href="#" onclick="return false;">Terms</a>
+        </footer>
+
+    </div>
+
+    <!-- ============================================================
+    JAVASCRIPT — FULL INTEGRATION
+    ============================================================ -->
     <script>
-        // ============================================================
-        // FIXED: Multiple API endpoints for reliability
-        // ============================================================
-        
-        const API_ENDPOINTS = [
-            // Primary API (original)
-            {
-                url: (regNo) => `https://cjpindia.vercel.app/api/vehicle-details/${regNo}`,
-                type: 'direct'
-            },
-            // Alternative API 1
-            {
-                url: (regNo) => `https://api.allorigins.win/get?url=${encodeURIComponent(`https://cjpindia.vercel.app/api/vehicle-details/${regNo}`)}`,
-                type: 'proxy'
-            },
-            // Alternative API 2 - Mock data for testing (works even when API is down)
-            {
-                url: (regNo) => null,
-                type: 'mock',
-                generateMock: (regNo) => generateMockData(regNo)
-            }
-        ];
+        (function() {
+            'use strict';
 
-        // ============================================================
-        // MOCK DATA GENERATOR (FALLBACK WHEN API IS DOWN)
-        // ============================================================
-        
-        function generateMockData(regNo) {
-            const states = {
-                'GJ': 'Gujarat',
-                'MH': 'Maharashtra',
-                'KA': 'Karnataka',
-                'TN': 'Tamil Nadu',
-                'DL': 'Delhi',
-                'UP': 'Uttar Pradesh',
-                'RJ': 'Rajasthan',
-                'PB': 'Punjab',
-                'HR': 'Haryana',
-                'MP': 'Madhya Pradesh'
-            };
-            
-            const stateCode = regNo.substring(0, 2);
-            const stateName = states[stateCode] || 'Unknown State';
-            const rtoCode = regNo.substring(2, 4);
-            const vehicleType = regNo.includes('MS') ? 'Maruti Suzuki' : 'Hyundai';
-            const models = ['Swift', 'Baleno', 'i20', 'Creta', 'Dzire', 'Ertiga', 'Venue', 'Seltos'];
-            const model = models[Math.floor(Math.random() * models.length)];
-            const years = ['2018', '2019', '2020', '2021', '2022', '2023'];
-            const year = years[Math.floor(Math.random() * years.length)];
-            const names = ['Rajesh Kumar', 'Priya Sharma', 'Amit Patel', 'Sneha Reddy', 'Vikram Singh', 'Ananya Iyer'];
-            const name = names[Math.floor(Math.random() * names.length)];
-            
-            return {
-                registrationResult: {
-                    registrationNo: regNo,
-                    ownerName: name,
-                    make: vehicleType,
-                    model: model,
-                    displayVariant: `${model} VXI`,
-                    fuel: ['Petrol', 'Diesel', 'CNG'][Math.floor(Math.random() * 3)],
-                    cubicCapacity: ['1197', '1497', '1582'][Math.floor(Math.random() * 3)],
-                    registrationDate: `01-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${year}`,
-                    chasisno: `MAB${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
-                    engineno: `ENG${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-                    bodyType: ['Hatchback', 'Sedan', 'SUV', 'MUV'][Math.floor(Math.random() * 4)],
-                    seatingCapacity: ['5', '6', '7'][Math.floor(Math.random() * 3)],
-                    rto: {
-                        rtoPlateLntLoc: `${stateName} - RTO ${rtoCode}`,
-                        lntLoc: `${stateName}`
-                    },
-                    pucValidDate: `31-12-${Number(year) + 1}`,
-                    corrAddress: `123 Main Road, ${stateName}, India - ${Math.floor(Math.random() * 900000 + 100000)}`
+            // ============================================================
+            // CONFIGURATION — Actual API endpoints
+            // ============================================================
+            const CONFIG = {
+                vehicleAPI: {
+                    server1: 'https://cjpindia.vercel.app/api/vehicle-details/', // append number
+                    server2: 'https://cjpen.vercel.app/vehicle/', // append number
                 },
-                premiumRequest: {
-                    customerName: name,
-                    motorPremiumRequest: {
-                        registrationNo: regNo,
-                        make: vehicleType,
-                        model: model,
-                        variant: `${model} VXI`,
-                        fuel: ['Petrol', 'Diesel', 'CNG'][Math.floor(Math.random() * 3)],
-                        cubicCapacity: ['1197', '1497', '1582'][Math.floor(Math.random() * 3)],
-                        registrationDate: `01-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${year}`,
-                        rtoId: rtoCode,
-                        rtoDesp: `${stateName} RTO ${rtoCode}`,
-                        previousPolicyNumber: `POL${Math.random().toString(36).substring(2, 10).toUpperCase()}`
-                    }
-                }
+                ifscAPI: 'https://ifsc.razorpay.com/',
             };
-        }
 
-        // ============================================================
-        // MAIN SEARCH FUNCTION
-        // ============================================================
+            // ============================================================
+            // STATE
+            // ============================================================
+            let activeVehicleServer = 1; // 1 or 2
+            let isVehicleLoading = false;
+            let isIfscLoading = false;
 
-        function handleSearchSubmit(e) {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            
-            const rawInput = document.getElementById('vehicleNumber').value.trim();
-            const cleanRegNo = rawInput.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            // ============================================================
+            // DOM REFS
+            // ============================================================
+            const $ = (s) => document.querySelector(s);
+            const $$ = (s) => document.querySelectorAll(s);
 
-            if (!cleanRegNo) {
-                alert("Please enter a valid vehicle number.");
-                return;
-            }
+            const tabs = $$('.tab-btn');
+            const panels = {
+                vehicle: $('#panel-vehicle'),
+                ifsc: $('#panel-ifsc'),
+            };
 
-            if (cleanRegNo.length < 6) {
-                alert("Please enter a valid vehicle number (minimum 6 characters).");
-                return;
-            }
+            const vehicleInput = $('#vehicleInput');
+            const vehicleSearchBtn = $('#vehicleSearchBtn');
+            const vehicleResult = $('#vehicleResult');
+            const vehiclePlaceholder = $('#vehiclePlaceholder');
 
-            fetchVehicleData(cleanRegNo);
-        }
+            const ifscInput = $('#ifscInput');
+            const ifscSearchBtn = $('#ifscSearchBtn');
+            const ifscResult = $('#ifscResult');
+            const ifscPlaceholder = $('#ifscPlaceholder');
 
-        // ============================================================
-        // MOBILE EVENT HANDLERS
-        // ============================================================
+            const svr1Btn = $('#svr1Btn');
+            const svr2Btn = $('#svr2Btn');
 
-        document.getElementById('vehicleNumber').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' || e.key === 'Go' || e.keyCode === 13) {
-                e.preventDefault();
-                e.stopPropagation();
-                handleSearchSubmit(e);
-            }
-        });
+            const toast = $('#toast');
+            const toastMsg = $('#toastMsg');
 
-        document.getElementById('vehicleNumber').addEventListener('input', function(e) {
-            this.value = this.value.toUpperCase().replace(/[^a-zA-Z0-9]/g, '');
-        });
+            let toastTimer = null;
 
-        const searchBtn = document.getElementById('searchBtn');
-        searchBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            handleSearchSubmit(e);
-        });
-
-        searchBtn.addEventListener('touchstart', function(e) {
-            this.style.transform = 'scale(0.95)';
-        });
-
-        searchBtn.addEventListener('touchend', function(e) {
-            this.style.transform = 'scale(1)';
-            setTimeout(() => {
-                handleSearchSubmit(e);
-            }, 50);
-        });
-
-        document.getElementById('searchForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            handleSearchSubmit(e);
-            return false;
-        });
-
-        // ============================================================
-        // FETCH VEHICLE DATA WITH MULTIPLE FALLBACKS
-        // ============================================================
-
-        async function fetchVehicleData(regNo) {
-            const loader = document.getElementById('loader');
-            const notFound = document.getElementById('notFound');
-            const resultCard = document.getElementById('resultCard');
-
-            loader.style.display = 'block';
-            notFound.style.display = 'none';
-            resultCard.style.display = 'none';
-            updateSystemStatus('Fetching data...', '#f59e0b');
-
-            // Try each API endpoint in order
-            for (let i = 0; i < API_ENDPOINTS.length; i++) {
-                const endpoint = API_ENDPOINTS[i];
-                
-                try {
-                    let data = null;
-                    
-                    if (endpoint.type === 'mock') {
-                        // Use mock data
-                        data = endpoint.generateMock(regNo);
-                        if (data) {
-                            updateSystemStatus('Mock Data (API Unavailable)', '#f59e0b');
-                            renderVehicleData(data, regNo);
-                            loader.style.display = 'none';
-                            return;
-                        }
-                        continue;
-                    }
-
-                    const url = endpoint.url(regNo);
-                    if (!url) continue;
-
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 8000);
-
-                    const response = await fetch(url, {
-                        method: 'GET',
-                        headers: { 
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        signal: controller.signal
-                    });
-
-                    clearTimeout(timeoutId);
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-
-                    data = await response.json();
-                    
-                    if (data && (data.registrationResult || data.premiumRequest || data.registrationNo)) {
-                        updateSystemStatus('API Connected', '#10b981');
-                        renderVehicleData(data, regNo);
-                        loader.style.display = 'none';
-                        return;
-                    }
-                    
-                } catch (error) {
-                    console.warn(`Endpoint ${i + 1} failed:`, error);
-                    // Continue to next endpoint
+            // ============================================================
+            // TOAST
+            // ============================================================
+            function showToast(message, type = 'info') {
+                if (toastTimer) {
+                    clearTimeout(toastTimer);
+                    toast.classList.remove('show');
                 }
+                toast.className = 'toast';
+                const icon = toast.querySelector('i');
+                icon.className = 'fas';
+                if (type === 'error') {
+                    toast.classList.add('error');
+                    icon.classList.add('fa-circle-exclamation');
+                } else if (type === 'success') {
+                    toast.classList.add('success');
+                    icon.classList.add('fa-circle-check');
+                } else {
+                    toast.classList.add('info');
+                    icon.classList.add('fa-circle-info');
+                }
+                toastMsg.textContent = message;
+                void toast.offsetWidth;
+                toast.classList.add('show');
+                toastTimer = setTimeout(() => {
+                    toast.classList.remove('show');
+                    toastTimer = null;
+                }, 4000);
             }
 
-            // If all endpoints fail, try one more time with mock data
-            try {
-                const mockData = generateMockData(regNo);
-                if (mockData) {
-                    updateSystemStatus('Using Demo Data', '#f59e0b');
-                    renderVehicleData(mockData, regNo);
-                    loader.style.display = 'none';
+            // ============================================================
+            // HELPERS: input formatting (uppercase, no spaces)
+            // ============================================================
+            function formatVehicleInput(value) {
+                return value.replace(/\s/g, '').toUpperCase();
+            }
+
+            function formatIfscInput(value) {
+                return value.replace(/\s/g, '').toUpperCase();
+            }
+
+            // ============================================================
+            // RENDER: Vehicle Result (handles both API structures)
+            // ============================================================
+            function renderVehicleResult(data, serverLabel) {
+                // data is the parsed JSON from the API
+                let details = null;
+                let success = false;
+
+                // Determine which API structure we have
+                if (data.registrationResult && data.registrationResult.status === 'SUCCESS') {
+                    // Server 1 structure
+                    details = data.registrationResult;
+                    success = true;
+                } else if (data.success === true && data.data) {
+                    // Server 2 structure
+                    details = data.data;
+                    success = true;
+                } else if (data.status === 'error' || data.error || data.message === 'Not Found') {
+                    // Error case
+                    success = false;
+                } else {
+                    // Fallback: check if we have any data
+                    if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+                        details = data; // assume it's the details
+                        success = true;
+                    } else {
+                        success = false;
+                    }
+                }
+
+                if (!success || !details || Object.keys(details).length === 0) {
+                    showNotFound('Vehicle', 'No details found for this vehicle number.');
                     return;
                 }
-            } catch (e) {
-                console.error('Mock data failed:', e);
-            }
 
-            // All attempts failed
-            showNotFound(`Could not fetch data for "${regNo}". Please check the vehicle number and try again.`);
-            updateSystemStatus('Connection Failed', '#ef4444');
-            loader.style.display = 'none';
-        }
+                // Build a consistent field map from the details object
+                // We'll pick common and useful fields from both APIs
+                const fieldMap = {
+                    'registrationNo': 'Registration No.',
+                    'regNo': 'Registration No.',
+                    'owner': 'Owner Name',
+                    'ownerFirstName': 'Owner First Name',
+                    'ownerLastName': 'Owner Last Name',
+                    'ownerName': 'Owner Name',
+                    'make': 'Make',
+                    'manufacturer': 'Manufacturer',
+                    'model': 'Model',
+                    'vehicle': 'Model',
+                    'variant': 'Variant',
+                    'displayVariant': 'Variant',
+                    'fuel': 'Fuel',
+                    'fuelType': 'Fuel Type',
+                    'cubicCapacity': 'CC',
+                    'engine': 'Engine No.',
+                    'engineno': 'Engine No.',
+                    'chassis': 'Chassis No.',
+                    'chasisno': 'Chassis No.',
+                    'registrationDate': 'Reg. Date',
+                    'regDate': 'Reg. Date',
+                    'year': 'Year',
+                    'manufacturerYear': 'Mfg. Year',
+                    'manufacturerMonthYear': 'Mfg. Month/Year',
+                    'rto': 'RTO Code',
+                    'rtoCode': 'RTO Code',
+                    'rtoName': 'RTO Name',
+                    'regAuthority': 'Reg. Authority',
+                    'financerName': 'Financer',
+                    'insuranceCompanyName': 'Insurance Co.',
+                    'insuranceUpto': 'Insurance Upto',
+                    'insuranceExpired': 'Insurance Expired',
+                    'pucValidDate': 'PUC Valid Date',
+                    'puccValidUpto': 'PUC Valid Upto',
+                    'permanentAddress': 'Permanent Address',
+                    'presentAddress': 'Present Address',
+                    'corrAddress': 'Correspondence Address',
+                    'ownerFatherName': 'Father\'s Name',
+                    'seatCapacity': 'Seat Capacity',
+                    'seatingCapacity': 'Seating Capacity',
+                    'vehicleClass': 'Vehicle Class',
+                    'status': 'Status',
+                    'vertical': 'Vertical',
+                    'prePolicyNo': 'Previous Policy No.',
+                    'previousClaim': 'Previous Claim',
+                    'pucNo': 'PUC No.',
+                };
 
-        function updateSystemStatus(text, color) {
-            document.getElementById('statusText').innerText = text;
-            document.getElementById('statusDot').style.background = color;
-        }
+                // We'll also add any extra fields not in the map
+                const extraKeys = [];
 
-        function showNotFound(msg) {
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('notFound').style.display = 'block';
-            document.getElementById('resultCard').style.display = 'none';
-            if(msg) document.getElementById('errorDesc').innerText = msg;
-        }
-
-        function renderVehicleData(data, inputRegNo) {
-            document.getElementById('loader').style.display = 'none';
-            const resultCard = document.getElementById('resultCard');
-            const infoGrid = document.getElementById('infoGrid');
-            
-            const reg = data.registrationResult || data;
-            const req = data.premiumRequest || {};
-            const motorReq = req.motorPremiumRequest || {};
-
-            let regNo = reg.registrationNo || motorReq.registrationNo || inputRegNo;
-            document.getElementById('regNumberTitle').innerText = regNo;
-
-            const statusBadge = document.getElementById('statusBadge');
-            const statusText = reg.status || (reg.rto ? 'VERIFIED' : 'SUCCESS');
-            statusBadge.innerText = statusText;
-            
-            if(statusText === "SUCCESS" || statusText === "VERIFIED") {
-                statusBadge.className = "badge success";
-            } else {
-                statusBadge.className = "badge warning";
-            }
-
-            const fields = [
-                { label: 'Owner Name', value: reg.ownerName || `${reg.ownerFirstName || ''} ${reg.ownerLastName || ''}`.trim() || req.customerName },
-                { label: 'Maker / Model', value: `${reg.make || motorReq.make || ''} ${reg.model || motorReq.model || ''} (${reg.displayVariant || reg.variant || motorReq.variant || ''})` },
-                { label: 'Fuel Type', value: reg.fuel || motorReq.fuel },
-                { label: 'Cubic Capacity', value: (reg.cubicCapacity || motorReq.cubicCapacity) ? `${reg.cubicCapacity || motorReq.cubicCapacity} CC` : null },
-                { label: 'Registration Date', value: reg.registrationDate || motorReq.registrationDate },
-                { label: 'Financier Name', value: reg.financierName || 'N/A' },
-                { label: 'Chassis Number', value: reg.chasisno || reg.chassisNo || 'N/A' },
-                { label: 'Engine Number', value: reg.engineno || reg.engineNo || 'N/A' },
-                { label: 'Body Type', value: reg.bodyType || 'N/A' },
-                { label: 'Seating Capacity', value: reg.seatingCapacity || 'N/A' },
-                { label: 'RTO Location', value: reg.rto ? (reg.rto.rtoPlateLntLoc || reg.rto.lntLoc) : (motorReq.rtoDesp ? `${motorReq.rtoId} - ${motorReq.rtoDesp}` : 'N/A') },
-                { label: 'PUC Valid Date', value: reg.pucValidDate || 'N/A' },
-                { label: 'Previous Policy No', value: reg.prePolicyNo || motorReq.previousPolicyNumber || 'N/A' },
-                { label: 'Permanent Address', value: reg.corrAddress || reg.permanentAddress || 'N/A', full: true }
-            ];
-
-            let htmlContent = '';
-            let hasData = false;
-            
-            fields.forEach(item => {
-                let val = item.value ? String(item.value).trim() : "";
-                if (val && val !== "undefined" && val !== "null" && val !== "()" && val !== "" && val !== "N/A") {
-                    hasData = true;
-                    htmlContent += `
-                        <div class="info-item ${item.full ? 'full-width' : ''}">
-                            <label>${item.label}</label>
-                            <span>${val}</span>
-                        </div>
+                let html = `
+                            <div class="server-badge">
+                                <i class="fas fa-server"></i> ${serverLabel}
+                            </div>
+                            <div class="result-card">
+                                <div class="result-grid">
                     `;
+
+                let count = 0;
+                for (const [key, val] of Object.entries(details)) {
+                    if (val === null || val === undefined || val === '') continue;
+                    // Skip complex objects or arrays (we'll handle them separately)
+                    if (typeof val === 'object') continue;
+                    const label = fieldMap[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase());
+                    const displayVal = typeof val === 'string' ? val : JSON.stringify(val);
+                    html += `
+                                <div class="result-item">
+                                    <span class="label">${label}</span>
+                                    <span class="value">${escapeHtml(displayVal)}</span>
+                                </div>
+                            `;
+                    count++;
+                }
+
+                // If we have nested objects like 'rto' (which is an object in server1), we flatten some fields
+                if (details.rto && typeof details.rto === 'object') {
+                    const rto = details.rto;
+                    const rtoFields = {
+                        'rtoCode': 'RTO Code',
+                        'rtoPlate': 'RTO Plate',
+                        'lntLoc': 'Location'
+                    };
+                    for (const [k, v] of Object.entries(rtoFields)) {
+                        if (rto[k] !== undefined && rto[k] !== null && rto[k] !== '') {
+                            html += `
+                                <div class="result-item">
+                                    <span class="label">${v}</span>
+                                    <span class="value">${escapeHtml(rto[k])}</span>
+                                </div>
+                            `;
+                            count++;
+                        }
+                    }
+                }
+
+                if (count === 0) {
+                    showNotFound('Vehicle', 'No details found for this vehicle number.');
+                    return;
+                }
+
+                html += `
+                                </div>
+                            </div>
+                        `;
+
+                vehicleResult.innerHTML = html;
+            }
+
+            // ============================================================
+            // RENDER: IFSC Result
+            // ============================================================
+            function renderIfscResult(data) {
+                if (!data || typeof data !== 'object') {
+                    showNotFound('IFSC', 'No data received from server.');
+                    return;
+                }
+
+                if (data.error || data.message === 'Not Found' || data.status === 'error') {
+                    showNotFound('IFSC', data.message || 'Invalid IFSC code or not found.');
+                    return;
+                }
+
+                const d = data;
+
+                const fields = [
+                    { key: 'IFSC', label: 'IFSC Code' },
+                    { key: 'BANK', label: 'Bank Name' },
+                    { key: 'BRANCH', label: 'Branch' },
+                    { key: 'ADDRESS', label: 'Address' },
+                    { key: 'CONTACT', label: 'Contact' },
+                    { key: 'CITY', label: 'City' },
+                    { key: 'DISTRICT', label: 'District' },
+                    { key: 'STATE', label: 'State' },
+                    { key: 'MICR', label: 'MICR Code' },
+                    { key: 'RTGS', label: 'RTGS Enabled' },
+                    { key: 'NEFT', label: 'NEFT Enabled' },
+                    { key: 'IMPS', label: 'IMPS Enabled' },
+                    { key: 'UPI', label: 'UPI Enabled' },
+                ];
+
+                let html = `
+                            <div class="result-card">
+                                <div class="result-grid">
+                    `;
+
+                let hasData = false;
+                for (const f of fields) {
+                    const val = d[f.key];
+                    if (val === null || val === undefined || val === '') continue;
+                    const displayVal = typeof val === 'string' ? val : JSON.stringify(val);
+                    html += `
+                                <div class="result-item">
+                                    <span class="label">${f.label}</span>
+                                    <span class="value">${escapeHtml(displayVal)}</span>
+                                </div>
+                            `;
+                    hasData = true;
+                }
+
+                if (!hasData) {
+                    showNotFound('IFSC', 'No details found for this IFSC code.');
+                    return;
+                }
+
+                html += `
+                                </div>
+                            </div>
+                        `;
+
+                ifscResult.innerHTML = html;
+            }
+
+            // ============================================================
+            // RENDER: Not Found (Premium Warning)
+            // ============================================================
+            function showNotFound(type, message) {
+                const container = type === 'Vehicle' ? vehicleResult : ifscResult;
+                const icon = type === 'Vehicle' ? 'fa-truck' : 'fa-university';
+                container.innerHTML = `
+                            <div class="not-found">
+                                <div class="warning-icon">
+                                    <i class="fas fa-triangle-exclamation"></i>
+                                </div>
+                                <h3>${type} Not Found</h3>
+                                <p>${escapeHtml(message || 'We could not find any details. Please check the entered code and try again.')}</p>
+                                <div style="margin-top:12px;font-size:13px;color:var(--text-muted);">
+                                    <i class="fas fa-circle-info"></i> ${type === 'Vehicle' ? 'Vehicle number' : 'IFSC code'} must be correct and active.
+                                </div>
+                            </div>
+                        `;
+            }
+
+            // ============================================================
+            // RENDER: Loading
+            // ============================================================
+            function showLoading(container) {
+                container.innerHTML = `
+                            <div class="loader-wrap">
+                                <div class="loader"></div>
+                                <p>Fetching details…</p>
+                            </div>
+                        `;
+            }
+
+            // ============================================================
+            // RENDER: Placeholder
+            // ============================================================
+            function showPlaceholder(container, type) {
+                const icon = type === 'vehicle' ? 'fa-car' : 'fa-university';
+                const text = type === 'vehicle' ?
+                    'Enter a vehicle number and click Search<br />to fetch details from the selected server.' :
+                    'Enter an IFSC code and click Search<br />to fetch bank branch details.';
+                container.innerHTML = `
+                            <div class="result-placeholder">
+                                <i class="fas ${icon}"></i>
+                                <p>${text}</p>
+                            </div>
+                        `;
+            }
+
+            // ============================================================
+            // UTILITY: escape HTML
+            // ============================================================
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // ============================================================
+            // API CALL: Vehicle
+            // ============================================================
+            async function fetchVehicleDetails(vehicleNumber, server) {
+                const baseUrl = server === 1 ? CONFIG.vehicleAPI.server1 : CONFIG.vehicleAPI.server2;
+                const url = `${baseUrl}${encodeURIComponent(vehicleNumber)}`;
+                try {
+                    const res = await fetch(url, {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' },
+                    });
+                    if (!res.ok) {
+                        if (res.status === 404) {
+                            return { error: true, message: 'Not Found' };
+                        }
+                        throw new Error(`HTTP ${res.status}`);
+                    }
+                    const json = await res.json();
+                    return json;
+                } catch (err) {
+                    console.warn('Vehicle API fetch failed:', err);
+                    // Return a mock error response to trigger not-found
+                    return { error: true, message: 'Network error' };
+                }
+            }
+
+            // ============================================================
+            // API CALL: IFSC (Razorpay)
+            // ============================================================
+            async function fetchIfscDetails(ifscCode) {
+                const url = `${CONFIG.ifscAPI}${encodeURIComponent(ifscCode)}`;
+                try {
+                    const res = await fetch(url, {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' },
+                    });
+                    if (!res.ok) {
+                        if (res.status === 404) {
+                            return { error: true, message: 'Not Found' };
+                        }
+                        throw new Error(`HTTP ${res.status}`);
+                    }
+                    return await res.json();
+                } catch (err) {
+                    console.warn('IFSC API fetch failed:', err);
+                    return { error: true, message: 'Network error' };
+                }
+            }
+
+            // ============================================================
+            // HANDLERS: Vehicle
+            // ============================================================
+            async function handleVehicleSearch() {
+                if (isVehicleLoading) return;
+                const raw = vehicleInput.value;
+                const formatted = formatVehicleInput(raw);
+                if (!formatted) {
+                    showToast('Please enter a vehicle number.', 'error');
+                    return;
+                }
+                vehicleInput.value = formatted;
+
+                isVehicleLoading = true;
+                vehicleSearchBtn.disabled = true;
+                showLoading(vehicleResult);
+
+                try {
+                    const data = await fetchVehicleDetails(formatted, activeVehicleServer);
+                    const serverLabel = `Server ${activeVehicleServer}`;
+                    renderVehicleResult(data, serverLabel);
+                    // Check if we have a successful result
+                    const hasData = (data && data.registrationResult && data.registrationResult.status === 'SUCCESS') ||
+                        (data && data.success === true && data.data);
+                    if (hasData) {
+                        showToast('Vehicle details fetched successfully!', 'success');
+                    } else {
+                        // Not found case already rendered by renderVehicleResult
+                        showToast('No details found for this vehicle.', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showNotFound('Vehicle', 'An error occurred while fetching details.');
+                    showToast('Something went wrong. Please try again.', 'error');
+                } finally {
+                    isVehicleLoading = false;
+                    vehicleSearchBtn.disabled = false;
+                }
+            }
+
+            // ============================================================
+            // HANDLERS: IFSC
+            // ============================================================
+            async function handleIfscSearch() {
+                if (isIfscLoading) return;
+                const raw = ifscInput.value;
+                const formatted = formatIfscInput(raw);
+                if (!formatted) {
+                    showToast('Please enter an IFSC code.', 'error');
+                    return;
+                }
+                ifscInput.value = formatted;
+
+                isIfscLoading = true;
+                ifscSearchBtn.disabled = true;
+                showLoading(ifscResult);
+
+                try {
+                    const data = await fetchIfscDetails(formatted);
+                    renderIfscResult(data);
+                    if (data && data.IFSC && data.BANK) {
+                        showToast('IFSC details fetched successfully!', 'success');
+                    } else {
+                        showToast('Invalid IFSC code or not found.', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showNotFound('IFSC', 'An error occurred while fetching details.');
+                    showToast('Something went wrong. Please try again.', 'error');
+                } finally {
+                    isIfscLoading = false;
+                    ifscSearchBtn.disabled = false;
+                }
+            }
+
+            // ============================================================
+            // INPUT EVENT: format on input (uppercase, no spaces)
+            // ============================================================
+            vehicleInput.addEventListener('input', function() {
+                const start = this.selectionStart;
+                const val = this.value;
+                const cleaned = val.replace(/\s/g, '').toUpperCase();
+                if (val !== cleaned) {
+                    this.value = cleaned;
+                    const newPos = Math.min(start, cleaned.length);
+                    this.setSelectionRange(newPos, newPos);
                 }
             });
 
-            if (!hasData) {
-                htmlContent = `
-                    <div class="info-item full-width">
-                        <label>Vehicle Details</label>
-                        <span>Data retrieved successfully for ${regNo}</span>
-                    </div>
-                    <div class="info-item full-width">
-                        <label>Raw Data</label>
-                        <span style="font-size:0.8rem;word-break:break-all;">${JSON.stringify(data, null, 2)}</span>
-                    </div>
-                `;
+            ifscInput.addEventListener('input', function() {
+                const start = this.selectionStart;
+                const val = this.value;
+                const cleaned = val.replace(/\s/g, '').toUpperCase();
+                if (val !== cleaned) {
+                    this.value = cleaned;
+                    const newPos = Math.min(start, cleaned.length);
+                    this.setSelectionRange(newPos, newPos);
+                }
+            });
+
+            // Prevent space key in inputs
+            [vehicleInput, ifscInput].forEach((el) => {
+                el.addEventListener('keydown', function(e) {
+                    if (e.key === ' ') {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            });
+
+            // ============================================================
+            // SERVER SELECTOR
+            // ============================================================
+            function setActiveServer(server) {
+                activeVehicleServer = server;
+                svr1Btn.classList.toggle('active', server === 1);
+                svr2Btn.classList.toggle('active', server === 2);
+                showPlaceholder(vehicleResult, 'vehicle');
+                vehicleInput.value = '';
+                showToast(`Switched to Server ${server}`, 'info');
             }
 
-            infoGrid.innerHTML = htmlContent;
-            resultCard.style.display = 'block';
-        }
+            svr1Btn.addEventListener('click', () => setActiveServer(1));
+            svr2Btn.addEventListener('click', () => setActiveServer(2));
 
-        // ============================================================
-        // AUTO-LOAD ON PAGE LOAD
-        // ============================================================
+            // ============================================================
+            // TAB SWITCHING
+            // ============================================================
+            tabs.forEach((btn) => {
+                btn.addEventListener('click', function() {
+                    const tab = this.dataset.tab;
+                    tabs.forEach((b) => {
+                        b.classList.remove('active');
+                        b.setAttribute('aria-selected', 'false');
+                    });
+                    this.classList.add('active');
+                    this.setAttribute('aria-selected', 'true');
 
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                fetchVehicleData('GJ05MS9717');
-            }, 500);
-        });
+                    Object.keys(panels).forEach((key) => {
+                        panels[key].classList.toggle('active', key === tab);
+                    });
 
-        document.addEventListener('dblclick', function(e) {
-            e.preventDefault();
-        }, { passive: false });
+                    // Ensure placeholders are shown if result area is empty
+                    if (tab === 'vehicle' && vehicleResult.innerHTML.trim() === '') {
+                        showPlaceholder(vehicleResult, 'vehicle');
+                    }
+                    if (tab === 'ifsc' && ifscResult.innerHTML.trim() === '') {
+                        showPlaceholder(ifscResult, 'ifsc');
+                    }
+                });
+            });
+
+            // ============================================================
+            // SEARCH BUTTON CLICKS & ENTER KEY
+            // ============================================================
+            vehicleSearchBtn.addEventListener('click', handleVehicleSearch);
+            ifscSearchBtn.addEventListener('click', handleIfscSearch);
+
+            vehicleInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleVehicleSearch();
+                }
+            });
+
+            ifscInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleIfscSearch();
+                }
+            });
+
+            // ============================================================
+            // DISABLE RIGHT CLICK
+            // ============================================================
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+
+            // ============================================================
+            // DISABLE F12 KEY (and other dev tools shortcuts)
+            // ============================================================
+            document.addEventListener('keydown', function(e) {
+                // F12
+                if (e.key === 'F12') {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+                if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'i' || e.key === 'j')) {
+                    e.preventDefault();
+                    return false;
+                }
+                if (e.ctrlKey && e.key === 'u') {
+                    e.preventDefault();
+                    return false;
+                }
+                if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                    e.preventDefault();
+                    return false;
+                }
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // ============================================================
+            // INIT: show placeholders
+            // ============================================================
+            showPlaceholder(vehicleResult, 'vehicle');
+            showPlaceholder(ifscResult, 'ifsc');
+            svr1Btn.classList.add('active');
+            setTimeout(() => vehicleInput.focus(), 300);
+
+            console.log('%c🚗 AutoVerify Premium', 'font-size:20px;font-weight:bold;color:#7c6aff;');
+            console.log('%cVehicle & IFSC Lookup — 3 API Integration', 'font-size:14px;color:#a855f7;');
+            console.log('%c🔒 Right-click & F12 disabled.', 'font-size:12px;color:#f472b6;');
+
+            // Expose for debugging
+            window.__AUTOVERIFY = { CONFIG, activeVehicleServer };
+
+        })();
     </script>
+
 </body>
 </html>
