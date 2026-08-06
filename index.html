@@ -153,8 +153,8 @@
                             <span id="resFinancier" class="font-bold text-white">--</span>
                         </div>
                         <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60 hover:border-slate-700 transition-colors">
-                            <span class="block text-slate-400 text-xs uppercase tracking-wider font-medium mb-1">PUC Valid Date</span>
-                            <span id="resPuc" class="font-bold text-white">--</span>
+                            <span class="block text-slate-400 text-xs uppercase tracking-wider font-medium mb-1">RTO Location</span>
+                            <span id="resRtoLocation" class="font-bold text-white">--</span>
                         </div>
                     </div>
 
@@ -266,54 +266,50 @@
         async function searchVehicle(event) {
             event.preventDefault();
             const vehicleInput = document.getElementById('vehicleNumber');
-            const regNo = vehicleInput.value.trim().toUpperCase().replace(/\s+/g, '');
+            const vehicleNo = vehicleInput.value.trim().toUpperCase().replace(/\s+/g, '');
             const searchBtn = document.getElementById('searchBtn');
             const searchBtnText = document.getElementById('searchBtnText');
             const searchIcon = document.getElementById('searchIcon');
             const errorBox = document.getElementById('errorMessage');
             const resultContainer = document.getElementById('resultContainer');
 
-            if (!regNo) return;
+            if (!vehicleNo) return;
 
-            // Dismiss mobile keyboard smoothly
+            // Dismiss mobile keyboard seamlessly
             vehicleInput.blur();
 
             // Set loading state on button with spinner
             searchBtn.disabled = true;
             searchBtn.classList.add('opacity-80', 'cursor-not-allowed');
             searchIcon.outerHTML = `<div id="searchIcon" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>`;
-            searchBtnText.innerText = "Searching RTO Database...";
+            searchBtnText.innerText = "Connecting to RTO Database (Please wait)...";
             
             errorBox.classList.add('hidden');
             resultContainer.classList.add('hidden');
 
-            const rawApiUrl = `https://cjpindia.vercel.app/api/vehicle-details/${regNo}`;
+            const rawApiUrl = `https://cjpindia.vercel.app/api/vehicle-details/${vehicleNo}`;
             const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawApiUrl)}`;
 
-            // Initialize AbortController with a safe extended timeout (20 seconds)
+            // 25-Second AbortController Timeout Configuration
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 20000);
+            const timeoutId = setTimeout(() => controller.abort(), 25000);
 
             try {
                 let response;
                 try {
-                    // Try fetching through CORS proxy first
                     response = await fetch(proxyUrl, {
                         method: 'GET',
                         mode: 'cors',
-                        headers: {
-                            'Accept': 'application/json'
-                        },
+                        headers: { 'Accept': 'application/json' },
                         signal: controller.signal
                     });
                 } catch (proxyErr) {
-                    // Fallback to direct endpoint if proxy drops or blocks
                     if (proxyErr.name === 'AbortError') throw proxyErr;
                     
                     response = await fetch(rawApiUrl, {
                         method: 'GET',
                         mode: 'cors',
-                        headers: {
+                        headers: { 
                             'Accept': 'application/json',
                             'Content-Type': 'application/json'
                         },
@@ -338,8 +334,8 @@
                     throw new Error("No valid vehicle registration records found for this entry.");
                 }
 
-                // Populate UI fields safely
-                document.getElementById('resRegNo').innerText = regRes.registrationNo || regNo;
+                // Accurate Nested JSON Parsing
+                document.getElementById('resRegNo').innerText = regRes.registrationNo || vehicleNo;
                 document.getElementById('resStatus').innerText = regRes.status || "SUCCESS";
                 
                 const firstName = regRes.ownerFirstName || "";
@@ -356,7 +352,11 @@
                 document.getElementById('resYear').innerText = regRes.year || "N/A";
                 document.getElementById('resRegDate').innerText = regRes.registrationDate || "N/A";
                 document.getElementById('resFinancier').innerText = regRes.financierName || "N/A";
-                document.getElementById('resPuc').innerText = regRes.pucValidDate || "N/A";
+                
+                // Parse RTO Location safely from nested object structure
+                const rtoData = regRes.rto || {};
+                const rtoLoc = rtoData.lntLoc || rtoData.rtoName || rtoData.officeName || "N/A";
+                document.getElementById('resRtoLocation').innerText = rtoLoc;
                 
                 const address = regRes.permanentAddress || regRes.corrAddress || "N/A";
                 document.getElementById('resAddress').innerText = address;
@@ -371,9 +371,9 @@
                 let userFriendlyError = "An unexpected error occurred while fetching vehicle records.";
 
                 if (err.name === 'AbortError') {
-                    userFriendlyError = "Request timed out after 20 seconds. The RTO server is taking longer than usual to respond. Please try again.";
+                    userFriendlyError = "Request timed out after 25 seconds. The RTO server took too long to respond. Please check your connection and try again.";
                 } else if (err instanceof TypeError && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
-                    userFriendlyError = "Network connection blocked or CORS policy restriction encountered. Please check your internet connectivity.";
+                    userFriendlyError = "Network connection blocked or CORS policy restriction encountered. Please check your network stability.";
                 } else if (err.message) {
                     userFriendlyError = err.message;
                 }
