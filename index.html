@@ -1,1432 +1,561 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-    <title>Vehicle Details | CJP India</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoVerify Pro | Advanced Vehicle Intelligence</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ===== RESET & BASE ===== */
-        *,
-        *::before,
-        *::after {
+        :root {
+            --bg-primary: #030712;
+            --bg-secondary: #0b0f19;
+            --surface-glass: rgba(17, 24, 39, 0.75);
+            --surface-card: rgba(30, 41, 59, 0.4);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(99, 102, 241, 0.4);
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
             font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            background: #0b0e1a;
-            background-image:
-                radial-gradient(ellipse at 10% 20%, rgba(30, 60, 180, 0.25) 0%, transparent 55%),
-                radial-gradient(ellipse at 90% 80%, rgba(120, 40, 200, 0.20) 0%, transparent 55%),
-                radial-gradient(ellipse at 50% 50%, rgba(10, 20, 60, 0.90) 0%, #0b0e1a 100%);
-            color: #e8edf5;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 20px;
-            position: relative;
-            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
-        .bg-particles {
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Animated Background Orbs */
+        .bg-canvas {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, #0f172a 0%, #030712 100%);
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: floatOrb 20s infinite alternate ease-in-out;
+        }
+
+        .orb-1 { width: 450px; height: 450px; background: linear-gradient(135deg, #4f46e5, #06b6d4); top: -10%; left: -10%; }
+        .orb-2 { width: 500px; height: 500px; background: linear-gradient(135deg, #7c3aed, #db2777); bottom: -15%; right: -10%; animation-delay: -5s; }
+        .orb-3 { width: 350px; height: 350px; background: linear-gradient(135deg, #059669, #3b82f6); top: 40%; left: 60%; animation-delay: -10s; }
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(50px, -40px) scale(1.1); }
+            100% { transform: translate(-30px, 50px) scale(0.9); }
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 5%;
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-glass);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand { display: flex; align-items: center; gap: 0.8rem; }
+        .brand-icon { font-size: 1.6rem; background: linear-gradient(135deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .brand-text { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: #fff; }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            color: #34d399;
+        }
+        .status-dot { width: 7px; height: 7px; background-color: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); }
+
+        /* Container */
+        .main-container { max-width: 1200px; width: 92%; margin: 2rem auto; flex: 1; }
+
+        /* Search Card */
+        .search-card {
+            background: var(--surface-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            margin-bottom: 2rem;
+            position: relative;
             overflow: hidden;
         }
-        .bg-particles span {
+
+        .search-card::before {
+            content: '';
             position: absolute;
-            width: 6px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.06);
-            border-radius: 50%;
-            animation: floatParticle 18s infinite alternate ease-in-out;
-        }
-        .bg-particles span:nth-child(1) {
-            top: 12%;
-            left: 8%;
-            animation-duration: 22s;
-            width: 10px;
-            height: 10px;
-            background: rgba(100, 180, 255, 0.08);
-        }
-        .bg-particles span:nth-child(2) {
-            top: 75%;
-            left: 92%;
-            animation-duration: 26s;
-            animation-delay: 2s;
-            width: 14px;
-            height: 14px;
-            background: rgba(200, 120, 255, 0.07);
-        }
-        .bg-particles span:nth-child(3) {
-            top: 30%;
-            left: 85%;
-            animation-duration: 20s;
-            animation-delay: 4s;
-            width: 8px;
-            height: 8px;
-            background: rgba(255, 200, 100, 0.06);
-        }
-        .bg-particles span:nth-child(4) {
-            top: 88%;
-            left: 15%;
-            animation-duration: 24s;
-            animation-delay: 1s;
-            width: 12px;
-            height: 12px;
-            background: rgba(100, 255, 200, 0.05);
-        }
-        .bg-particles span:nth-child(5) {
-            top: 50%;
-            left: 5%;
-            animation-duration: 28s;
-            animation-delay: 3s;
-            width: 9px;
-            height: 9px;
-            background: rgba(255, 150, 150, 0.05);
-        }
-        .bg-particles span:nth-child(6) {
-            top: 5%;
-            left: 55%;
-            animation-duration: 20s;
-            animation-delay: 5s;
-            width: 16px;
-            height: 16px;
-            background: rgba(150, 200, 255, 0.04);
-        }
-        .bg-particles span:nth-child(7) {
-            top: 60%;
-            left: 45%;
-            animation-duration: 30s;
-            animation-delay: 0.5s;
-            width: 7px;
-            height: 7px;
-            background: rgba(255, 180, 80, 0.05);
-        }
-        .bg-particles span:nth-child(8) {
-            top: 20%;
-            left: 35%;
-            animation-duration: 23s;
-            animation-delay: 6s;
-            width: 11px;
-            height: 11px;
-            background: rgba(80, 200, 255, 0.06);
-        }
-        @keyframes floatParticle {
-            0% {
-                transform: translate(0, 0) scale(1) rotate(0deg);
-                opacity: 0.3;
-            }
-            33% {
-                transform: translate(30px, -40px) scale(1.4) rotate(120deg);
-                opacity: 0.8;
-            }
-            66% {
-                transform: translate(-20px, 30px) scale(0.8) rotate(240deg);
-                opacity: 0.5;
-            }
-            100% {
-                transform: translate(15px, -15px) scale(1.2) rotate(360deg);
-                opacity: 0.7;
-            }
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
         }
 
-        .app-container {
-            position: relative;
-            z-index: 1;
+        .input-group { display: flex; gap: 0.75rem; width: 100%; }
+        .input-wrapper { position: relative; flex: 1; }
+        .input-wrapper i { position: absolute; left: 1.1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+        .custom-input {
             width: 100%;
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 20px 15px 40px;
-        }
-
-        /* ===== HEADER ===== */
-        .app-header {
-            text-align: center;
-            margin-bottom: 35px;
-            animation: fadeDown 0.9s ease forwards;
-        }
-        .app-header .logo-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 70px;
-            height: 70px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, #2b3c8a, #6a3f9e);
-            box-shadow: 0 15px 40px rgba(42, 60, 138, 0.4);
-            margin-bottom: 16px;
-            font-size: 32px;
-            color: #fff;
-            transition: transform 0.4s ease, box-shadow 0.4s ease;
-        }
-        .app-header .logo-icon:hover {
-            transform: scale(1.08) rotate(-4deg);
-            box-shadow: 0 20px 50px rgba(42, 60, 138, 0.6);
-        }
-        .app-header h1 {
-            font-size: clamp(1.8rem, 5vw, 3.2rem);
-            font-weight: 900;
-            letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #ffffff 20%, #a8c0ff 70%, #d4a0ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1.2;
-        }
-        .app-header p {
-            font-size: clamp(0.9rem, 1.5vw, 1.15rem);
-            color: rgba(255, 255, 255, 0.55);
-            margin-top: 8px;
-            font-weight: 400;
-            letter-spacing: 0.3px;
-        }
-
-        /* ===== SEARCH ===== */
-        .search-section {
-            max-width: 700px;
-            margin: 0 auto 25px;
-            animation: fadeUp 0.9s ease 0.15s forwards;
-            opacity: 0;
-        }
-        .search-box {
-            display: flex;
-            align-items: stretch;
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(255, 255, 255, 0.10);
-            border-radius: 60px;
-            padding: 6px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        .search-box:focus-within {
-            border-color: rgba(120, 160, 255, 0.45);
-            box-shadow: 0 20px 70px rgba(42, 60, 138, 0.35), 0 0 0 4px rgba(100, 140, 255, 0.08);
-        }
-        .search-box .search-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 18px 0 22px;
-            color: rgba(255, 255, 255, 0.35);
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-        .search-box input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            padding: 16px 10px 16px 0;
-            font-size: clamp(0.95rem, 1.4vw, 1.15rem);
-            font-weight: 500;
-            color: #f0f4ff;
-            font-family: 'Inter', sans-serif;
-            letter-spacing: 0.5px;
-            min-width: 0;
-        }
-        .search-box input::placeholder {
-            color: rgba(255, 255, 255, 0.30);
-            font-weight: 400;
-            letter-spacing: 0.2px;
-        }
-        .search-box input:focus::placeholder {
-            opacity: 0.5;
-        }
-        .search-box .search-btn {
-            padding: 14px 34px;
-            border: none;
-            border-radius: 50px;
-            background: linear-gradient(135deg, #3b5ad9, #7a3fbf);
-            color: #fff;
-            font-weight: 700;
-            font-size: clamp(0.85rem, 1.1vw, 1rem);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-family: 'Inter', sans-serif;
-            letter-spacing: 0.3px;
-            white-space: nowrap;
-            flex-shrink: 0;
-            box-shadow: 0 8px 24px rgba(59, 90, 217, 0.30);
-        }
-        .search-box .search-btn:hover {
-            transform: scale(1.03);
-            box-shadow: 0 12px 36px rgba(59, 90, 217, 0.45);
-            background: linear-gradient(135deg, #4a6ae8, #8a4fd0);
-        }
-        .search-box .search-btn:active {
-            transform: scale(0.97);
-        }
-        .search-box .search-btn i {
-            font-size: 16px;
-        }
-
-        /* ===== WARNING BANNER ===== */
-        .warning-banner {
-            display: none;
-            max-width: 700px;
-            margin: 0 auto 20px;
-            padding: 14px 22px;
-            background: rgba(255, 200, 50, 0.10);
-            border-left: 4px solid #f7c948;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-glass);
+            padding: 0.95rem 1rem 0.95rem 2.8rem;
             border-radius: 12px;
-            backdrop-filter: blur(10px);
-            color: #f7c948;
-            font-weight: 500;
-            font-size: 0.95rem;
-            animation: fadeUp 0.5s ease;
-            align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-        .warning-banner.active {
-            display: flex;
-        }
-        .warning-banner i {
-            font-size: 22px;
-            color: #f7c948;
-        }
-        .warning-banner .warning-text {
-            flex: 1;
-        }
-        .warning-banner .warning-text strong {
-            color: #fff;
-        }
-
-        /* ===== LOADING ===== */
-        .loading-wrapper {
-            display: none;
-            justify-content: center;
-            align-items: center;
-            padding: 50px 0;
-            animation: fadeIn 0.4s ease;
-        }
-        .loading-wrapper.active {
-            display: flex;
-        }
-        .loader {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-        .loader-spinner {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 4px solid rgba(255, 255, 255, 0.06);
-            border-top: 4px solid #6a8aff;
-            border-right: 4px solid #a87aff;
-            animation: spin 1s cubic-bezier(0.6, 0.0, 0.4, 1.0) infinite;
-            box-shadow: 0 0 40px rgba(100, 140, 255, 0.15);
-        }
-        .loader-text {
+            color: var(--text-main);
             font-size: 1rem;
-            color: rgba(255, 255, 255, 0.50);
-            font-weight: 400;
+            font-family: 'JetBrains Mono', monospace;
             letter-spacing: 0.5px;
-            animation: pulseText 1.6s ease-in-out infinite;
+            outline: none;
+            transition: var(--transition-smooth);
         }
+        .custom-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--accent-glow); }
 
-        /* ===== ERROR ===== */
-        .error-wrapper {
-            display: none;
-            max-width: 560px;
-            margin: 20px auto 0;
-            padding: 20px 28px;
-            background: rgba(255, 70, 70, 0.10);
-            border: 1px solid rgba(255, 70, 70, 0.20);
+        .search-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #fff;
+            border: none;
+            padding: 0 1.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition-smooth);
+            white-space: nowrap;
+        }
+        .search-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(99, 102, 241, 0.5); }
+
+        /* Hero Summary Banner */
+        .hero-summary {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+            border: 1px solid rgba(99, 102, 241, 0.3);
             border-radius: 16px;
-            backdrop-filter: blur(10px);
-            text-align: center;
-            animation: shake 0.5s ease;
-        }
-        .error-wrapper.active {
-            display: block;
-        }
-        .error-wrapper i {
-            font-size: 28px;
-            color: #ff6b6b;
-            margin-bottom: 8px;
-        }
-        .error-wrapper p {
-            font-size: 1rem;
-            color: #ff8a8a;
-            font-weight: 500;
-        }
-
-        /* ===== RESULTS ===== */
-        .results-container {
-            display: none;
-            animation: fadeUp 0.7s ease forwards;
-        }
-        .results-container.active {
-            display: block;
-        }
-
-        /* ===== HERO CARD ===== */
-        .vehicle-hero {
-            background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            border-radius: 28px;
-            padding: 28px 35px;
-            margin-bottom: 30px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
             display: flex;
-            flex-wrap: wrap;
-            align-items: center;
             justify-content: space-between;
-            gap: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .vehicle-hero:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
-        }
-        .vehicle-hero .hero-left {
-            display: flex;
             align-items: center;
-            gap: 20px;
             flex-wrap: wrap;
+            gap: 1rem;
+            backdrop-filter: blur(12px);
         }
-        .vehicle-hero .reg-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 22px;
-            border-radius: 60px;
-            background: linear-gradient(135deg, rgba(59, 90, 217, 0.25), rgba(122, 63, 191, 0.20));
-            border: 1px solid rgba(120, 160, 255, 0.15);
-            font-size: clamp(1.1rem, 1.8vw, 1.5rem);
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            color: #fff;
-        }
-        .vehicle-hero .reg-badge i {
-            color: #7a9aff;
-            font-size: 0.8em;
-        }
-        .vehicle-hero .hero-title {
-            font-size: clamp(1.1rem, 1.6vw, 1.5rem);
-            font-weight: 700;
-            color: #e8edf5;
-        }
-        .vehicle-hero .hero-title .make-model {
-            color: #e8edf5;
-        }
-        .vehicle-hero .hero-title .variant {
-            color: rgba(255, 255, 255, 0.45);
-            font-weight: 400;
-            font-size: 0.7em;
-        }
-        .vehicle-hero .hero-status {
+        .hero-left { display: flex; flex-direction: column; gap: 0.3rem; }
+        .hero-reg { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 700; color: #fff; letter-spacing: 1px; }
+        .hero-model { color: var(--text-muted); font-size: 0.95rem; font-weight: 500; }
+        .hero-right { display: flex; align-items: center; gap: 1rem; }
+
+        /* Warning Banner */
+        .warning-banner {
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 18px;
-            border-radius: 60px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            background: rgba(0, 230, 120, 0.12);
-            border: 1px solid rgba(0, 230, 120, 0.15);
-            color: #4ae0a0;
-        }
-        .vehicle-hero .hero-status .dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #4ae0a0;
-            animation: pulseDot 2s ease-in-out infinite;
-        }
-        .vehicle-hero .hero-status.badge-warning {
-            background: rgba(255, 200, 50, 0.12);
-            border-color: rgba(255, 200, 50, 0.15);
-            color: #f7c948;
-        }
-        .vehicle-hero .hero-status.badge-warning .dot {
-            background: #f7c948;
-        }
-        .vehicle-hero .hero-status.badge-danger {
-            background: rgba(255, 70, 70, 0.12);
-            border-color: rgba(255, 70, 70, 0.15);
-            color: #ff6b6b;
-        }
-        .vehicle-hero .hero-status.badge-danger .dot {
-            background: #ff6b6b;
-        }
-
-        /* ===== SEQUENCE CARDS ===== */
-        .sequence-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 22px;
-        }
-
-        .seq-card {
-            background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 22px;
-            padding: 24px 30px;
-            transition: all 0.35s ease;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            animation: fadeUp 0.6s ease forwards;
-            opacity: 0;
-            width: 100%;
-        }
-        .seq-card:nth-child(1) {
-            animation-delay: 0.05s;
-        }
-        .seq-card:nth-child(2) {
-            animation-delay: 0.12s;
-        }
-        .seq-card:nth-child(3) {
-            animation-delay: 0.19s;
-        }
-        .seq-card:nth-child(4) {
-            animation-delay: 0.26s;
-        }
-        .seq-card:nth-child(5) {
-            animation-delay: 0.33s;
-        }
-        .seq-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(120, 160, 255, 0.15);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30);
-            background: rgba(255, 255, 255, 0.07);
-        }
-
-        .seq-card .card-header {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 18px;
-            padding-bottom: 14px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        }
-        .seq-card .card-header i {
-            font-size: 20px;
-            color: #7a9aff;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            background: rgba(100, 140, 255, 0.10);
-        }
-        .seq-card .card-header h3 {
-            font-size: 0.95rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: rgba(255, 255, 255, 0.60);
-        }
-
-        .seq-card .card-body {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px 30px;
-        }
-
-        .seq-card .detail-item {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            padding: 4px 0;
-        }
-        .seq-card .detail-item .label {
-            font-size: 0.72rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: rgba(255, 255, 255, 0.30);
-        }
-        .seq-card .detail-item .value {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #f0f4ff;
-            word-break: break-word;
-        }
-        .seq-card .detail-item .value.highlight {
-            color: #8ab4ff;
-        }
-        .seq-card .detail-item .value.gold {
-            color: #f7c948;
-        }
-        .seq-card .detail-item .value.green {
-            color: #4ae0a0;
-        }
-        .seq-card .detail-item .value.pink {
-            color: #ff7eb3;
-        }
-        .seq-card .detail-item .value.small {
+            gap: 0.75rem;
+            color: #fbbf24;
             font-size: 0.9rem;
-            font-weight: 500;
-        }
-        .seq-card .detail-item .value.address {
-            font-weight: 400;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.75);
-            font-size: 0.95rem;
-        }
-        .seq-card .detail-item .value.address i {
-            color: #7a9aff;
-            margin-right: 8px;
-            width: 18px;
+            backdrop-filter: blur(10px);
         }
 
-        /* Full width for address card */
-        .seq-card.address-card .card-body {
-            grid-template-columns: 1fr;
-        }
-        .seq-card.address-card .detail-item .value.address {
-            padding: 4px 0;
-        }
+        /* Results Grid & Cards */
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem; }
 
-        /* ===== RESPONSIVE ===== */
+        .data-card {
+            background: var(--surface-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: var(--transition-smooth);
+        }
+        .data-card:hover { transform: translateY(-3px); border-color: var(--border-hover); }
+
+        .data-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; }
+        .card-reg::after { background: #3b82f6; }
+        .card-owner::after { background: #10b981; }
+        .card-specs::after { background: #8b5cf6; }
+        .card-tech::after { background: #f59e0b; }
+        .card-puc::after { background: #06b6d4; }
+
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-glass); }
+        .card-title-group { display: flex; align-items: center; gap: 0.6rem; }
+        .card-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; background: rgba(255, 255, 255, 0.05); }
+        .card-title { font-size: 1rem; font-weight: 600; }
+
+        .card-body { display: grid; gap: 0.75rem; }
+        .data-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; }
+        .data-label { color: var(--text-muted); font-size: 0.8rem; font-weight: 500; flex: 1; }
+        .data-value { color: var(--text-main); font-size: 0.85rem; font-weight: 500; text-align: right; flex: 1; word-break: break-word; }
+
+        /* Badges */
+        .badge { padding: 0.25rem 0.75rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        /* Loader & Error */
+        .loader-container { display: none; flex-direction: column; align-items: center; padding: 4rem 0; gap: 1rem; }
+        .spinner { width: 40px; height: 40px; border: 3px solid rgba(99, 102, 241, 0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-text { color: var(--text-muted); font-size: 0.9rem; }
+
+        .error-card {
+            background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 16px; padding: 2.5rem 1.5rem; text-align: center; max-width: 450px; margin: 2rem auto;
+        }
+        .error-icon { font-size: 2.5rem; color: var(--danger); margin-bottom: 0.75rem; }
+        .error-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.4rem; }
+        .error-msg { color: var(--text-muted); font-size: 0.85rem; }
+
+        /* Toast */
+        .toast-container {
+            position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(80px);
+            background: rgba(15, 23, 42, 0.95); border: 1px solid var(--border-glass); padding: 0.75rem 1.25rem;
+            border-radius: 50px; backdrop-filter: blur(12px); display: flex; align-items: center; gap: 0.6rem;
+            z-index: 1100; opacity: 0; transition: 0.3s; pointer-events: none;
+        }
+        .toast-container.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast-text { font-size: 0.85rem; }
+
+        footer { text-align: center; padding: 1.25rem 5%; background: rgba(3, 7, 18, 0.8); border-top: 1px solid var(--border-glass); color: var(--text-muted); font-size: 0.8rem; }
+
         @media (max-width: 768px) {
-            body {
-                padding: 12px;
-            }
-            .app-container {
-                padding: 12px 8px 30px;
-            }
-            .app-header {
-                margin-bottom: 25px;
-            }
-            .app-header .logo-icon {
-                width: 56px;
-                height: 56px;
-                font-size: 26px;
-                border-radius: 16px;
-            }
-            .search-box {
-                border-radius: 40px;
-                padding: 4px;
-                flex-wrap: nowrap;
-            }
-            .search-box .search-icon {
-                padding: 0 12px 0 16px;
-                font-size: 15px;
-            }
-            .search-box input {
-                padding: 14px 8px 14px 0;
-                font-size: 0.95rem;
-            }
-            .search-box .search-btn {
-                padding: 12px 20px;
-                font-size: 0.85rem;
-                gap: 6px;
-                border-radius: 40px;
-            }
-            .search-box .search-btn span {
-                display: none;
-            }
-            .search-box .search-btn i {
-                font-size: 18px;
-            }
-            .vehicle-hero {
-                padding: 20px;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 14px;
-                border-radius: 20px;
-            }
-            .vehicle-hero .hero-left {
-                width: 100%;
-                gap: 12px;
-            }
-            .vehicle-hero .reg-badge {
-                font-size: 1rem;
-                padding: 8px 16px;
-            }
-            .vehicle-hero .hero-title {
-                font-size: 1rem;
-            }
-            .vehicle-hero .hero-status {
-                font-size: 0.75rem;
-                padding: 6px 14px;
-            }
-            .seq-card {
-                padding: 18px 16px;
-                border-radius: 18px;
-            }
-            .seq-card .card-body {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-            .seq-card .detail-item .value {
-                font-size: 0.92rem;
-            }
-            .seq-card .card-header h3 {
-                font-size: 0.8rem;
-            }
-            .warning-banner {
-                padding: 12px 18px;
-                font-size: 0.85rem;
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .loader-spinner {
-                width: 48px;
-                height: 48px;
-            }
-            .error-wrapper {
-                padding: 16px 20px;
-                margin: 16px 10px 0;
-            }
-        }
-
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .seq-card .card-body {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .seq-card.address-card .card-body {
-                grid-template-columns: 1fr;
-            }
-            .vehicle-hero {
-                padding: 26px 28px;
-            }
-        }
-
-        @media (min-width: 1025px) {
-            .seq-card .card-body {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            .seq-card.address-card .card-body {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* ===== ANIMATIONS ===== */
-        @keyframes fadeDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        @keyframes pulseText {
-            0%,
-            100% {
-                opacity: 0.5;
-            }
-            50% {
-                opacity: 1;
-            }
-        }
-        @keyframes pulseDot {
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.5;
-                transform: scale(0.8);
-            }
-        }
-        @keyframes shake {
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-            20% {
-                transform: translateX(-12px);
-            }
-            40% {
-                transform: translateX(12px);
-            }
-            60% {
-                transform: translateX(-6px);
-            }
-            80% {
-                transform: translateX(6px);
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(120, 160, 255, 0.25);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(120, 160, 255, 0.40);
+            .input-group { flex-direction: column; }
+            .search-btn { width: 100%; justify-content: center; padding: 0.9rem; }
+            .results-grid { grid-template-columns: 1fr; }
+            .hero-summary { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
-    <div class="bg-particles">
-        <span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span>
+    <div class="bg-canvas">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
     </div>
 
-    <div class="app-container">
+    <header>
+        <div class="brand">
+            <i class="fa-solid fa-shield-halved brand-icon"></i>
+            <span class="brand-text">AutoVerify Pro</span>
+        </div>
+        <div class="status-badge">
+            <div class="status-dot"></div>
+            <span>Online</span>
+        </div>
+    </header>
 
-        <!-- HEADER -->
-        <header class="app-header">
-            <div class="logo-icon">
-                <i class="fas fa-car-side"></i>
-            </div>
-            <h1>Vehicle Detail Explorer</h1>
-            <p>Enter any vehicle number to fetch complete information</p>
-        </header>
-
-        <!-- SEARCH -->
-        <section class="search-section">
-            <form class="search-box" id="searchForm" autocomplete="off">
-                <div class="search-icon">
-                    <i class="fas fa-search"></i>
+    <div class="main-container">
+        <!-- Search Card -->
+        <div class="search-card">
+            <div class="input-group">
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-hashtag"></i>
+                    <input type="text" id="vehicle-input" class="custom-input" placeholder="Enter Vehicle No. (e.g. GJ05HG7801)" maxlength="15" autocomplete="off">
                 </div>
-                <input
-                type="text"
-                id="vehicleInput"
-                placeholder="Enter vehicle number e.g. GJ05HG7801"
-                value="GJ05HG7801"
-                aria-label="Vehicle Registration Number"
-                spellcheck="false"
-                />
-                <button type="submit" class="search-btn" id="searchBtn">
-                    <i class="fas fa-arrow-right"></i>
-                    <span>Search</span>
-                </button>
-            </form>
-        </section>
-
-        <!-- WARNING BANNER -->
-        <div class="warning-banner" id="warningBanner">
-            <i class="fas fa-exclamation-triangle"></i>
-            <div class="warning-text" id="warningText">
-                <strong>Data Mismatch:</strong> <span id="mismatchDetails"></span>
+                <button class="search-btn" onclick="fetchVehicleData()"><i class="fa-solid fa-magnifying-glass"></i> Search Record</button>
             </div>
         </div>
 
-        <!-- LOADING -->
-        <div class="loading-wrapper" id="loadingWrapper">
-            <div class="loader">
-                <div class="loader-spinner"></div>
-                <div class="loader-text">Fetching vehicle details...</div>
-            </div>
+        <!-- Loader -->
+        <div id="vehicle-loader" class="loader-container">
+            <div class="spinner"></div>
+            <div class="loader-text">Querying secure vehicle databases...</div>
         </div>
 
-        <!-- ERROR -->
-        <div class="error-wrapper" id="errorWrapper">
-            <i class="fas fa-exclamation-circle"></i>
-            <p id="errorMessage">Something went wrong. Please try again.</p>
-        </div>
-
-        <!-- ===== RESULTS ===== -->
-        <div class="results-container" id="resultsContainer">
-
-            <!-- HERO -->
-            <div class="vehicle-hero" id="vehicleHero">
+        <!-- Dynamic Results Container -->
+        <div id="vehicle-results" style="display: none;">
+            
+            <!-- Hero Summary Section -->
+            <div class="hero-summary">
                 <div class="hero-left">
-                    <div class="reg-badge">
-                        <i class="fas fa-id-card"></i>
-                        <span id="heroReg">GJ05HG7801</span>
-                    </div>
-                    <div class="hero-title">
-                        <span class="make-model" id="heroMakeModel">Hero Motocorp Pleasure</span>
-                        <span class="variant" id="heroVariant">STD (102 CC)</span>
-                    </div>
+                    <span class="hero-reg" id="hero-reg">—</span>
+                    <span class="hero-model" id="hero-model">—</span>
                 </div>
-                <div class="hero-status" id="heroStatus">
-                    <span class="dot"></span>
-                    <span id="heroStatusText">Active</span>
+                <div class="hero-right">
+                    <span class="badge badge-success" id="hero-status">Active Record</span>
                 </div>
             </div>
 
-            <!-- SEQUENCE CARDS -->
-            <div class="sequence-grid" id="sequenceGrid">
-
-                <!-- CARD 1: REGISTRATION DETAILS -->
-                <div class="seq-card" id="cardRegistration">
-                    <div class="card-header">
-                        <i class="fas fa-calendar-check"></i>
-                        <h3>Registration Details</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="detail-item">
-                            <span class="label">Registration Number</span>
-                            <span class="value highlight" id="regNumber">GJ05HG7801</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">Registration Date</span>
-                            <span class="value gold" id="regDate">18/11/2011</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">RTO</span>
-                            <span class="value" id="regRTO">Surat</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">RTO Code</span>
-                            <span class="value" id="regRTOCode">GJ05</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CARD 2: OWNER DETAILS -->
-                <div class="seq-card" id="cardOwner">
-                    <div class="card-header">
-                        <i class="fas fa-user"></i>
-                        <h3>Owner Details</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="detail-item">
-                            <span class="label">Owner Name</span>
-                            <span class="value highlight" id="ownerName">RAJENDRA</span>
-                        </div>
-                        <div class="detail-item" style="grid-column: 1 / -1;">
-                            <span class="label">Permanent Address</span>
-                            <span class="value address" id="ownerAddress">
-                                <i class="fas fa-location-dot"></i> PLOT NO-109. RANCHHOD NAGAR, OPP. CITY IND.UDHNA MAIN ROAD, SURAT, -394210
-                            </span>
-                        </div>
-                        <div class="detail-item" style="grid-column: 1 / -1;" id="corrAddressWrapper">
-                            <span class="label">Correspondence Address</span>
-                            <span class="value address" id="corrAddress">
-                                <i class="fas fa-envelope"></i> PLOT NO-109. RANCHHOD NAGAR, OPP. CITY IND.UDHNA MAIN ROAD, SURAT, -394210
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CARD 3: VEHICLE SPECIFICATIONS -->
-                <div class="seq-card" id="cardSpecs">
-                    <div class="card-header">
-                        <i class="fas fa-cog"></i>
-                        <h3>Vehicle Specifications</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="detail-item">
-                            <span class="label">Make</span>
-                            <span class="value" id="specMake">Hero Motocorp</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">Model</span>
-                            <span class="value" id="specModel">Pleasure</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">Variant</span>
-                            <span class="value" id="specVariant">STD (102 CC)</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">Year</span>
-                            <span class="value highlight" id="specYear">2011</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">Fuel</span>
-                            <span class="value" id="specFuel">Petrol</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">Cubic Capacity</span>
-                            <span class="value" id="specCC">102 CC</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">Seating Capacity</span>
-                            <span class="value" id="specSeating">2</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">Body Type</span>
-                            <span class="value" id="specBody">SOLWPR SOLO+PILL. RIDER</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CARD 4: TECHNICAL DETAILS -->
-                <div class="seq-card" id="cardTechnical">
-                    <div class="card-header">
-                        <i class="fas fa-microchip"></i>
-                        <h3>Technical Details</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="detail-item">
-                            <span class="label">Chassis Number</span>
-                            <span class="value" id="techChassis">MBLJF16EDBGL04042</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">Engine Number</span>
-                            <span class="value" id="techEngine">JF16EBBGL04419</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">Vehicle ID</span>
-                            <span class="value" id="techVehicleId">1180</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">Vertical</span>
-                            <span class="value" id="techVertical">TW</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CARD 5: PUC DETAILS -->
-                <div class="seq-card" id="cardPUC">
-                    <div class="card-header">
-                        <i class="fas fa-leaf"></i>
-                        <h3>PUC Details</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="detail-item">
-                            <span class="label">PUC Number</span>
-                            <span class="value" id="pucNumber">GJ00504380003920</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">Valid Till</span>
-                            <span class="value gold" id="pucValid">06-Sep-2026</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div><!-- /sequence-grid -->
-
-            <!-- HIDDEN DATA (for reference) -->
-            <div style="display:none;" id="hiddenData">
-                <span id="hdnReg1">GJ</span>
-                <span id="hdnReg2">05</span>
-                <span id="hdnReg3">HG</span>
-                <span id="hdnReg4">7801</span>
-                <span id="hdnExpiry">1</span>
-                <span id="hdnPrevClaim">false</span>
-                <span id="hdnSource">adrilla</span>
-                <span id="hdnStatus">SUCCESS</span>
-                <span id="hdnPucNo">GJ00504380003920</span>
-                <span id="hdnPucValid">06-Sep-2026</span>
-                <span id="hdnMakeModelId">1180</span>
-                <span id="hdnCubicCapacity">102</span>
-                <span id="hdnFuel">Petrol</span>
-                <span id="hdnYear">2011</span>
-                <span id="hdnRegistrationDate">18/11/2011</span>
-                <span id="hdnRTODesp">Surat</span>
-                <span id="hdnRTOId">GJ05</span>
-                <span id="hdnOwnerFirstName">RAJENDRA</span>
-                <span id="hdnChasisno">MBLJF16EDBGL04042</span>
-                <span id="hdnEngineno">JF16EBBGL04419</span>
-                <span id="hdnPrePolicyNo">D272845008</span>
-                <span id="hdnSeatingCapacity">2</span>
-                <span id="hdnBodyType">SOLWPR SOLO+PILL. RIDER</span>
-                <span id="hdnPermanentAddress">PLOT NO-109. RANCHHOD NAGAR, OPP. CITY IND.UDHNA MAIN ROAD, SURAT, -394210</span>
-                <span id="hdnCorrAddress">PLOT NO-109. RANCHHOD NAGAR, OPP. CITY IND.UDHNA MAIN ROAD, SURAT, -394210</span>
-                <span id="hdnVehicleId">1180</span>
-                <span id="hdnVertical">TW</span>
-                <span id="hdnMake">Hero Motocorp</span>
-                <span id="hdnModel">Pleasure</span>
-                <span id="hdnVariant">STD (102 CC)</span>
-                <span id="hdnApplicableNCB">0</span>
-                <span id="hdnPrevNCB">0</span>
-                <span id="hdnEligibleForNCB">true</span>
+            <!-- Warning Banner (If validation error occurs) -->
+            <div id="warning-banner" class="warning-banner" style="display: none;">
+                <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.1rem;"></i>
+                <span id="warning-text">Validation warning detected in system verification matrix.</span>
             </div>
 
-        </div><!-- /results-container -->
+            <!-- Fixed 5-Card Sequence Grid -->
+            <div class="results-grid">
+                
+                <!-- 1. Registration Details -->
+                <div class="data-card card-reg">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <div class="card-icon" style="color: #3b82f6;"><i class="fa-solid fa-file-lines"></i></div>
+                            <span class="card-title">Registration Details</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row"><span class="data-label">Registration Number</span><span class="data-value" id="r-regno">—</span></div>
+                        <div class="data-row"><span class="data-label">Registration Date</span><span class="data-value" id="r-regdate">—</span></div>
+                        <div class="data-row"><span class="data-label">RTO Office</span><span class="data-value" id="r-rto">—</span></div>
+                        <div class="data-row"><span class="data-label">RTO Code</span><span class="data-value" id="r-rtocode">—</span></div>
+                    </div>
+                </div>
 
-    </div><!-- /app-container -->
+                <!-- 2. Owner Details -->
+                <div class="data-card card-owner">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <div class="card-icon" style="color: #10b981;"><i class="fa-solid fa-user-shield"></i></div>
+                            <span class="card-title">Owner Details</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row"><span class="data-label">Owner Name</span><span class="data-value" id="o-name">—</span></div>
+                        <div class="data-row"><span class="data-label">Permanent Address</span><span class="data-value" id="o-perm-addr">—</span></div>
+                        <div class="data-row"><span class="data-label">Correspondence Address</span><span class="data-value" id="o-corr-addr">—</span></div>
+                    </div>
+                </div>
+
+                <!-- 3. Vehicle Specifications -->
+                <div class="data-card card-specs">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <div class="card-icon" style="color: #8b5cf6;"><i class="fa-solid fa-car"></i></div>
+                            <span class="card-title">Vehicle Specifications</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row"><span class="data-label">Make</span><span class="data-value" id="s-make">—</span></div>
+                        <div class="data-row"><span class="data-label">Model</span><span class="data-value" id="s-model">—</span></div>
+                        <div class="data-row"><span class="data-label">Variant</span><span class="data-value" id="s-variant">—</span></div>
+                        <div class="data-row"><span class="data-label">Manufacturing Year</span><span class="data-value" id="s-year">—</span></div>
+                        <div class="data-row"><span class="data-label">Fuel Type</span><span class="data-value" id="s-fuel">—</span></div>
+                        <div class="data-row"><span class="data-label">Engine CC</span><span class="data-value" id="s-cc">—</span></div>
+                        <div class="data-row"><span class="data-label">Seating Capacity</span><span class="data-value" id="s-seating">—</span></div>
+                        <div class="data-row"><span class="data-label">Body Type</span><span class="data-value" id="s-body">—</span></div>
+                    </div>
+                </div>
+
+                <!-- 4. Technical Details -->
+                <div class="data-card card-tech">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <div class="card-icon" style="color: #f59e0b;"><i class="fa-solid fa-gears"></i></div>
+                            <span class="card-title">Technical Details</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row"><span class="data-label">Chassis Number</span><span class="data-value" id="t-chassis">—</span></div>
+                        <div class="data-row"><span class="data-label">Engine Number</span><span class="data-value" id="t-engine">—</span></div>
+                        <div class="data-row"><span class="data-label">Vehicle ID</span><span class="data-value" id="t-vehicleid">—</span></div>
+                        <div class="data-row"><span class="data-label">Vertical</span><span class="data-value" id="t-vertical">—</span></div>
+                    </div>
+                </div>
+
+                <!-- 5. PUC Details -->
+                <div class="data-card card-puc">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <div class="card-icon" style="color: #06b6d4;"><i class="fa-solid fa-leaf"></i></div>
+                            <span class="card-title">PUC Details</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row"><span class="data-label">PUC Number</span><span class="data-value" id="p-number">—</span></div>
+                        <div class="data-row"><span class="data-label">Valid Till</span><span class="data-value" id="p-valid">—</span></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Error Card -->
+        <div id="vehicle-error" style="display: none;">
+            <div class="error-card">
+                <div class="error-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="error-title">No Record Found</div>
+                <div class="error-msg" id="vehicle-error-text">Unable to retrieve valid registration records from the system. Please verify the registration number.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast-container"><span id="toast-msg" class="toast-text">Message</span></div>
+
+    <footer><p>&copy; 2026 AutoVerify Pro. High-Performance Secure Vehicle Intelligence.</p></footer>
 
     <script>
-        (function() {
-            'use strict';
+        document.addEventListener('contextmenu', e => e.preventDefault());
 
-            // ===== DOM REFS =====
-            const form = document.getElementById('searchForm');
-            const input = document.getElementById('vehicleInput');
-            const loading = document.getElementById('loadingWrapper');
-            const errorWrapper = document.getElementById('errorWrapper');
-            const errorMsg = document.getElementById('errorMessage');
-            const results = document.getElementById('resultsContainer');
-            const warningBanner = document.getElementById('warningBanner');
-            const mismatchDetails = document.getElementById('mismatchDetails');
+        const inputField = document.getElementById('vehicle-input');
+        
+        // Auto uppercase, trim and block spaces during typing / pasting
+        inputField.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase().replace(/\s+/g, '');
+        });
+        inputField.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') e.preventDefault();
+        });
 
-            // Hero
-            const heroReg = document.getElementById('heroReg');
-            const heroMakeModel = document.getElementById('heroMakeModel');
-            const heroVariant = document.getElementById('heroVariant');
-            const heroStatusText = document.getElementById('heroStatusText');
-            const heroStatus = document.getElementById('heroStatus');
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            t.className = "toast-container show";
+            setTimeout(() => t.className = "toast-container", 3000);
+        }
 
-            // Registration
-            const regNumber = document.getElementById('regNumber');
-            const regDate = document.getElementById('regDate');
-            const regRTO = document.getElementById('regRTO');
-            const regRTOCode = document.getElementById('regRTOCode');
+        function setEl(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = (val !== null && val !== undefined && val !== "") ? val : "—";
+        }
 
-            // Owner
-            const ownerName = document.getElementById('ownerName');
-            const ownerAddress = document.getElementById('ownerAddress');
-            const corrAddress = document.getElementById('corrAddress');
-            const corrAddressWrapper = document.getElementById('corrAddressWrapper');
+        // On page load, auto-fetch default vehicle number
+        window.addEventListener('DOMContentLoaded', () => {
+            inputField.value = "GJ05HG7801";
+            fetchVehicleData();
+        });
 
-            // Specs
-            const specMake = document.getElementById('specMake');
-            const specModel = document.getElementById('specModel');
-            const specVariant = document.getElementById('specVariant');
-            const specYear = document.getElementById('specYear');
-            const specFuel = document.getElementById('specFuel');
-            const specCC = document.getElementById('specCC');
-            const specSeating = document.getElementById('specSeating');
-            const specBody = document.getElementById('specBody');
-
-            // Technical
-            const techChassis = document.getElementById('techChassis');
-            const techEngine = document.getElementById('techEngine');
-            const techVehicleId = document.getElementById('techVehicleId');
-            const techVertical = document.getElementById('techVertical');
-
-            // PUC
-            const pucNumber = document.getElementById('pucNumber');
-            const pucValid = document.getElementById('pucValid');
-
-            // Hidden
-            const hdn = {
-                reg1: document.getElementById('hdnReg1'),
-                reg2: document.getElementById('hdnReg2'),
-                reg3: document.getElementById('hdnReg3'),
-                reg4: document.getElementById('hdnReg4'),
-                expiry: document.getElementById('hdnExpiry'),
-                prevClaim: document.getElementById('hdnPrevClaim'),
-                source: document.getElementById('hdnSource'),
-                status: document.getElementById('hdnStatus'),
-                pucNo: document.getElementById('hdnPucNo'),
-                pucValid: document.getElementById('hdnPucValid'),
-                makeModelId: document.getElementById('hdnMakeModelId'),
-                cubicCapacity: document.getElementById('hdnCubicCapacity'),
-                fuel: document.getElementById('hdnFuel'),
-                year: document.getElementById('hdnYear'),
-                registrationDate: document.getElementById('hdnRegistrationDate'),
-                rtoDesp: document.getElementById('hdnRTODesp'),
-                rtoId: document.getElementById('hdnRTOId'),
-                ownerFirstName: document.getElementById('hdnOwnerFirstName'),
-                chasisno: document.getElementById('hdnChasisno'),
-                engineno: document.getElementById('hdnEngineno'),
-                prePolicyNo: document.getElementById('hdnPrePolicyNo'),
-                seatingCapacity: document.getElementById('hdnSeatingCapacity'),
-                bodyType: document.getElementById('hdnBodyType'),
-                permanentAddress: document.getElementById('hdnPermanentAddress'),
-                corrAddress: document.getElementById('hdnCorrAddress'),
-                vehicleId: document.getElementById('hdnVehicleId'),
-                vertical: document.getElementById('hdnVertical'),
-                make: document.getElementById('hdnMake'),
-                model: document.getElementById('hdnModel'),
-                variant: document.getElementById('hdnVariant'),
-                applicableNCB: document.getElementById('hdnApplicableNCB'),
-                prevNCB: document.getElementById('hdnPrevNCB'),
-                eligibleForNCB: document.getElementById('hdnEligibleForNCB'),
-            };
-
-            // ===== HELPERS =====
-            function showLoading(show) {
-                loading.classList.toggle('active', show);
+        async function fetchVehicleData() {
+            const regNo = inputField.value.trim();
+            if (!regNo || regNo.length < 4) {
+                showToast("Please enter a valid vehicle registration number.");
+                return;
             }
 
-            function showError(message) {
-                errorMsg.textContent = message || 'Something went wrong. Please try again.';
-                errorWrapper.classList.add('active');
-                results.classList.remove('active');
-                warningBanner.classList.remove('active');
-                showLoading(false);
-            }
+            const loader = document.getElementById('vehicle-loader');
+            const results = document.getElementById('vehicle-results');
+            const errCard = document.getElementById('vehicle-error');
+            const warningBanner = document.getElementById('warning-banner');
 
-            function hideError() {
-                errorWrapper.classList.remove('active');
-            }
+            loader.style.display = 'flex';
+            results.style.display = 'none';
+            errCard.style.display = 'none';
+            warningBanner.style.display = 'none';
 
-            function showWarning(message) {
-                mismatchDetails.textContent = message;
-                warningBanner.classList.add('active');
-            }
+            let endpoint = `https://cjpindia.vercel.app/api/vehicle-details/${regNo}`;
 
-            function hideWarning() {
-                warningBanner.classList.remove('active');
-            }
-
-            function formatValue(val) {
-                if (val === undefined || val === null || val === '') return '—';
-                if (typeof val === 'boolean') return val ? 'Yes' : 'No';
-                return String(val);
-            }
-
-            function formatBool(val) {
-                if (val === undefined || val === null) return '—';
-                if (typeof val === 'boolean') return val ? 'Yes' : 'No';
-                if (typeof val === 'string') {
-                    const lower = val.toLowerCase();
-                    if (lower === 'true') return 'Yes';
-                    if (lower === 'false') return 'No';
-                    return val;
-                }
-                return String(val);
-            }
-
-            // ===== RENDER =====
-            function renderData(data) {
-                hideError();
-                hideWarning();
-                showLoading(false);
-
-                const prem = data.premiumRequest || {};
-                const motor = prem.motorPremiumRequest || {};
-                const reg = data.registrationResult || {};
-
-                // --- Hero ---
-                const regNo = reg.registrationNo || prem.registrationNo || input.value.trim() || 'GJ05HG7801';
-                heroReg.textContent = regNo;
-                const make = reg.make || prem.make || '—';
-                const model = reg.model || prem.model || '—';
-                heroMakeModel.textContent = make + ' ' + model;
-                heroVariant.textContent = reg.displayVariant || prem.variant || '—';
-
-                const statusVal = reg.status || 'SUCCESS';
-                if (statusVal === 'SUCCESS') {
-                    heroStatusText.textContent = 'Active';
-                    heroStatus.className = 'hero-status';
-                } else if (statusVal === 'Error') {
-                    heroStatusText.textContent = 'Error';
-                    heroStatus.className = 'hero-status badge-danger';
-                } else {
-                    heroStatusText.textContent = statusVal || 'Unknown';
-                    heroStatus.className = 'hero-status badge-warning';
+            try {
+                let response = await fetch(endpoint).catch(() => null);
+                if (!response || !response.ok) {
+                    // Fallback proxy for mobile CORS restrictions if direct fetch fails
+                    const proxyUrl = `https://api.allorigins.win/raw?url=` + encodeURIComponent(endpoint);
+                    response = await fetch(proxyUrl);
                 }
 
-                // --- Registration ---
-                regNumber.textContent = regNo;
-                regDate.textContent = reg.registrationDate || prem.registrationDate || '—';
-                const rtoName = reg.rto?.lntLoc || prem.rtoDesp || '—';
-                const rtoCode = reg.rto?.rtoCode || prem.rtoId || '—';
-                regRTO.textContent = rtoName;
-                regRTOCode.textContent = rtoCode;
+                if (!response || !response.ok) throw new Error("API request failed.");
 
-                // --- Owner ---
-                ownerName.textContent = reg.ownerFirstName || '—';
-                const permAddr = reg.permanentAddress || '—';
-                ownerAddress.innerHTML = '<i class="fas fa-location-dot"></i> ' + permAddr;
-                const corrAddr = reg.corrAddress || permAddr;
-                if (corrAddr !== permAddr && corrAddr !== '—') {
-                    corrAddress.innerHTML = '<i class="fas fa-envelope"></i> ' + corrAddr;
-                    corrAddressWrapper.style.display = 'block';
-                } else {
-                    corrAddressWrapper.style.display = 'none';
+                let json = await response.json();
+                if (typeof json === 'string') json = JSON.parse(json);
+
+                if (!json.registrationResult) {
+                    throw new Error("No registrationResult found in response.");
                 }
 
-                // --- Specs ---
-                specMake.textContent = make;
-                specModel.textContent = model;
-                specVariant.textContent = reg.displayVariant || prem.variant || '—';
-                specYear.textContent = reg.year || prem.year || '—';
-                specFuel.textContent = reg.fuel || prem.fuel || '—';
-                const cc = reg.cubicCapacity || prem.cubicCapacity || '—';
-                specCC.textContent = cc + ' CC';
-                specSeating.textContent = reg.seatingCapacity || '—';
-                specBody.textContent = reg.bodyType || '—';
+                const d = json.registrationResult;
 
-                // --- Technical ---
-                techChassis.textContent = reg.chasisno || '—';
-                techEngine.textContent = reg.engineno || '—';
-                techVehicleId.textContent = reg.vehicleId || prem.makeModelId || '—';
-                techVertical.textContent = reg.vertical || '—';
+                // Handle validation mismatch status warning
+                if (json.validateRegistrationResult && json.validateRegistrationResult.status === 'Error') {
+                    document.getElementById('warning-text').textContent = json.validateRegistrationResult.message || "System validation warning: Data mismatch detected.";
+                    warningBanner.style.display = 'flex';
+                }
 
-                // --- PUC ---
-                pucNumber.textContent = reg.pucNo || '—';
-                pucValid.textContent = reg.pucValidDate || '—';
+                // Populate Hero Section
+                let fullName = `${d.ownerFirstName || ''} ${d.ownerMiddleName || ''} ${d.ownerLastName || ''}`.trim() || d.ownerName;
+                setEl('hero-reg', d.regNo || d.registrationNo || regNo);
+                setEl('hero-model', `${d.makerDescription || d.maker || 'Vehicle'} - ${d.makerModel || d.model || ''}`);
 
-                // --- Hidden ---
-                if (reg.reg1) hdn.reg1.textContent = reg.reg1;
-                if (reg.reg2) hdn.reg2.textContent = reg.reg2;
-                if (reg.reg3) hdn.reg3.textContent = reg.reg3;
-                if (reg.reg4) hdn.reg4.textContent = reg.reg4;
-                if (reg.expiryValue !== undefined) hdn.expiry.textContent = reg.expiryValue;
-                if (reg.previousClaim !== undefined) hdn.prevClaim.textContent = String(reg.previousClaim);
-                if (reg.source) hdn.source.textContent = reg.source;
-                if (reg.status) hdn.status.textContent = reg.status;
-                if (reg.pucNo) hdn.pucNo.textContent = reg.pucNo;
-                if (reg.pucValidDate) hdn.pucValid.textContent = reg.pucValidDate;
-                if (reg.vehicleId) hdn.makeModelId.textContent = reg.vehicleId;
-                if (reg.cubicCapacity) hdn.cubicCapacity.textContent = reg.cubicCapacity;
-                if (reg.fuel) hdn.fuel.textContent = reg.fuel;
-                if (reg.year) hdn.year.textContent = reg.year;
-                if (reg.registrationDate) hdn.registrationDate.textContent = reg.registrationDate;
-                if (reg.rto?.lntLoc) hdn.rtoDesp.textContent = reg.rto.lntLoc;
-                if (reg.rto?.rtoCode) hdn.rtoId.textContent = reg.rto.rtoCode;
-                if (reg.ownerFirstName) hdn.ownerFirstName.textContent = reg.ownerFirstName;
-                if (reg.chasisno) hdn.chasisno.textContent = reg.chasisno;
-                if (reg.engineno) hdn.engineno.textContent = reg.engineno;
-                if (reg.prePolicyNo) hdn.prePolicyNo.textContent = reg.prePolicyNo;
-                if (reg.seatingCapacity) hdn.seatingCapacity.textContent = reg.seatingCapacity;
-                if (reg.bodyType) hdn.bodyType.textContent = reg.bodyType;
-                if (reg.permanentAddress) hdn.permanentAddress.textContent = reg.permanentAddress;
-                if (reg.corrAddress) hdn.corrAddress.textContent = reg.corrAddress;
-                if (reg.vehicleId) hdn.vehicleId.textContent = reg.vehicleId;
-                if (reg.vertical) hdn.vertical.textContent = reg.vertical;
-                if (reg.make) hdn.make.textContent = reg.make;
-                if (reg.model) hdn.model.textContent = reg.model;
-                if (reg.displayVariant) hdn.variant.textContent = reg.displayVariant;
-                if (motor.applicableNCB !== undefined) hdn.applicableNCB.textContent = motor.applicableNCB;
-                if (prem.prevNCB !== undefined) hdn.prevNCB.textContent = prem.prevNCB;
-                if (motor.eligibleForNCB !== undefined) hdn.eligibleForNCB.textContent = String(motor.eligibleForNCB);
+                // Populate 1. Registration Details
+                setEl('r-regno', d.regNo || d.registrationNo);
+                setEl('r-regdate', d.regDate || d.registrationDate);
+                setEl('r-rto', d.rto || d.rtoOffice);
+                setEl('r-rtocode', d.rtoCode);
 
-                results.classList.add('active');
+                // Populate 2. Owner Details
+                setEl('o-name', fullName);
+                setEl('o-perm-addr', d.permanentAddress || d.address);
+                setEl('o-corr-addr', d.presentAddress || d.correspondenceAddress || d.permanentAddress || d.address);
+
+                // Populate 3. Vehicle Specifications
+                setEl('s-make', d.makerDescription || d.maker);
+                setEl('s-model', d.makerModel || d.model);
+                setEl('s-variant', d.variant);
+                setEl('s-year', d.manufacturingYear || d.mfgYear || d.manufacturingDate);
+                setEl('s-fuel', d.fuelType || d.fuel);
+                setEl('s-cc', d.cubicCapacity || d.engineCC);
+                setEl('s-seating', d.seatingCapacity);
+                setEl('s-body', d.bodyType || d.vehicleClass);
+
+                // Populate 4. Technical Details
+                setEl('t-chassis', d.chasisno || d.chassisNo || d.chassis);
+                setEl('t-engine', d.engineno || d.engineNo || d.engine);
+                setEl('t-vehicleid', d.vehicleId || d.vhId);
+                setEl('t-vertical', d.vertical || d.vehicleVertical);
+
+                // Populate 5. PUC Details
+                setEl('p-number', d.pucNo || d.puccNumber);
+                setEl('p-valid', d.pucUpto || d.pucValidDate || d.puccValidUpto);
+
+                loader.style.display = 'none';
+                results.style.display = 'block';
+                showToast("Vehicle details loaded successfully!");
+
+            } catch (err) {
+                loader.style.display = 'none';
+                errCard.style.display = 'block';
+                document.getElementById('vehicle-error-text').textContent = err.message || "Failed to retrieve records.";
+                showToast("Verification failed.");
             }
-
-            // ===== FETCH =====
-            async function fetchVehicleDetails(vehicleNumber) {
-                if (!vehicleNumber || vehicleNumber.trim().length < 4) {
-                    showError('Please enter a valid vehicle number.');
-                    return;
-                }
-
-                const clean = vehicleNumber.trim().toUpperCase();
-                const url = 'https://cjpindia.vercel.app/api/vehicle-details/' + encodeURIComponent(clean);
-
-                hideError();
-                hideWarning();
-                results.classList.remove('active');
-                showLoading(true);
-
-                try {
-                    const response = await fetch(url);
-
-                    if (!response.ok) {
-                        let errMsg = 'Server responded with status ' + response.status;
-                        try {
-                            const errData = await response.json();
-                            if (errData.message) errMsg = errData.message;
-                            else if (errData.error) errMsg = errData.error;
-                        } catch (_) { /* ignore */ }
-                        throw new Error(errMsg);
-                    }
-
-                    const data = await response.json();
-
-                    if (!data || typeof data !== 'object') {
-                        throw new Error('Invalid response from server.');
-                    }
-
-                    const validation = data.validateRegistrationResult;
-                    let mismatchMsg = '';
-
-                    if (validation?.status === 'Error' && Array.isArray(validation.mismatchFields)) {
-                        const mismatches = validation.mismatchFields.map(m =>
-                            `${m.fieldName} (RTO: ${m.rtoValue}, Your: ${m.userValue})`
-                        );
-                        mismatchMsg = mismatches.join('; ');
-                    }
-
-                    if (data.registrationResult && Object.keys(data.registrationResult).length > 0) {
-                        renderData(data);
-                        if (mismatchMsg) {
-                            showWarning(mismatchMsg);
-                        }
-                    } else {
-                        if (mismatchMsg) {
-                            throw new Error('Data mismatch: ' + mismatchMsg);
-                        } else {
-                            throw new Error('Vehicle not found or invalid registration.');
-                        }
-                    }
-
-                } catch (err) {
-                    console.error('Fetch error:', err);
-                    showError(err.message || 'Failed to fetch vehicle details. Please check the number and try again.');
-                    results.classList.remove('active');
-                } finally {
-                    showLoading(false);
-                }
-            }
-
-            // ===== EVENTS =====
-            function handleSearch(e) {
-                e.preventDefault();
-                const val = input.value.trim();
-                if (!val) {
-                    showError('Please enter a vehicle number.');
-                    input.focus();
-                    return;
-                }
-                fetchVehicleDetails(val);
-            }
-
-            form.addEventListener('submit', handleSearch);
-
-            window.addEventListener('DOMContentLoaded', function() {
-                setTimeout(() => {
-                    const defaultVal = input.value.trim();
-                    if (defaultVal) {
-                        fetchVehicleDetails(defaultVal);
-                    }
-                }, 300);
-            });
-
-            input.addEventListener('paste', function() {
-                setTimeout(() => {
-                    this.value = this.value.toUpperCase().replace(/\s/g, '');
-                }, 10);
-            });
-
-            input.addEventListener('input', function() {
-                const start = this.selectionStart;
-                const end = this.selectionEnd;
-                this.value = this.value.toUpperCase().replace(/\s/g, '');
-                this.setSelectionRange(start, end);
-            });
-
-            window.__vehicleApp = {
-                fetch: fetchVehicleDetails,
-                render: renderData,
-            };
-
-        })();
+        }
     </script>
-
 </body>
 </html>
