@@ -106,7 +106,7 @@
             <!-- LOADING SPINNER -->
             <div id="loadingIndicator" class="hidden text-center py-16">
                 <div class="inline-block w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4 shadow-lg shadow-blue-500/20"></div>
-                <p class="text-sm font-medium text-slate-300">Fetching official records via high-speed API...</p>
+                <p class="text-sm font-medium text-slate-300">Fetching official records via proxy channel...</p>
                 <p class="text-xs text-slate-500 mt-1">Please keep this window open.</p>
             </div>
 
@@ -287,23 +287,29 @@
             errorBox.classList.add('hidden');
             resultContainer.classList.add('hidden');
 
-            // Secure HTTPS Endpoint URL
-            const targetUrl = `https://cjpindia.vercel.app/api/vehicle-details/${regNo}`;
+            // Target API URL
+            const rawApiUrl = `https://cjpindia.vercel.app/api/vehicle-details/${regNo}`;
+            // Route through public CORS proxy (AllOrigins raw) to bypass strict browser CORS policies on mobile & PC
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawApiUrl)}`;
 
             try {
-                // Abort controller to handle mobile network timeouts (Jio/Airtel latency)
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-                const response = await fetch(targetUrl, {
+                let response = await fetch(proxyUrl, {
                     method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    mode: 'cors',
                     signal: controller.signal
                 });
+
+                // Fallback attempt to direct endpoint if proxy fails
+                if (!response.ok) {
+                    response = await fetch(rawApiUrl, {
+                        method: 'GET',
+                        mode: 'cors',
+                        headers: { 'Accept': 'application/json' },
+                        signal: controller.signal
+                    });
+                }
                 
                 clearTimeout(timeoutId);
 
@@ -351,14 +357,12 @@
 
             } catch (err) {
                 loading.classList.add('hidden');
-                console.error("Mobile Fetch Error Details:", err);
+                console.error("Fetch Error Details:", err);
 
-                let userFriendlyError = "Failed to fetch vehicle details. Please check your mobile network connection and try again.";
+                let userFriendlyError = "Failed to fetch vehicle details. Please check your network connection and try again.";
                 
                 if (err.name === 'AbortError') {
-                    userFriendlyError = "Request timed out. The mobile cellular network or server took too long to respond.";
-                } else if (err instanceof TypeError && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
-                    userFriendlyError = "Network connection blocked or CORS restriction encountered. Please ensure you are on a stable connection or try switching networks.";
+                    userFriendlyError = "Request timed out. The network or server took too long to respond.";
                 } else if (err.message) {
                     userFriendlyError = err.message;
                 }
